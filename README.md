@@ -6,4 +6,4 @@ Vet-MP là một phần mềm quản lý hệ thống thú y. Bác sĩ có thể
 
 - Frontend: React Native
 - Backend: 
-- DatabaseL Supabase
+- Database: Supabase
