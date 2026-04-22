@@ -12,3 +12,5 @@ const RootStack = createNativeStackNavigator({
 const Navigation = createStaticNavigation(RootStack);
 
 export default Navigation;
+
+//This is a test comment to check if the commit is working properly.
