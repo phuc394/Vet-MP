@@ -5,11 +5,11 @@
   "license": "ISC",
   "author": "",
   "type": "commonjs",
-  "main": "dist/index.js",
+  "main": "dist/gateway.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js",
-    "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts"
+    "start": "node dist/gateway.js",
+    "dev": "nodemon --watch src --ext ts --exec ts-node src/gateway.ts"
   },
   "dependencies": {
     "dotenv": "^17.4.2",
