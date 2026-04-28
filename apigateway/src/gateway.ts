@@ -4,38 +4,49 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 const app = express();
 const port = Number(process.env.PORT) || 3000;
 
-app.use('/api/v1/medical-records', createProxyMiddleware({
+app.use('/api/v1/auth', createProxyMiddleware({
     target: 'http://localhost:3001',
     changeOrigin: true,
 }));
 
-app.use('/api/v1/inventory', createProxyMiddleware({
-    target: 'http://localhost:3002',
-    changeOrigin: true,
-}));
-
-app.use('/api/v1/suppliers', createProxyMiddleware({
-    target: 'http://localhost:3002',
-    changeOrigin: true,
-}));
-
-app.use('/api/v1/appointments', createProxyMiddleware({
-    target: 'http://localhost:3003',
-    changeOrigin: true,
-}));
-
-app.use('/api/v1/auth', createProxyMiddleware({
-    target: 'http://localhost:3004',
-    changeOrigin: true,
-}));
-
 app.use('/api/v1/users', createProxyMiddleware({
-    target: 'http://localhost:3004',
+    target: 'http://localhost:3001',
     changeOrigin: true,
 }));
 
 app.use('/api/v1/pets', createProxyMiddleware({
+    target: 'http://localhost:3002',
+    changeOrigin: true,
+}));
+
+app.use('/api/v1/catalog', createProxyMiddleware({
+    target: 'http://localhost:3003',
+    changeOrigin: true,
+}));
+
+app.use('/api/v1/inventory', createProxyMiddleware({
+    target: 'http://localhost:3004',
+    changeOrigin: true,
+}));
+
+app.use('/api/v1/suppliers', createProxyMiddleware({
+    target: 'http://localhost:3004',
+    changeOrigin: true,
+}));
+
+app.use('/api/v1/appointments', createProxyMiddleware({
     target: 'http://localhost:3005',
+    changeOrigin: true,
+}));
+
+app.use('/api/v1/medical-records', createProxyMiddleware({
+    target: 'http://localhost:3006',
+    changeOrigin: true,
+}));
+
+
+app.use('/api/v1/reports', createProxyMiddleware({
+    target: 'http://localhost:3007',
     changeOrigin: true,
 }));
 
