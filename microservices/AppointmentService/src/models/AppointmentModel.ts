@@ -1,18 +1,44 @@
-const Appointment = {
-    fields: {
-        appointment_id: Number,
-        pet_id: Number,
-        service_id: Number,
-        staff_id: Number,
-        appointment_date: Date,
-        start_time: Date,
-        end_time: Date,
-        status: String,
-        cancellation_reason: String,
-        service_price: Number,
-        created_at: Date,
-        updated_at: Date
-    }
-    
+export interface Appointment {
+    appointment_id?: number;
+    pet_id: number;
+    service_id: number;
+    staff_id: number;
+    appointment_date: Date;
+    start_time: Date;
+    end_time: Date;
+    status: string;
+    cancellation_reason?: string;
+    service_price: number;
+    created_at?: Date;
+    updated_at?: Date;
 }
-export default Appointment;
+
+export interface CreateAppointmentRequest {
+    pet_id: number;
+    service_id: number;
+    staff_id: number;
+    appointment_date: Date;
+    start_time: Date;
+    end_time: Date;
+    service_price: number;
+}
+
+export interface UpdateAppointmentRequest {
+    pet_id?: number;
+    service_id?: number;
+    staff_id?: number;
+    appointment_date?: Date;
+    start_time?: Date;
+    end_time?: Date;
+    status?: string;
+    cancellation_reason?: string;
+    service_price?: number;
+}
+
+export enum AppointmentStatus {
+    SCHEDULED = 'scheduled',
+    CONFIRMED = 'confirmed',
+    CANCELLED = 'cancelled',
+    COMPLETED = 'completed',
+    NO_SHOW = 'no_show'
+}
