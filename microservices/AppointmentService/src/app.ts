@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import express from "express";
+import AppointmentRoute from "./routes/AppointmentRoute";
 
 dotenv.config();
 
@@ -15,5 +16,8 @@ app.get("/health", (_request, response) => {
     port: Number(process.env.PORT ?? 3005),
   });
 });
+
+app.use("/appointments", AppointmentRoute);
+
 
 export default app;
