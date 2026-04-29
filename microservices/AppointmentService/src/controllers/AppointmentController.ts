@@ -52,10 +52,43 @@ async function deleteAppointment(req: any, res: any) {
     }
 }
 
+async function getAppointmentsByPetId(req: any, res: any) {
+    try {
+        const { petId } = req.params;
+        const appointments = await AppointmentService.getAppointmentsByPetId(petId);
+        res.json(appointments);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+async function getAppointmentsByStaffId(req: any, res: any) {
+    try {
+        const { staffId } = req.params;
+        const appointments = await AppointmentService.getAppointmentsByStaffId(staffId);
+        res.json(appointments);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+async function getAppointmentsByDateRange(req: any, res: any) {
+    try {
+        const { startDate, endDate } = req.params;
+        const appointments = await AppointmentService.getAppointmentsByDateRange(startDate, endDate);
+        res.json(appointments);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
 export {
     getAllAppointments,
     getAppointmentById,
     createAppointment,
     updateAppointment,
-    deleteAppointment
+    deleteAppointment,
+    getAppointmentsByPetId,
+    getAppointmentsByStaffId,
+    getAppointmentsByDateRange
 };

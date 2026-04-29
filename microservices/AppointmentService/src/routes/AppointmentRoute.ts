@@ -8,6 +8,9 @@ router.get('/:id', AppointmentController.getAppointmentById);
 router.post('/', AppointmentController.createAppointment);
 router.put('/:id', AppointmentController.updateAppointment);
 router.delete('/:id', AppointmentController.deleteAppointment);
+router.get('/pet/:petId', AppointmentController.getAppointmentsByPetId);
+router.get('/staff/:staffId', AppointmentController.getAppointmentsByStaffId);
+router.get('/date-range/:startDate/:endDate', AppointmentController.getAppointmentsByDateRange);
 
 
 export default router;
