@@ -42,3 +42,4 @@ export enum AppointmentStatus {
     COMPLETED = 'completed',
     NO_SHOW = 'no_show'
 }
+
