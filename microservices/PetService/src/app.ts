@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import express from "express";
-
+import petRoutes from "./routes/pet.routes";
 dotenv.config();
 
 const app = express();
@@ -15,5 +15,7 @@ app.get("/health", (_request, response) => {
     port: Number(process.env.PORT ?? 3002),
   });
 });
+
+app.use("/api/v1/pets", petRoutes);
 
 export default app;
