@@ -6,10 +6,12 @@ dotenv.config();
 
 const app = express();
 const MedicineRoute = require('./routes/MedicineRoute');
+const ServiceRoute = require('./routes/ServiceRoute');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/medicines', MedicineRoute);
+app.use('/catalog/medicines', MedicineRoute);
+app.use('/catalog/services', ServiceRoute);
 
 app.get("/health", (_request, response) => {
   response.json({
