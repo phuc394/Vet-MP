@@ -1,0 +1,55 @@
+const MedicalRecordService = require('../services/MedicalRecordService');
+
+async function getAllMedicalRecords(_req: any, res: any) {
+    try {
+        const medicalRecords = await MedicalRecordService.getAllMedicalRecords();
+        res.json(medicalRecords);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+async function getMedicalRecordById(req: any, res: any) {
+    try {
+        const { id } = req.params;
+        const medicalRecord = await MedicalRecordService.getMedicalRecordById(id);
+        res.json(medicalRecord);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+async function createMedicalRecord(req: any, res: any) {
+    try {
+        const medicalRecord = await MedicalRecordService.createMedicalRecord(req.body);
+        res.json(medicalRecord);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+async function updateMedicalRecord(req: any, res: any) {
+    try {
+        const medicalRecord = await MedicalRecordService.updateMedicalRecord(req.body);
+        res.json(medicalRecord);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+async function deleteMedicalRecord(req: any, res: any) {
+    try {
+        const medicalRecord = await MedicalRecordService.deleteMedicalRecord(req.body);
+        res.json(medicalRecord);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+export {
+    getAllMedicalRecords,
+    getMedicalRecordById,
+    createMedicalRecord,
+    updateMedicalRecord,
+    deleteMedicalRecord
+};
