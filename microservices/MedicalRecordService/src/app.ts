@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import express from "express";
+import MedicalRecordRoute from "./routes/MedicalRecordRoute";
 
 dotenv.config();
 
@@ -15,5 +16,7 @@ app.get("/health", (_request, response) => {
     port: Number(process.env.PORT ?? 3006),
   });
 });
+
+app.use("/medical-records", MedicalRecordRoute);
 
 export default app;
