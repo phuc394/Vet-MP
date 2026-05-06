@@ -1,6 +1,8 @@
 import dotenv from "dotenv";
 import express from "express";
 import MedicalRecordRoute from "./routes/MedicalRecordRoute";
+import PrescriptionRoute from "./routes/PrescriptionRoute";
+import ReExaminationRoute from "./routes/ReExaminationRoute";
 
 dotenv.config();
 
@@ -17,6 +19,9 @@ app.get("/health", (_request, response) => {
   });
 });
 
+
 app.use("/medical-records", MedicalRecordRoute);
+app.use("/prescriptions", PrescriptionRoute);
+app.use("/re-examinations", ReExaminationRoute);
 
 export default app;
