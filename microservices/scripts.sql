@@ -27,6 +27,18 @@ CREATE TABLE Employee (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
+CREATE TABLE RefreshTokens (
+    token_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    refresh_token TEXT NOT NULL,
+    expires_at DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_refresh_token_user
+    FOREIGN KEY (user_id)
+    REFERENCES Users(user_id)
+    ON DELETE CASCADE
+);
 
 CREATE DATABASE IF NOT EXISTS pet_db_vet;
 USE pet_db_vet;
