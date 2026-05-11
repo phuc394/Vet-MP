@@ -1,5 +1,5 @@
 const connection = require('../config/database');
-import { Service, CreateServiceRequest, UpdateServiceRequest } from '../models/CatalogModel';
+import { Service, CreateServiceRequest, UpdateServiceRequest } from '../models/ServiceModel';
 
 async function getAllServices(): Promise<Service[]> {
     const results = await connection.query('SELECT * FROM Service');

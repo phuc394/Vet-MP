@@ -1,5 +1,5 @@
 const connection = require('../config/database');
-import { Medicine, CreateMedicineRequest, UpdateMedicineRequest } from '../models/CatalogModel';
+import { Medicine, CreateMedicineRequest, UpdateMedicineRequest } from '../models/MedicineModel';
 
 async function getAllMedicines(): Promise<Medicine[]> {
     const results = await connection.query('SELECT * FROM Medicine');

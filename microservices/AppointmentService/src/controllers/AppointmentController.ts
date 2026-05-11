@@ -82,6 +82,16 @@ async function getAppointmentsByDateRange(req: any, res: any) {
     }
 }
 
+async function cancelAppointment(req: any, res: any) {
+    try {
+        const { id } = req.params;
+        const result = await AppointmentService.cancelAppointment(id);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
 export {
     getAllAppointments,
     getAppointmentById,
@@ -90,5 +100,6 @@ export {
     deleteAppointment,
     getAppointmentsByPetId,
     getAppointmentsByStaffId,
-    getAppointmentsByDateRange
+    getAppointmentsByDateRange,
+    cancelAppointment
 };
