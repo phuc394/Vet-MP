@@ -11,6 +11,6 @@ router.delete('/:id', AppointmentController.deleteAppointment);
 router.get('/pet/:petId', AppointmentController.getAppointmentsByPetId);
 router.get('/staff/:staffId', AppointmentController.getAppointmentsByStaffId);
 router.get('/date-range/:startDate/:endDate', AppointmentController.getAppointmentsByDateRange);
-
+router.post('/cancel/:id', AppointmentController.cancelAppointment);
 
 export default router;

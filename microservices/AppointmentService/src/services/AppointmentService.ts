@@ -64,6 +64,11 @@ async function getAppointmentsByDateRange(startDate: Date, endDate: Date): Promi
     return results;
 }
 
+async function cancelAppointment(id: number): Promise<boolean> {
+    const results = await connection.query('UPDATE Appointment SET status = ? WHERE appointment_id = ?', [AppointmentStatus.CANCELLED, id]);
+    return results.affectedRows > 0;
+}
+
 export {
     getAllAppointments,
     getAppointmentById,
@@ -72,5 +77,6 @@ export {
     deleteAppointment,
     getAppointmentsByPetId,
     getAppointmentsByStaffId,
-    getAppointmentsByDateRange
+    getAppointmentsByDateRange,
+    cancelAppointment
 };
