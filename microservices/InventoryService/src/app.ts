@@ -1,5 +1,8 @@
 import dotenv from "dotenv";
 import express from "express";
+import SupplierRoute from "./routes/SupplierRoute";
+import MedicineInventoryRoute from "./routes/MedicineInventoryRoute";
+import InventoryTransactionRoute from "./routes/InventoryTransactionRoute";
 
 dotenv.config();
 
@@ -15,5 +18,9 @@ app.get("/health", (_request, response) => {
     port: Number(process.env.PORT ?? 3004),
   });
 });
+
+app.use("/suppliers", SupplierRoute);
+app.use("/medicine-inventory", MedicineInventoryRoute);
+app.use("/inventory-transactions", InventoryTransactionRoute);
 
 export default app;
