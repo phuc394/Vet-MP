@@ -92,6 +92,16 @@ async function cancelAppointment(req: any, res: any) {
     }
 }
 
+async function searchAppointments(req: any, res: any) {
+    try {
+        const { status, startDate, endDate, petId, staffId } = req.query;
+        const appointments = await AppointmentService.searchAppointments(status, startDate, endDate, petId, staffId);
+        res.json(appointments);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
 export {
     getAllAppointments,
     getAppointmentById,
@@ -101,5 +111,6 @@ export {
     getAppointmentsByPetId,
     getAppointmentsByStaffId,
     getAppointmentsByDateRange,
-    cancelAppointment
+    cancelAppointment,
+    searchAppointments
 };

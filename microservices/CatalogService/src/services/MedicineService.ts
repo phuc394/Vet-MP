@@ -40,10 +40,29 @@ async function deleteMedicine(id: number): Promise<boolean> {
     return result.affectedRows > 0;
 }
 
+async function searchMedicines(query?: string, ingredients?: string): Promise<Medicine[]> {
+    let sql = 'SELECT * FROM Medicine WHERE is_active = true';
+    const params: any[] = [];
+    
+    if (query) {
+        sql += ' AND name LIKE ?';
+        params.push(`%${query}%`);
+    }
+    
+    if (ingredients) {
+        sql += ' AND ingredients LIKE ?';
+        params.push(`%${ingredients}%`);
+    }
+    
+    const results = await connection.query(sql, params);
+    return results;
+}
+
 export {
     getAllMedicines,
     getMedicineById,
     createMedicine,
     updateMedicine,
-    deleteMedicine
+    deleteMedicine,
+    searchMedicines
 };

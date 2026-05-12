@@ -69,6 +69,40 @@ async function cancelAppointment(id: number): Promise<boolean> {
     return results.affectedRows > 0;
 }
 
+async function searchAppointments(status?: string, startDate?: string, endDate?: string, petId?: string, staffId?: string): Promise<Appointment[]> {
+    let sql = 'SELECT * FROM Appointment WHERE 1=1';
+    const params: any[] = [];
+    
+    if (status) {
+        sql += ' AND status = ?';
+        params.push(status);
+    }
+    
+    if (startDate && endDate) {
+        sql += ' AND appointment_date BETWEEN ? AND ?';
+        params.push(startDate, endDate);
+    } else if (startDate) {
+        sql += ' AND appointment_date >= ?';
+        params.push(startDate);
+    } else if (endDate) {
+        sql += ' AND appointment_date <= ?';
+        params.push(endDate);
+    }
+    
+    if (petId) {
+        sql += ' AND pet_id = ?';
+        params.push(petId);
+    }
+    
+    if (staffId) {
+        sql += ' AND staff_id = ?';
+        params.push(staffId);
+    }
+    
+    const results = await connection.query(sql, params);
+    return results;
+}
+
 export {
     getAllAppointments,
     getAppointmentById,
@@ -78,5 +112,6 @@ export {
     getAppointmentsByPetId,
     getAppointmentsByStaffId,
     getAppointmentsByDateRange,
-    cancelAppointment
+    cancelAppointment,
+    searchAppointments
 };

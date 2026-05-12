@@ -67,6 +67,23 @@ async function getLowStockItems(): Promise<MedicineInventory[]> {
     return results;
 }
 
+async function searchMedicineInventory(query?: string, lowStock?: boolean): Promise<MedicineInventory[]> {
+    let sql = 'SELECT mi.* FROM Medicine_Inventory mi';
+    const params: any[] = [];
+    
+    if (query) {
+        sql += ' JOIN Medicine m ON mi.medicine_id = m.medicine_id WHERE m.name LIKE ?';
+        params.push(`%${query}%`);
+    }
+    
+    if (lowStock) {
+        sql += query ? ' AND mi.available_stock <= mi.min_threshold' : ' WHERE mi.available_stock <= mi.min_threshold';
+    }
+    
+    const results = await connection.query(sql, params);
+    return results;
+}
+
 export {
     getAllMedicineInventory,
     getMedicineInventoryById,
@@ -75,5 +92,6 @@ export {
     updateMedicineInventory,
     updateMedicineInventoryByMedicineId,
     deleteMedicineInventory,
-    getLowStockItems
+    getLowStockItems,
+    searchMedicineInventory
 };

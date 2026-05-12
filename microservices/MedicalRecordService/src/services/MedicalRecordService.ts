@@ -30,9 +30,39 @@ async function deleteMedicalRecord(id: number): Promise<void> {
     await connection.query('DELETE FROM MedicalRecord WHERE record_id = ?', [id]);
 }
 
+async function getAllMedicalRecords(): Promise<MedicalRecord[]> {
+    const results = await connection.query('SELECT * FROM MedicalRecord');
+    return results;
+}
+
+async function searchMedicalRecords(symptoms?: string, diagnosis?: string, status?: string): Promise<MedicalRecord[]> {
+    let sql = 'SELECT * FROM MedicalRecord WHERE 1=1';
+    const params: any[] = [];
+    
+    if (symptoms) {
+        sql += ' AND symptoms LIKE ?';
+        params.push(`%${symptoms}%`);
+    }
+    
+    if (diagnosis) {
+        sql += ' AND diagnosis LIKE ?';
+        params.push(`%${diagnosis}%`);
+    }
+    
+    if (status) {
+        sql += ' AND status = ?';
+        params.push(status);
+    }
+    
+    const results = await connection.query(sql, params);
+    return results;
+}
+
 export {
     createMedicalRecord,
     getMedicalRecordById,
     updateMedicalRecord,
-    deleteMedicalRecord
+    deleteMedicalRecord,
+    getAllMedicalRecords,
+    searchMedicalRecords
 };

@@ -37,11 +37,25 @@ async function deleteService(id: number): Promise<boolean> {
     return result.affectedRows > 0;
 }
 
+async function searchServices(query?: string): Promise<Service[]> {
+    let sql = 'SELECT * FROM Service WHERE is_active = true';
+    const params: any[] = [];
+    
+    if (query) {
+        sql += ' AND (name LIKE ? OR description LIKE ?)';
+        params.push(`%${query}%`, `%${query}%`);
+    }
+    
+    const results = await connection.query(sql, params);
+    return results;
+}
+
 export {
     getAllServices,
     getServiceById,
     createService,
     updateService,
-    deleteService
+    deleteService,
+    searchServices
 };
 
