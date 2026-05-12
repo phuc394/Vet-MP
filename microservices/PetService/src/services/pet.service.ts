@@ -92,10 +92,16 @@ const deletePet = async (id: number): Promise<boolean> => {
 };
 
 
+const searchPet = async(keyword : string) : Promise<Pet[]> =>{
+    const [rows]= await pool.query(`SELECT * FROM Pet Where name LIKE ? AND is_deleted = FALSE`,[`%${keyword}%`]);
+    return rows as Pet[];
+}
+
 export {
   getAllPets,
   getPetById,
   createPet,
   updatePet,
   deletePet,
+  searchPet,
 };
