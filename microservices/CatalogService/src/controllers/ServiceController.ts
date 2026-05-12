@@ -48,10 +48,21 @@ async function deleteService(req: any, res: any) {
     }
 }
 
+async function searchServices(req: any, res: any) {
+    try {
+        const { query } = req.query;
+        const services = await ServiceService.searchServices(query);
+        res.json(services);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
 export {
     getAllServices,
     getServiceById,
     createService,
     updateService,
-    deleteService
+    deleteService,
+    searchServices
 };

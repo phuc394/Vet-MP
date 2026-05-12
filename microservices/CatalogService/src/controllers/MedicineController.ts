@@ -48,10 +48,21 @@ async function deleteMedicine(req: any, res: any) {
     }
 }
 
+async function searchMedicines(req: any, res: any) {
+    try {
+        const { query, ingredients } = req.query;
+        const medicines = await MedicineService.searchMedicines(query, ingredients);
+        res.json(medicines);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
 export {
     getAllMedicines,
     getMedicineById,
     createMedicine,
     updateMedicine,
-    deleteMedicine
+    deleteMedicine,
+    searchMedicines
 };

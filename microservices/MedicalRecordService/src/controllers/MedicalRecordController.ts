@@ -46,10 +46,21 @@ async function deleteMedicalRecord(req: any, res: any) {
     }
 }
 
+async function searchMedicalRecords(req: any, res: any) {
+    try {
+        const { symptoms, diagnosis, status } = req.query;
+        const records = await MedicalRecordService.searchMedicalRecords(symptoms, diagnosis, status);
+        res.json(records);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
 export {
     getAllMedicalRecords,
     getMedicalRecordById,
     createMedicalRecord,
     updateMedicalRecord,
-    deleteMedicalRecord
+    deleteMedicalRecord,
+    searchMedicalRecords
 };

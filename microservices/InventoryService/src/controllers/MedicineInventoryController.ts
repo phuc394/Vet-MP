@@ -80,6 +80,16 @@ async function getLowStockItems(_req: any, res: any) {
     }
 }
 
+async function searchMedicineInventory(req: any, res: any) {
+    try {
+        const { query, lowStock } = req.query;
+        const inventory = await MedicineInventoryService.searchMedicineInventory(query, lowStock === 'true');
+        res.json(inventory);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
 export {
     getAllMedicineInventory,
     getMedicineInventoryById,
@@ -88,5 +98,6 @@ export {
     updateMedicineInventory,
     updateMedicineInventoryByMedicineId,
     deleteMedicineInventory,
-    getLowStockItems
+    getLowStockItems,
+    searchMedicineInventory
 };
