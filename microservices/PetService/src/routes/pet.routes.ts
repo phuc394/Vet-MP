@@ -4,11 +4,11 @@ import { authMiddleware } from "../middleware/auth.middleware";
 
 const router = Router();
 
-router.get("/", petController.getPets);
-router.get("/search", petController.searchPet);
-router.get("/:id", petController.getPetById);
-router.post("/", petController.createPet);
-router.put("/:id", petController.updatePet);
-router.delete("/:id", petController.deletePet);
+router.get("/",authMiddleware, petController.getPets);
+router.get("/search",authMiddleware, petController.searchPet);
+router.get("/:id",authMiddleware, petController.getPetById);
+router.post("/",authMiddleware, petController.createPet);
+router.put("/:id",authMiddleware, petController.updatePet);
+router.delete("/:id",authMiddleware, petController.deletePet);
 
 export default router;
