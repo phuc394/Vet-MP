@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import express from "express";
+import ReportRoute from "./routes/ReportRoute";
 
 dotenv.config();
 
@@ -15,5 +16,7 @@ app.get("/health", (_request, response) => {
     port: Number(process.env.PORT ?? 3007),
   });
 });
+
+app.use("/reports", ReportRoute);
 
 export default app;
