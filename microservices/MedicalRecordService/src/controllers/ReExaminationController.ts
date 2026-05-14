@@ -1,4 +1,4 @@
-const ReExaminationService = require('../services/ReExaminationService');
+import * as ReExaminationService from '../services/ReExaminationService';
 
 async function getAllReExaminations(_req: any, res: any) {
     try {

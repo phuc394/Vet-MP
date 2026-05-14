@@ -1,6 +1,14 @@
-const express = require('express');
+import express from 'express';
+import {
+    createMedicalRecord,
+    deleteMedicalRecord,
+    getAllMedicalRecords,
+    getMedicalRecordById,
+    searchMedicalRecords,
+    updateMedicalRecord
+} from '../controllers/MedicalRecordController';
+
 const router = express.Router();
-const { getAllMedicalRecords, getMedicalRecordById, createMedicalRecord, updateMedicalRecord, deleteMedicalRecord, searchMedicalRecords } = require('../controllers/MedicalRecordController');
 
 router.get('/', getAllMedicalRecords);
 router.get('/search', searchMedicalRecords);

@@ -1,4 +1,4 @@
-const PrescriptionService = require('../services/PrescriptionService');
+import * as PrescriptionService from '../services/PrescriptionService';
 
 async function getAllPrescriptions(_req: any, res: any) {
     try {

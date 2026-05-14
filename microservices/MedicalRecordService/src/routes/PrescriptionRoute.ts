@@ -1,6 +1,14 @@
-const express = require('express');
+import express from 'express';
+import {
+    createPrescription,
+    deletePrescription,
+    getAllPrescriptions,
+    getPrescriptionById,
+    getPrescriptionsByRecordId,
+    updatePrescription
+} from '../controllers/PrescriptionController';
+
 const router = express.Router();
-const { getAllPrescriptions, getPrescriptionById, getPrescriptionsByRecordId, createPrescription, updatePrescription, deletePrescription } = require('../controllers/PrescriptionController');
 
 router.get('/', getAllPrescriptions);
 router.get('/:id', getPrescriptionById);
