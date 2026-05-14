@@ -1,4 +1,4 @@
-const ServiceService = require('../services/ServiceService');
+import * as ServiceService from '../services/ServiceService';
 
 async function getAllServices(_req: any, res: any) {
     try {

@@ -1,4 +1,4 @@
-const InventoryTransactionService = require('../services/InventoryTransactionService');
+import * as InventoryTransactionService from '../services/InventoryTransactionService';
 
 async function getAllInventoryTransactions(_req: any, res: any) {
     try {

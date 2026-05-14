@@ -1,14 +1,15 @@
-const connection = require('../config/database');
+import connection from '../config/database';
 import { Medicine, CreateMedicineRequest, UpdateMedicineRequest } from '../models/MedicineModel';
 
 async function getAllMedicines(): Promise<Medicine[]> {
-    const results = await connection.query('SELECT * FROM Medicine');
-    return results;
+    const [rows] = await connection.query('SELECT * FROM Medicine');
+    return rows as Medicine[];
 }
 
 async function getMedicineById(id: number): Promise<Medicine | null> {
-    const results = await connection.query('SELECT * FROM Medicine WHERE medicine_id = ?', [id]);
-    return results.length > 0 ? results[0] : null;
+    const [rows] = await connection.query('SELECT * FROM Medicine WHERE medicine_id = ?', [id]);
+    const medicines = rows as Medicine[];
+    return medicines.length > 0 ? medicines[0] ?? null : null;
 }
 
 async function createMedicine(medicineData: CreateMedicineRequest): Promise<Medicine> {
@@ -22,12 +23,12 @@ async function createMedicine(medicineData: CreateMedicineRequest): Promise<Medi
         updated_at: new Date()
     };
     
-    const result = await connection.query('INSERT INTO Medicine SET ?', medicine);
+    const [result] = await connection.query('INSERT INTO Medicine SET ?', medicine);
     return { ...medicine, medicine_id: result.insertId };
 }
 
 async function updateMedicine(id: number, medicineData: UpdateMedicineRequest): Promise<Medicine | null> {
-    const result = await connection.query('UPDATE Medicine SET ? WHERE medicine_id = ?', [medicineData, id]);
+    const [result] = await connection.query('UPDATE Medicine SET ? WHERE medicine_id = ?', [medicineData, id]);
     if (result.affectedRows === 0) {
         return null;
     }
@@ -36,7 +37,7 @@ async function updateMedicine(id: number, medicineData: UpdateMedicineRequest): 
 }
 
 async function deleteMedicine(id: number): Promise<boolean> {
-    const result = await connection.query('DELETE FROM Medicine WHERE medicine_id = ?', [id]);
+    const [result] = await connection.query('DELETE FROM Medicine WHERE medicine_id = ?', [id]);
     return result.affectedRows > 0;
 }
 
@@ -54,8 +55,8 @@ async function searchMedicines(query?: string, ingredients?: string): Promise<Me
         params.push(`%${ingredients}%`);
     }
     
-    const results = await connection.query(sql, params);
-    return results;
+    const [rows] = await connection.query(sql, params);
+    return rows as Medicine[];
 }
 
 export {

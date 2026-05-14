@@ -1,12 +1,11 @@
 import dotenv from "dotenv";
 import express from "express";
-
+import MedicineRoute from "./routes/MedicineRoute";
+import ServiceRoute from "./routes/ServiceRoute";
 
 dotenv.config();
 
 const app = express();
-const MedicineRoute = require('./routes/MedicineRoute');
-const ServiceRoute = require('./routes/ServiceRoute');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
