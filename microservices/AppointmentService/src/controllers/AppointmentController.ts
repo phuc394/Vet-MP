@@ -1,4 +1,4 @@
-const AppointmentService = require('../services/AppointmentService');
+import * as AppointmentService from '../services/AppointmentService';
 
 async function getAllAppointments(_req: any, res: any) {
     try {
@@ -22,8 +22,8 @@ async function getAppointmentById(req: any, res: any) {
 
 async function createAppointment(req: any, res: any) {
    try {
-    const { patientId, vetId, appointmentDate, status } = req.body;
-    const result = await AppointmentService.createAppointment({ patientId, vetId, appointmentDate, status });
+    const { pet_id, staff_id, appointment_date, service_id, start_time, end_time, service_price } = req.body;
+    const result = await AppointmentService.createAppointment({ pet_id, staff_id, appointment_date, service_id, start_time, end_time, service_price  });
     res.json(result);
    } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
@@ -33,8 +33,8 @@ async function createAppointment(req: any, res: any) {
 async function updateAppointment(req: any, res: any) {
     try {
         const { id } = req.params;
-        const { patientId, vetId, appointmentDate, status } = req.body;
-        const result = await AppointmentService.updateAppointment(id, { patientId, vetId, appointmentDate, status });
+        const { pet_id, staff_id, appointment_date, service_id, start_time, end_time, service_price } = req.body;
+        const result = await AppointmentService.updateAppointment(id, { pet_id, staff_id, appointment_date, service_id, start_time, end_time, service_price });
         res.json(result);
 
     } catch (error) {

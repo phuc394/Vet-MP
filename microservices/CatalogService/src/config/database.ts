@@ -1,6 +1,6 @@
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 
-const connection = mysql.createConnection({
+const connection = mysql.createPool({
     host: 'localhost',
     port: 3306,
     user: 'root',
@@ -9,4 +9,4 @@ const connection = mysql.createConnection({
     database: 'catalog_db_vet'
 });
 
-module.exports = connection;
+export default connection;

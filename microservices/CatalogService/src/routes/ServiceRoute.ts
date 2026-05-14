@@ -1,6 +1,7 @@
-const express = require('express');
+import express from 'express';
+import * as ServiceController from '../controllers/ServiceController';
+
 const router = express.Router();
-const ServiceController = require('../controllers/ServiceController');
 
 router.get('/', ServiceController.getAllServices);
 router.get('/search', ServiceController.searchServices);
@@ -9,4 +10,4 @@ router.post('/', ServiceController.createService);
 router.put('/:id', ServiceController.updateService);
 router.delete('/:id', ServiceController.deleteService);
 
-module.exports = router;
+export default router;

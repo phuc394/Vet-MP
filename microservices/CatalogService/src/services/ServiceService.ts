@@ -1,14 +1,15 @@
-const connection = require('../config/database');
+import connection from '../config/database';
 import { Service, CreateServiceRequest, UpdateServiceRequest } from '../models/ServiceModel';
 
 async function getAllServices(): Promise<Service[]> {
-    const results = await connection.query('SELECT * FROM Service');
-    return results;
+    const [rows] = await connection.query('SELECT * FROM Service');
+    return rows as Service[];
 }
 
 async function getServiceById(id: number): Promise<Service | null> {
-    const results = await connection.query('SELECT * FROM Service WHERE service_id = ?', [id]);
-    return results.length > 0 ? results[0] : null;
+    const [rows] = await connection.query('SELECT * FROM Service WHERE service_id = ?', [id]);
+    const services = rows as Service[];
+    return services.length > 0 ? services[0] ?? null : null;
 }
 
 async function createService(serviceData: CreateServiceRequest): Promise<Service> {
@@ -20,12 +21,12 @@ async function createService(serviceData: CreateServiceRequest): Promise<Service
         created_at: new Date(),
         updated_at: new Date()
     };
-    const result = await connection.query('INSERT INTO Service SET ?', service);
+    const [result] = await connection.query('INSERT INTO Service SET ?', service);
     return { ...service, service_id: result.insertId };
 }
 
 async function updateService(id: number, serviceData: UpdateServiceRequest): Promise<Service | null> {
-    const result = await connection.query('UPDATE Service SET ? WHERE service_id = ?', [serviceData, id]);
+    const [result] = await connection.query('UPDATE Service SET ? WHERE service_id = ?', [serviceData, id]);
     if (result.affectedRows === 0) {
         return null;
     }
@@ -33,7 +34,7 @@ async function updateService(id: number, serviceData: UpdateServiceRequest): Pro
 }
 
 async function deleteService(id: number): Promise<boolean> {
-    const result = await connection.query('DELETE FROM Service WHERE service_id = ?', [id]);
+    const [result] = await connection.query('DELETE FROM Service WHERE service_id = ?', [id]);
     return result.affectedRows > 0;
 }
 
@@ -46,8 +47,8 @@ async function searchServices(query?: string): Promise<Service[]> {
         params.push(`%${query}%`, `%${query}%`);
     }
     
-    const results = await connection.query(sql, params);
-    return results;
+    const [rows] = await connection.query(sql, params);
+    return rows as Service[];
 }
 
 export {

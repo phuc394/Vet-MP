@@ -1,5 +1,5 @@
-const express = require('express');
-const MedicineController = require('../controllers/MedicineController');
+import express from 'express';
+import * as MedicineController from '../controllers/MedicineController';
 
 const router = express.Router();
 
@@ -10,4 +10,4 @@ router.post('/', MedicineController.createMedicine);
 router.put('/:id', MedicineController.updateMedicine);
 router.delete('/:id', MedicineController.deleteMedicine);
 
-module.exports = router;
+export default router;

@@ -1,4 +1,4 @@
-const MedicineService = require('../services/MedicineService');
+import * as MedicineService from '../services/MedicineService';
 
 async function getAllMedicines(_req: any, res: any) {
     try {
