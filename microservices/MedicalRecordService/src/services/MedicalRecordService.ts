@@ -1,4 +1,4 @@
-const connection = require('../config/database');
+import connection from '../config/database';
 import { MedicalRecord, CreateMedicalRecordRequest, UpdateMedicalRecordRequest } from '../models/MedicalRecordModel';
 
 async function createMedicalRecord(medicalRecordData: CreateMedicalRecordRequest): Promise<MedicalRecord> {
@@ -12,18 +12,28 @@ async function createMedicalRecord(medicalRecordData: CreateMedicalRecordRequest
         updated_at: new Date()
     };
     
-    const result = await connection.query('INSERT INTO MedicalRecord SET ?', medicalRecord);
-    return result;
+    const [result] = await connection.query('INSERT INTO MedicalRecord SET ?', medicalRecord);
+    return { ...medicalRecord, record_id: result.insertId };
 }
 
 async function getMedicalRecordById(id: number): Promise<MedicalRecord | null> {
-    const result = await connection.query('SELECT * FROM MedicalRecord WHERE record_id = ?', [id]);
-    return result.length > 0 ? result[0] : null;
+    const [rows] = await connection.query('SELECT * FROM MedicalRecord WHERE record_id = ?', [id]);
+    const medicalRecords = rows as MedicalRecord[];
+    return medicalRecords.length > 0 ? medicalRecords[0] ?? null : null;
 }
 
 async function updateMedicalRecord(id: number, medicalRecordData: UpdateMedicalRecordRequest): Promise<MedicalRecord> {
-    const result = await connection.query('UPDATE MedicalRecord SET ? WHERE record_id = ?', [medicalRecordData, id]);
-    return result;
+    const updateData = {
+        ...medicalRecordData,
+        updated_at: new Date()
+    };
+
+    await connection.query('UPDATE MedicalRecord SET ? WHERE record_id = ?', [updateData, id]);
+    const medicalRecord = await getMedicalRecordById(id);
+    if (!medicalRecord) {
+        throw new Error(`Medical record ${id} not found after update`);
+    }
+    return medicalRecord;
 }
 
 async function deleteMedicalRecord(id: number): Promise<void> {
@@ -31,8 +41,8 @@ async function deleteMedicalRecord(id: number): Promise<void> {
 }
 
 async function getAllMedicalRecords(): Promise<MedicalRecord[]> {
-    const results = await connection.query('SELECT * FROM MedicalRecord');
-    return results;
+    const [rows] = await connection.query('SELECT * FROM MedicalRecord');
+    return rows as MedicalRecord[];
 }
 
 async function searchMedicalRecords(symptoms?: string, diagnosis?: string, status?: string): Promise<MedicalRecord[]> {
@@ -54,8 +64,8 @@ async function searchMedicalRecords(symptoms?: string, diagnosis?: string, statu
         params.push(status);
     }
     
-    const results = await connection.query(sql, params);
-    return results;
+    const [rows] = await connection.query(sql, params);
+    return rows as MedicalRecord[];
 }
 
 export {

@@ -1,19 +1,20 @@
-const connection = require('../config/database');
+import connection from '../config/database';
 import { ReExamination, CreateReExaminationRequest, UpdateReExaminationRequest } from '../models/ReExaminationModel';
 
 async function getAllReExaminations(): Promise<ReExamination[]> {
-    const result = await connection.query('SELECT * FROM Re_Examination');
-    return result;
+    const [rows] = await connection.query('SELECT * FROM Re_Examination');
+    return rows as ReExamination[];
 }
 
 async function getReExaminationById(id: number): Promise<ReExamination | null> {
-    const result = await connection.query('SELECT * FROM Re_Examination WHERE re_exam_id = ?', [id]);
-    return result.length > 0 ? result[0] : null;
+    const [rows] = await connection.query('SELECT * FROM Re_Examination WHERE re_exam_id = ?', [id]);
+    const reExaminations = rows as ReExamination[];
+    return reExaminations.length > 0 ? reExaminations[0] ?? null : null;
 }
 
 async function getReExaminationsByRecordId(recordId: number): Promise<ReExamination[]> {
-    const result = await connection.query('SELECT * FROM Re_Examination WHERE record_id = ?', [recordId]);
-    return result;
+    const [rows] = await connection.query('SELECT * FROM Re_Examination WHERE record_id = ?', [recordId]);
+    return rows as ReExamination[];
 }
 
 async function createReExamination(reExaminationData: CreateReExaminationRequest): Promise<ReExamination> {
@@ -25,13 +26,17 @@ async function createReExamination(reExaminationData: CreateReExaminationRequest
         created_at: new Date()
     };
     
-    const result = await connection.query('INSERT INTO Re_Examination SET ?', reExamination);
-    return result;
+    const [result] = await connection.query('INSERT INTO Re_Examination SET ?', reExamination);
+    return { ...reExamination, re_exam_id: result.insertId };
 }
 
 async function updateReExamination(id: number, reExaminationData: UpdateReExaminationRequest): Promise<ReExamination> {
-    const result = await connection.query('UPDATE Re_Examination SET ? WHERE re_exam_id = ?', [reExaminationData, id]);
-    return result;
+    await connection.query('UPDATE Re_Examination SET ? WHERE re_exam_id = ?', [reExaminationData, id]);
+    const reExamination = await getReExaminationById(id);
+    if (!reExamination) {
+        throw new Error(`Re-examination ${id} not found after update`);
+    }
+    return reExamination;
 }
 
 async function deleteReExamination(id: number): Promise<void> {

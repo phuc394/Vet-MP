@@ -1,4 +1,4 @@
-const MedicalRecordService = require('../services/MedicalRecordService');
+import * as MedicalRecordService from '../services/MedicalRecordService';
 
 async function getAllMedicalRecords(_req: any, res: any) {
     try {
@@ -30,7 +30,8 @@ async function createMedicalRecord(req: any, res: any) {
 
 async function updateMedicalRecord(req: any, res: any) {
     try {
-        const medicalRecord = await MedicalRecordService.updateMedicalRecord(req.body);
+        const { id } = req.params;
+        const medicalRecord = await MedicalRecordService.updateMedicalRecord(id, req.body);
         res.json(medicalRecord);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -39,8 +40,9 @@ async function updateMedicalRecord(req: any, res: any) {
 
 async function deleteMedicalRecord(req: any, res: any) {
     try {
-        const medicalRecord = await MedicalRecordService.deleteMedicalRecord(req.body);
-        res.json(medicalRecord);
+        const { id } = req.params;
+        await MedicalRecordService.deleteMedicalRecord(id);
+        res.status(204).send();
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
     }
