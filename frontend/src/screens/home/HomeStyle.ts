@@ -97,57 +97,5 @@ export const styles = StyleSheet.create({
     marginLeft: 4,
   },
 
-  // --- SUPPORT CARD ---
-  supportCard: {
-    backgroundColor: '#6E8A76',
-    borderRadius: 24,
-    padding: 24,
-    flexDirection: 'row',
-    overflow: 'hidden',
-    minHeight: 160,
-  },
-  supportContent: {
-    flex: 1,
-    zIndex: 1,
-    justifyContent: 'center',
-  },
-  supportTitle: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  supportText: {
-    color: '#D1DDD5',
-    fontSize: 13,
-    marginBottom: 18,
-    lineHeight: 18,
-    maxWidth: '85%',
-  },
-  supportButton: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    alignSelf: 'flex-start',
-  },
-  supportButtonText: {
-    color: '#8CA694',
-    fontWeight: '700',
-    fontSize: 13,
-  },
-  supportImageContainer: {
-    position: 'absolute',
-    right: -20,
-    bottom: -15,
-    width: 150,
-    height: 150,
-    opacity: 0.3, // Làm mờ ảnh nhân viên hỗ trợ để giống thiết kế
-    zIndex: 0,
-  },
-  supportImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
-  }
+  
 });

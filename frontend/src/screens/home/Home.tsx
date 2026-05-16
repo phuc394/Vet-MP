@@ -4,6 +4,7 @@ import { View, Text, Image, TouchableOpacity, ScrollView, SafeAreaView } from 'r
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { styles } from './HomeStyle';
 import { MOCK_PETS } from './HomeUtils';
+import SupportCard from '../../components/SupportCard';
 
 export default function Home() {
   return (
@@ -51,26 +52,7 @@ export default function Home() {
         </ScrollView>
 
         {/* Bảng Hỗ trợ / Reschedule */}
-        <View style={styles.supportCard}>
-          <View style={styles.supportContent}>
-            <Text style={styles.supportTitle}>Need to reschedule?</Text>
-            <Text style={styles.supportText}>
-              Call our help center for immediate changes to appointments within 24 hours.
-            </Text>
-            <TouchableOpacity style={styles.supportButton} activeOpacity={0.8}>
-              <Text style={styles.supportButtonText}>Call Support</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Hình ảnh mặt người bên góc phải */}
-          <View style={styles.supportImageContainer}>
-            <Image
-              // Bạn có thể thay link này bằng link ảnh mờ vector mặt người thật trong assets dự án (VD: require('../../assets/headset-icon.png'))
-              source={require('../../../assets/anh-cskh.png')} 
-              style={styles.supportImage}
-            />
-          </View>
-        </View>
+        <SupportCard />
 
       </ScrollView>
     </SafeAreaView>
