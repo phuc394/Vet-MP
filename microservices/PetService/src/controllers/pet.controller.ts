@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import * as petService from "../services/pet.service.js";
-import { CreatePet, UpdatePet } from "../models/pet.model.js";
+import * as petService from "../services/pet.service";
+import { CreatePet, UpdatePet } from "../models/pet.model";
 import { validateCreatePet } from "../utils/createPet.validate";
 import { validateUpdatePet } from "../utils/updatePet.validate";
 
@@ -177,6 +177,37 @@ const deletePet = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+const searchPet= async(
+  req: Request,
+  res: Response
+) : Promise <void>=>{
+
+ 
+  try{
+      const keyword= req.query.name as string;
+       if (!keyword || keyword.trim() === "") {
+      res.status(400).json({
+        message: "Search keyword is required",
+      });
+      return;
+    }
+      const pets = await petService.searchPet(keyword);
+      res.status(200).json({
+      message: "Search pets successfully",
+      total: pets.length,
+      data: pets,
+    });
+  } catch (error){
+    res.status(500).json({
+      message: "Internal server error",
+      error,
+    });
+  }
+
+  
+
+}
+
 
 export {
   getPets,
@@ -184,4 +215,5 @@ export {
   createPet,
   updatePet,
   deletePet,
+  searchPet
 };
