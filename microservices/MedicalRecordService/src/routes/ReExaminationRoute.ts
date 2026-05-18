@@ -1,6 +1,14 @@
-const express = require('express');
+import express from 'express';
+import {
+    createReExamination,
+    deleteReExamination,
+    getAllReExaminations,
+    getReExaminationById,
+    getReExaminationsByRecordId,
+    updateReExamination
+} from '../controllers/ReExaminationController';
+
 const router = express.Router();
-const { getAllReExaminations, getReExaminationById, getReExaminationsByRecordId, createReExamination, updateReExamination, deleteReExamination } = require('../controllers/ReExaminationController');
 
 router.get('/', getAllReExaminations);
 router.get('/:id', getReExaminationById);

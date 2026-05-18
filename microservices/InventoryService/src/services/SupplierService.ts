@@ -1,14 +1,15 @@
-const connection = require('../config/database');
+import connection from '../config/database';
 import { Supplier, CreateSupplierRequest, UpdateSupplierRequest } from '../models/SupplierModel';
 
 async function getAllSuppliers(): Promise<Supplier[]> {
-    const results = await connection.query('SELECT * FROM Supplier');
-    return results;
+    const [rows] = await connection.query('SELECT * FROM Supplier');
+    return rows as Supplier[];
 }
 
 async function getSupplierById(id: number): Promise<Supplier | null> {
-    const results = await connection.query('SELECT * FROM Supplier WHERE supplier_id = ?', [id]);
-    return results.length > 0 ? results[0] : null;
+    const [rows] = await connection.query('SELECT * FROM Supplier WHERE supplier_id = ?', [id]);
+    const suppliers = rows as Supplier[];
+    return suppliers.length > 0 ? suppliers[0] ?? null : null;
 }
 
 async function createSupplier(supplierData: CreateSupplierRequest): Promise<Supplier> {
@@ -26,8 +27,8 @@ async function createSupplier(supplierData: CreateSupplierRequest): Promise<Supp
         supplier.address = supplierData.address;
     }
     
-    const results = await connection.query('INSERT INTO Supplier SET ?', [supplier]);
-    return { ...supplier, supplier_id: results.insertId };
+    const [result] = await connection.query('INSERT INTO Supplier SET ?', [supplier]);
+    return { ...supplier, supplier_id: result.insertId };
 }
 
 async function updateSupplier(id: number, supplierData: UpdateSupplierRequest): Promise<Supplier | null> {
@@ -43,8 +44,8 @@ async function updateSupplier(id: number, supplierData: UpdateSupplierRequest): 
 }
 
 async function deleteSupplier(id: number): Promise<boolean> {
-    const results = await connection.query('DELETE FROM Supplier WHERE supplier_id = ?', [id]);
-    return results.affectedRows > 0;
+    const [result] = await connection.query('DELETE FROM Supplier WHERE supplier_id = ?', [id]);
+    return result.affectedRows > 0;
 }
 
 export {

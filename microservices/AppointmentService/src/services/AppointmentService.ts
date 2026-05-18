@@ -1,14 +1,15 @@
-const connection = require('../config/database');
+import connection from '../config/database';
 import { Appointment, CreateAppointmentRequest, UpdateAppointmentRequest, AppointmentStatus } from '../models/AppointmentModel';
 
 async function getAllAppointments(): Promise<Appointment[]> {
-    const results = await connection.query('SELECT * FROM Appointment');
-    return results;
+    const [rows] = await connection.query('SELECT * FROM Appointment');
+    return rows as Appointment[];
 }
 
 async function getAppointmentById(id: number): Promise<Appointment | null> {
-    const results = await connection.query('SELECT * FROM Appointment WHERE appointment_id = ?', [id]);
-    return results.length > 0 ? results[0] : null;
+    const [rows] = await connection.query('SELECT * FROM Appointment WHERE appointment_id = ?', [id]);
+    const appointments = rows as Appointment[];
+    return appointments.length > 0 ? appointments[0] ?? null : null;
 }
 
 async function createAppointment(appointmentData: CreateAppointmentRequest): Promise<Appointment> {
@@ -25,8 +26,8 @@ async function createAppointment(appointmentData: CreateAppointmentRequest): Pro
         updated_at: new Date()
     };
     
-    const results = await connection.query('INSERT INTO Appointment SET ?', [appointment]);
-    return { ...appointment, appointment_id: results.insertId };
+    const [result] = await connection.query('INSERT INTO Appointment SET ?', [appointment]);
+    return { ...appointment, appointment_id: result.insertId };
 }
 
 async function updateAppointment(id: number, appointmentData: UpdateAppointmentRequest): Promise<Appointment | null> {
@@ -42,31 +43,31 @@ async function updateAppointment(id: number, appointmentData: UpdateAppointmentR
 }
 
 async function deleteAppointment(id: number): Promise<boolean> {
-    const results = await connection.query('DELETE FROM Appointment WHERE appointment_id = ?', [id]);
-    return results.affectedRows > 0;
+    const [result] = await connection.query('DELETE FROM Appointment WHERE appointment_id = ?', [id]);
+    return result.affectedRows > 0;
 }
 
 async function getAppointmentsByPetId(petId: number): Promise<Appointment[]> {
-    const results = await connection.query('SELECT * FROM Appointment WHERE pet_id = ?', [petId]);
-    return results;
+    const [rows] = await connection.query('SELECT * FROM Appointment WHERE pet_id = ?', [petId]);
+    return rows as Appointment[];
 }
 
 async function getAppointmentsByStaffId(staffId: number): Promise<Appointment[]> {
-    const results = await connection.query('SELECT * FROM Appointment WHERE staff_id = ?', [staffId]);
-    return results;
+    const [rows] = await connection.query('SELECT * FROM Appointment WHERE staff_id = ?', [staffId]);
+    return rows as Appointment[];
 }
 
 async function getAppointmentsByDateRange(startDate: Date, endDate: Date): Promise<Appointment[]> {
-    const results = await connection.query(
+    const [rows] = await connection.query(
         'SELECT * FROM Appointment WHERE appointment_date BETWEEN ? AND ?',
         [startDate, endDate]
     );
-    return results;
+    return rows as Appointment[];
 }
 
 async function cancelAppointment(id: number): Promise<boolean> {
-    const results = await connection.query('UPDATE Appointment SET status = ? WHERE appointment_id = ?', [AppointmentStatus.CANCELLED, id]);
-    return results.affectedRows > 0;
+    const [result] = await connection.query('UPDATE Appointment SET status = ? WHERE appointment_id = ?', [AppointmentStatus.CANCELLED, id]);
+    return result.affectedRows > 0;
 }
 
 async function searchAppointments(status?: string, startDate?: string, endDate?: string, petId?: string, staffId?: string): Promise<Appointment[]> {
@@ -99,8 +100,8 @@ async function searchAppointments(status?: string, startDate?: string, endDate?:
         params.push(staffId);
     }
     
-    const results = await connection.query(sql, params);
-    return results;
+    const [rows] = await connection.query(sql, params);
+    return rows as Appointment[];
 }
 
 export {

@@ -1,4 +1,4 @@
-const SupplierService = require('../services/SupplierService');
+import * as SupplierService from '../services/SupplierService';
 
 async function getAllSuppliers(_req: any, res: any) {
     try {

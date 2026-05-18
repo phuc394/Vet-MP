@@ -1,19 +1,21 @@
-const connection = require('../config/database');
+import connection from '../config/database';
 import { MedicineInventory, CreateMedicineInventoryRequest, UpdateMedicineInventoryRequest } from '../models/MedicineInventoryModel';
 
 async function getAllMedicineInventory(): Promise<MedicineInventory[]> {
-    const results = await connection.query('SELECT * FROM Medicine_Inventory');
-    return results;
+    const [rows] = await connection.query('SELECT * FROM Medicine_Inventory');
+    return rows as MedicineInventory[];
 }
 
 async function getMedicineInventoryById(id: number): Promise<MedicineInventory | null> {
-    const results = await connection.query('SELECT * FROM Medicine_Inventory WHERE inventory_id = ?', [id]);
-    return results.length > 0 ? results[0] : null;
+    const [rows] = await connection.query('SELECT * FROM Medicine_Inventory WHERE inventory_id = ?', [id]);
+    const inventories = rows as MedicineInventory[];
+    return inventories.length > 0 ? inventories[0] ?? null : null;
 }
 
 async function getMedicineInventoryByMedicineId(medicineId: number): Promise<MedicineInventory | null> {
-    const results = await connection.query('SELECT * FROM Medicine_Inventory WHERE medicine_id = ?', [medicineId]);
-    return results.length > 0 ? results[0] : null;
+    const [rows] = await connection.query('SELECT * FROM Medicine_Inventory WHERE medicine_id = ?', [medicineId]);
+    const inventories = rows as MedicineInventory[];
+    return inventories.length > 0 ? inventories[0] ?? null : null;
 }
 
 async function createMedicineInventory(inventoryData: CreateMedicineInventoryRequest): Promise<MedicineInventory> {
@@ -29,8 +31,8 @@ async function createMedicineInventory(inventoryData: CreateMedicineInventoryReq
         inventory.import_price = inventoryData.import_price;
     }
     
-    const results = await connection.query('INSERT INTO Medicine_Inventory SET ?', [inventory]);
-    return { ...inventory, inventory_id: results.insertId };
+    const [result] = await connection.query('INSERT INTO Medicine_Inventory SET ?', [inventory]);
+    return { ...inventory, inventory_id: result.insertId };
 }
 
 async function updateMedicineInventory(id: number, inventoryData: UpdateMedicineInventoryRequest): Promise<MedicineInventory | null> {
@@ -58,13 +60,13 @@ async function updateMedicineInventoryByMedicineId(medicineId: number, inventory
 }
 
 async function deleteMedicineInventory(id: number): Promise<boolean> {
-    const results = await connection.query('DELETE FROM Medicine_Inventory WHERE inventory_id = ?', [id]);
-    return results.affectedRows > 0;
+    const [result] = await connection.query('DELETE FROM Medicine_Inventory WHERE inventory_id = ?', [id]);
+    return result.affectedRows > 0;
 }
 
 async function getLowStockItems(): Promise<MedicineInventory[]> {
-    const results = await connection.query('SELECT * FROM Medicine_Inventory WHERE available_stock <= min_threshold');
-    return results;
+    const [rows] = await connection.query('SELECT * FROM Medicine_Inventory WHERE available_stock <= min_threshold');
+    return rows as MedicineInventory[];
 }
 
 async function searchMedicineInventory(query?: string, lowStock?: boolean): Promise<MedicineInventory[]> {
@@ -80,8 +82,8 @@ async function searchMedicineInventory(query?: string, lowStock?: boolean): Prom
         sql += query ? ' AND mi.available_stock <= mi.min_threshold' : ' WHERE mi.available_stock <= mi.min_threshold';
     }
     
-    const results = await connection.query(sql, params);
-    return results;
+    const [rows] = await connection.query(sql, params);
+    return rows as MedicineInventory[];
 }
 
 export {
