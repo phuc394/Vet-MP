@@ -48,6 +48,7 @@ CREATE TABLE Pet (
     pet_id INT AUTO_INCREMENT PRIMARY KEY,
     owner_id INT NOT NULL, -- [REFERENCE] Tham chiếu logic tới auth_db_vet.Users.user_id
     name VARCHAR(50) NOT NULL,
+    sex ENUM('male', 'female') NOT NULL,
     species VARCHAR(50) NULL,
     breed VARCHAR(50) NULL,
     birth_date DATE NULL,
