@@ -24,7 +24,8 @@ async function createMedicine(medicineData: CreateMedicineRequest): Promise<Medi
     };
     
     const [result] = await connection.query('INSERT INTO Medicine SET ?', medicine);
-    return { ...medicine, medicine_id: result.insertId };
+    const insertId = (result as any).insertId;
+    return { ...medicine, medicine_id: insertId };
 }
 
 async function updateMedicine(id: number, medicineData: UpdateMedicineRequest): Promise<Medicine | null> {

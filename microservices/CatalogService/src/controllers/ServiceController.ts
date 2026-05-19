@@ -12,7 +12,7 @@ async function getAllServices(_req: any, res: any) {
 async function getServiceById(req: any, res: any) {
     try {
         const { id } = req.params;
-        const service = await ServiceService.getServiceById(id);
+        const service = await ServiceService.getServiceById(Number(id));
         res.json(service);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -31,7 +31,7 @@ async function createService(req: any, res: any) {
 async function updateService(req: any, res: any) {
     try {
         const { id } = req.params;
-        const service = await ServiceService.updateService(id, req.body);
+        const service = await ServiceService.updateService(Number(id), req.body);
         res.json(service);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -41,7 +41,7 @@ async function updateService(req: any, res: any) {
 async function deleteService(req: any, res: any) {
     try {
         const { id } = req.params;
-        const service = await ServiceService.deleteService(id);
+        const service = await ServiceService.deleteService(Number(id));
         res.json(service);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });

@@ -12,7 +12,7 @@ async function getAllMedicineInventory(_req: any, res: any) {
 async function getMedicineInventoryById(req: any, res: any) {
     try {
         const { id } = req.params;
-        const inventory = await MedicineInventoryService.getMedicineInventoryById(id);
+        const inventory = await MedicineInventoryService.getMedicineInventoryById(Number(id));
         res.json(inventory);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -22,7 +22,7 @@ async function getMedicineInventoryById(req: any, res: any) {
 async function getMedicineInventoryByMedicineId(req: any, res: any) {
     try {
         const { medicineId } = req.params;
-        const inventory = await MedicineInventoryService.getMedicineInventoryByMedicineId(medicineId);
+        const inventory = await MedicineInventoryService.getMedicineInventoryByMedicineId(Number(medicineId));
         res.json(inventory);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -43,7 +43,7 @@ async function updateMedicineInventory(req: any, res: any) {
     try {
         const { id } = req.params;
         const { import_price, available_stock, min_threshold } = req.body;
-        const result = await MedicineInventoryService.updateMedicineInventory(id, { import_price, available_stock, min_threshold });
+        const result = await MedicineInventoryService.updateMedicineInventory(Number(id), { import_price, available_stock, min_threshold });
         res.json(result);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -54,7 +54,7 @@ async function updateMedicineInventoryByMedicineId(req: any, res: any) {
     try {
         const { medicineId } = req.params;
         const { import_price, available_stock, min_threshold } = req.body;
-        const result = await MedicineInventoryService.updateMedicineInventoryByMedicineId(medicineId, { import_price, available_stock, min_threshold });
+        const result = await MedicineInventoryService.updateMedicineInventoryByMedicineId(Number(medicineId), { import_price, available_stock, min_threshold });
         res.json(result);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -64,7 +64,7 @@ async function updateMedicineInventoryByMedicineId(req: any, res: any) {
 async function deleteMedicineInventory(req: any, res: any) {
     try {
         const { id } = req.params;
-        const result = await MedicineInventoryService.deleteMedicineInventory(id);
+        const result = await MedicineInventoryService.deleteMedicineInventory(Number(id));
         res.json(result);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });

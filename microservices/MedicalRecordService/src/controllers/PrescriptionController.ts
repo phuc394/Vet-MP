@@ -12,7 +12,7 @@ async function getAllPrescriptions(_req: any, res: any) {
 async function getPrescriptionById(req: any, res: any) {
     try {
         const { id } = req.params;
-        const prescription = await PrescriptionService.getPrescriptionById(id);
+        const prescription = await PrescriptionService.getPrescriptionById(Number(id));
         if (!prescription) {
             return res.status(404).json({ error: 'Prescription not found' });
         }
@@ -25,7 +25,7 @@ async function getPrescriptionById(req: any, res: any) {
 async function getPrescriptionsByRecordId(req: any, res: any) {
     try {
         const { recordId } = req.params;
-        const prescriptions = await PrescriptionService.getPrescriptionsByRecordId(recordId);
+        const prescriptions = await PrescriptionService.getPrescriptionsByRecordId(Number(recordId));
         res.json(prescriptions);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -44,7 +44,7 @@ async function createPrescription(req: any, res: any) {
 async function updatePrescription(req: any, res: any) {
     try {
         const { id } = req.params;
-        const prescription = await PrescriptionService.updatePrescription(id, req.body);
+        const prescription = await PrescriptionService.updatePrescription(Number(id), req.body);
         res.json(prescription);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -54,7 +54,7 @@ async function updatePrescription(req: any, res: any) {
 async function deletePrescription(req: any, res: any) {
     try {
         const { id } = req.params;
-        await PrescriptionService.deletePrescription(id);
+        await PrescriptionService.deletePrescription(Number(id));
         res.status(204).send();
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });

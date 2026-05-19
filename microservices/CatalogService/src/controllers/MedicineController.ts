@@ -12,7 +12,7 @@ async function getAllMedicines(_req: any, res: any) {
 async function getMedicineById(req: any, res: any) {
     try {
         const { id } = req.params;
-        const medicine = await MedicineService.getMedicineById(id);
+        const medicine = await MedicineService.getMedicineById(Number(id));
         res.json(medicine);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -31,7 +31,7 @@ async function createMedicine(req: any, res: any) {
 async function updateMedicine(req: any, res: any) {
     try {
         const { id } = req.params;
-        const medicine = await MedicineService.updateMedicine(id, req.body);
+        const medicine = await MedicineService.updateMedicine(Number(id), req.body);
         res.json(medicine);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -41,7 +41,7 @@ async function updateMedicine(req: any, res: any) {
 async function deleteMedicine(req: any, res: any) {
     try {
         const { id } = req.params;
-        const medicine = await MedicineService.deleteMedicine(id);
+        const medicine = await MedicineService.deleteMedicine(Number(id));
         res.json(medicine);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });

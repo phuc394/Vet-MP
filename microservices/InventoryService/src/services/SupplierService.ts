@@ -28,7 +28,8 @@ async function createSupplier(supplierData: CreateSupplierRequest): Promise<Supp
     }
     
     const [result] = await connection.query('INSERT INTO Supplier SET ?', [supplier]);
-    return { ...supplier, supplier_id: result.insertId };
+    const insertId = (result as any).insertId;
+    return { ...supplier, supplier_id: insertId };
 }
 
 async function updateSupplier(id: number, supplierData: UpdateSupplierRequest): Promise<Supplier | null> {

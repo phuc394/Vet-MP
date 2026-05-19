@@ -12,7 +12,7 @@ async function getAllMedicalRecords(_req: any, res: any) {
 async function getMedicalRecordById(req: any, res: any) {
     try {
         const { id } = req.params;
-        const medicalRecord = await MedicalRecordService.getMedicalRecordById(id);
+        const medicalRecord = await MedicalRecordService.getMedicalRecordById(Number(id));
         res.json(medicalRecord);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -31,7 +31,7 @@ async function createMedicalRecord(req: any, res: any) {
 async function updateMedicalRecord(req: any, res: any) {
     try {
         const { id } = req.params;
-        const medicalRecord = await MedicalRecordService.updateMedicalRecord(id, req.body);
+        const medicalRecord = await MedicalRecordService.updateMedicalRecord(Number(id), req.body);
         res.json(medicalRecord);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -41,7 +41,7 @@ async function updateMedicalRecord(req: any, res: any) {
 async function deleteMedicalRecord(req: any, res: any) {
     try {
         const { id } = req.params;
-        await MedicalRecordService.deleteMedicalRecord(id);
+        await MedicalRecordService.deleteMedicalRecord(Number(id));
         res.status(204).send();
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });

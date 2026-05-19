@@ -13,7 +13,8 @@ async function createMedicalRecord(medicalRecordData: CreateMedicalRecordRequest
     };
     
     const [result] = await connection.query('INSERT INTO MedicalRecord SET ?', medicalRecord);
-    return { ...medicalRecord, record_id: result.insertId };
+    const insertId = (result as any).insertId;
+    return { ...medicalRecord, record_id: insertId };
 }
 
 async function getMedicalRecordById(id: number): Promise<MedicalRecord | null> {

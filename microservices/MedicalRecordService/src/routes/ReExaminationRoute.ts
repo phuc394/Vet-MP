@@ -11,8 +11,8 @@ import {
 const router = express.Router();
 
 router.get('/', getAllReExaminations);
-router.get('/:id', getReExaminationById);
 router.get('/record/:recordId', getReExaminationsByRecordId);
+router.get('/:id', getReExaminationById);
 router.post('/', createReExamination);
 router.put('/:id', updateReExamination);
 router.delete('/:id', deleteReExamination);
