@@ -6,6 +6,7 @@ export interface Pet {
   breed: string | null;
   birth_date: string | null; // DATE → string
   weight: number | null;
+  sex : 'male' | 'female';
   notes: string | null;
   avatar: string | null;
   is_deleted: boolean;
@@ -20,6 +21,7 @@ export interface CreatePet {
   breed?: string;
   birth_date?: string;
   weight?: number;
+  sex: 'male' | 'female';
   notes?: string;
   avatar?: string;
 }
@@ -30,6 +32,7 @@ export interface UpdatePet {
   breed?: string;
   birth_date?: string;
   weight?: number;
+  sex?: 'male' | 'female';
   notes?: string;
   avatar?: string;
 }
