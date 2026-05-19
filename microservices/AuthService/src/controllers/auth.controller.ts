@@ -105,7 +105,49 @@ const refreshToken = async (
     );
   }
 };
+const forgotPassword = async (
+  req : Request,
+  res : Response
+) => {
+  try {
+    const { email } = req.body;
 
+    const result =
+      await authService.forgotPassword(
+        email
+      );
+
+    return res.status(200).json(result);
+  } catch (error : any) {
+    return res.status(400).json({
+      message: error.message,
+    });
+  }
+};
+
+const resetPassword = async (
+  req : Request,
+  res : Response
+) => {
+  try {
+    const {
+      token,
+      newPassword,
+    } = req.body;
+
+    const result =
+      await authService.resetPassword(
+        token,
+        newPassword
+      );
+
+    return res.status(200).json(result);
+  } catch (error : any) {
+    return res.status(400).json({
+      message: error.message,
+    });
+  }
+};
 const logout = async (
   req: Request,
   res: Response
@@ -140,9 +182,43 @@ const logout = async (
   }
 };
 
+const changePassword = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+
+    const userId = (req as any).user.user_id;
+
+    const {
+      currentPassword,
+      newPassword,
+    } = req.body;
+
+    const result =
+      await authService.changePassword(
+        userId,
+        currentPassword,
+        newPassword
+      );
+
+    res.status(200).json(result);
+
+  } catch (error: any) {
+
+    res.status(400).json({
+      message: error.message,
+    });
+
+  }
+};
+
 export default {
   register,
   login,
   refreshToken,
   logout,
+  forgotPassword,
+  resetPassword,
+  changePassword
 };
