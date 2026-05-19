@@ -53,7 +53,8 @@ async function createInventoryTransaction(transactionData: CreateInventoryTransa
     }
     
     const [result] = await connection.query('INSERT INTO Inventory_Transaction SET ?', [transaction]);
-    return { ...transaction, transaction_id: result.insertId };
+    const insertId = (result as any).insertId;
+    return { ...transaction, transaction_id: insertId };
 }
 
 async function updateInventoryTransaction(id: number, transactionData: UpdateInventoryTransactionRequest): Promise<InventoryTransaction | null> {

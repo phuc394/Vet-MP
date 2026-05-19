@@ -22,7 +22,8 @@ async function createService(serviceData: CreateServiceRequest): Promise<Service
         updated_at: new Date()
     };
     const [result] = await connection.query('INSERT INTO Service SET ?', service);
-    return { ...service, service_id: result.insertId };
+    const insertId = (result as any).insertId;
+    return { ...service, service_id: insertId };
 }
 
 async function updateService(id: number, serviceData: UpdateServiceRequest): Promise<Service | null> {

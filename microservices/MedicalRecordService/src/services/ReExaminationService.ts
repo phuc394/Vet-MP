@@ -27,7 +27,8 @@ async function createReExamination(reExaminationData: CreateReExaminationRequest
     };
     
     const [result] = await connection.query('INSERT INTO Re_Examination SET ?', reExamination);
-    return { ...reExamination, re_exam_id: result.insertId };
+    const insertId = (result as any).insertId;
+    return { ...reExamination, re_exam_id: insertId };
 }
 
 async function updateReExamination(id: number, reExaminationData: UpdateReExaminationRequest): Promise<ReExamination> {

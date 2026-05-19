@@ -27,7 +27,8 @@ async function createAppointment(appointmentData: CreateAppointmentRequest): Pro
     };
     
     const [result] = await connection.query('INSERT INTO Appointment SET ?', [appointment]);
-    return { ...appointment, appointment_id: result.insertId };
+    const insertId = (result as any).insertId;
+    return { ...appointment, appointment_id: insertId };
 }
 
 async function updateAppointment(id: number, appointmentData: UpdateAppointmentRequest): Promise<Appointment | null> {

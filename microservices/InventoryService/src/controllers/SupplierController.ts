@@ -12,7 +12,7 @@ async function getAllSuppliers(_req: any, res: any) {
 async function getSupplierById(req: any, res: any) {
     try {
         const { id } = req.params;
-        const supplier = await SupplierService.getSupplierById(id);
+        const supplier = await SupplierService.getSupplierById(Number(id));
         res.json(supplier);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -33,7 +33,7 @@ async function updateSupplier(req: any, res: any) {
     try {
         const { id } = req.params;
         const { name, contact_info, address } = req.body;
-        const result = await SupplierService.updateSupplier(id, { name, contact_info, address });
+        const result = await SupplierService.updateSupplier(Number(id), { name, contact_info, address });
         res.json(result);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -43,7 +43,7 @@ async function updateSupplier(req: any, res: any) {
 async function deleteSupplier(req: any, res: any) {
     try {
         const { id } = req.params;
-        const result = await SupplierService.deleteSupplier(id);
+        const result = await SupplierService.deleteSupplier(Number(id));
         res.json(result);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });

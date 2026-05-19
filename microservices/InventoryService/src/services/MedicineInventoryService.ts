@@ -32,7 +32,8 @@ async function createMedicineInventory(inventoryData: CreateMedicineInventoryReq
     }
     
     const [result] = await connection.query('INSERT INTO Medicine_Inventory SET ?', [inventory]);
-    return { ...inventory, inventory_id: result.insertId };
+    const insertId = (result as any).insertId;
+    return { ...inventory, inventory_id: insertId };
 }
 
 async function updateMedicineInventory(id: number, inventoryData: UpdateMedicineInventoryRequest): Promise<MedicineInventory | null> {

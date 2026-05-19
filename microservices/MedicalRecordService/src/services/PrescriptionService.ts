@@ -29,7 +29,8 @@ async function createPrescription(prescriptionData: CreatePrescriptionRequest): 
     };
     
     const [result] = await connection.query('INSERT INTO Prescription SET ?', prescription);
-    return { ...prescription, prescription_id: result.insertId };
+    const insertId = (result as any).insertId;
+    return { ...prescription, prescription_id: insertId };
 }
 
 async function updatePrescription(id: number, prescriptionData: UpdatePrescriptionRequest): Promise<Prescription> {

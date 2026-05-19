@@ -12,7 +12,7 @@ async function getAllReExaminations(_req: any, res: any) {
 async function getReExaminationById(req: any, res: any) {
     try {
         const { id } = req.params;
-        const reExamination = await ReExaminationService.getReExaminationById(id);
+        const reExamination = await ReExaminationService.getReExaminationById(Number(id));
         if (!reExamination) {
             return res.status(404).json({ error: 'Re-examination not found' });
         }
@@ -25,7 +25,7 @@ async function getReExaminationById(req: any, res: any) {
 async function getReExaminationsByRecordId(req: any, res: any) {
     try {
         const { recordId } = req.params;
-        const reExaminations = await ReExaminationService.getReExaminationsByRecordId(recordId);
+        const reExaminations = await ReExaminationService.getReExaminationsByRecordId(Number(recordId));
         res.json(reExaminations);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -44,7 +44,7 @@ async function createReExamination(req: any, res: any) {
 async function updateReExamination(req: any, res: any) {
     try {
         const { id } = req.params;
-        const reExamination = await ReExaminationService.updateReExamination(id, req.body);
+        const reExamination = await ReExaminationService.updateReExamination(Number(id), req.body);
         res.json(reExamination);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -54,7 +54,7 @@ async function updateReExamination(req: any, res: any) {
 async function deleteReExamination(req: any, res: any) {
     try {
         const { id } = req.params;
-        await ReExaminationService.deleteReExamination(id);
+        await ReExaminationService.deleteReExamination(Number(id));
         res.status(204).send();
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });

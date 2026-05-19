@@ -12,7 +12,7 @@ async function getAllInventoryTransactions(_req: any, res: any) {
 async function getInventoryTransactionById(req: any, res: any) {
     try {
         const { id } = req.params;
-        const transaction = await InventoryTransactionService.getInventoryTransactionById(id);
+        const transaction = await InventoryTransactionService.getInventoryTransactionById(Number(id));
         res.json(transaction);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -22,7 +22,7 @@ async function getInventoryTransactionById(req: any, res: any) {
 async function getTransactionsByMedicineId(req: any, res: any) {
     try {
         const { medicineId } = req.params;
-        const transactions = await InventoryTransactionService.getTransactionsByMedicineId(medicineId);
+        const transactions = await InventoryTransactionService.getTransactionsByMedicineId(Number(medicineId));
         res.json(transactions);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -32,7 +32,7 @@ async function getTransactionsByMedicineId(req: any, res: any) {
 async function getTransactionsBySupplierId(req: any, res: any) {
     try {
         const { supplierId } = req.params;
-        const transactions = await InventoryTransactionService.getTransactionsBySupplierId(supplierId);
+        const transactions = await InventoryTransactionService.getTransactionsBySupplierId(Number(supplierId));
         res.json(transactions);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
@@ -72,7 +72,7 @@ async function updateInventoryTransaction(req: any, res: any) {
     try {
         const { id } = req.params;
         const { medicine_id, transaction_type, quantity, transaction_date, supplier_id, reference_id, created_by, notes } = req.body;
-        const result = await InventoryTransactionService.updateInventoryTransaction(id, { 
+        const result = await InventoryTransactionService.updateInventoryTransaction(Number(id), { 
             medicine_id, 
             transaction_type, 
             quantity, 
@@ -91,7 +91,7 @@ async function updateInventoryTransaction(req: any, res: any) {
 async function deleteInventoryTransaction(req: any, res: any) {
     try {
         const { id } = req.params;
-        const result = await InventoryTransactionService.deleteInventoryTransaction(id);
+        const result = await InventoryTransactionService.deleteInventoryTransaction(Number(id));
         res.json(result);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
