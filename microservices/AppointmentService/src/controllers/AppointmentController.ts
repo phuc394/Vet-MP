@@ -26,6 +26,7 @@ async function createAppointment(req: any, res: any) {
     const result = await AppointmentService.createAppointment({ pet_id, staff_id, appointment_date, service_id, start_time, end_time, service_price  });
     res.json(result);
    } catch (error) {
+    console.error('Failed to create appointment:', error);
     res.status(500).json({ error: 'Internal server error' });
    }
 }
@@ -38,6 +39,7 @@ async function updateAppointment(req: any, res: any) {
         res.json(result);
 
     } catch (error) {
+        console.error('Failed to update appointment:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 }

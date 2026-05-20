@@ -33,12 +33,20 @@ async function createSupplier(supplierData: CreateSupplierRequest): Promise<Supp
 }
 
 async function updateSupplier(id: number, supplierData: UpdateSupplierRequest): Promise<Supplier | null> {
-    const updateData = {
-        ...supplierData,
+    const updateData = Object.fromEntries(
+        Object.entries(supplierData).filter(([, value]) => value !== undefined)
+    );
+
+    if (Object.keys(updateData).length === 0) {
+        return getSupplierById(id);
+    }
+
+    const payload = {
+        ...updateData,
         updated_at: new Date()
     };
     
-    await connection.query('UPDATE Supplier SET ? WHERE supplier_id = ?', [updateData, id]);
+    await connection.query('UPDATE Supplier SET ? WHERE supplier_id = ?', [payload, id]);
     
     const updatedSupplier = await getSupplierById(id);
     return updatedSupplier;
