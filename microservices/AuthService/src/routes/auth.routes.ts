@@ -1,8 +1,10 @@
 import express from "express";
 
 import authController from "../controllers/auth.controller";
+import authenticate from "../middleware/authenticate.middleware";
 
 const router = express.Router();
+
 
 router.post(
   "/register",
@@ -20,8 +22,23 @@ router.post(
 );
 
 router.post(
-  "/logout",
+  "/logout",authenticate,
   authController.logout
+);
+
+router.post(
+  "/forgot-password",
+  authController.forgotPassword
+);
+
+router.post(
+  "/reset-password",
+  authController.resetPassword
+);
+
+router.post(
+  "/change-password",authenticate,
+  authController.changePassword
 );
 
 export default router;

@@ -20,6 +20,13 @@ export interface User {
   created_at: Date;
 
   updated_at: Date;
+
+  reset_token_hash: string | null; 
+     
+  reset_token_expired: Date | null;
+     
+  reset_token_used: boolean;
+
 }
 
 export interface RegisterInput {
@@ -57,3 +64,4 @@ export interface LoginResponse {
     role: string;
   };
 }
+
