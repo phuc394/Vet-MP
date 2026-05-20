@@ -75,7 +75,7 @@ const updatePet = async (
     `UPDATE Pet SET ${fields.join(", ")} WHERE pet_id = ? AND is_deleted = FALSE`,
     values
   );
-
+  // trả về pet vừa mới upd
   return getPetById(id);
 };
 

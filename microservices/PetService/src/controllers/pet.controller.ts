@@ -57,7 +57,7 @@ const getPetById = async (req: Request, res: Response): Promise<void> => {
 const createPet = async (req: Request, res: Response): Promise<void> => {
   try {
     const body = req.body;
-
+    const user = (req as any).user;
     
     const error = validateCreatePet(body);
     if (error) {
@@ -67,12 +67,13 @@ const createPet = async (req: Request, res: Response): Promise<void> => {
 
     
     const data: CreatePet = {
-      owner_id: body.owner_id,
+      owner_id: user.user_id,
       name: body.name,
       species: body.species,
       breed: body.breed,
       birth_date: body.birth_date,
       weight: body.weight,
+      sex: body.sex,
       notes: body.notes,
       avatar: body.avatar,
     };
