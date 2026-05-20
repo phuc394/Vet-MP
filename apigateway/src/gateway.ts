@@ -4,79 +4,30 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 const app = express();
 const port = Number(process.env.PORT) || 3000;
 
-app.use('/api/v1/auth', createProxyMiddleware({
-    target: 'http://localhost:3001',
-    changeOrigin: true,
-    pathRewrite: {
-        '^/api/v1/auth': '/auth',
-    },
-}));
+function registerProxy(route: string, target: string) {
+  app.use(
+    route,
+    createProxyMiddleware({
+      target,
+      changeOrigin: true,
+    }),
+  );
+}
 
-app.use('/api/v1/users', createProxyMiddleware({
-    target: 'http://localhost:3001',
-    changeOrigin: true,
-    pathRewrite: {
-        '^/api/v1/users': '/users',
-    },
-}));
-
-app.use('/api/v1/pets', createProxyMiddleware({
-    target: 'http://localhost:3002',
-    changeOrigin: true,
-    pathRewrite: {
-        '^/api/v1/pets': '/pets',
-    },
-}));
-
-app.use('/api/v1/catalog', createProxyMiddleware({
-    target: 'http://localhost:3003',
-    changeOrigin: true,
-    pathRewrite: {
-        '^/api/v1/catalog': '/catalog',
-    },
-}));
-
-app.use('/api/v1/inventory', createProxyMiddleware({
-    target: 'http://localhost:3004',
-    changeOrigin: true,
-    pathRewrite: {
-        '^/api/v1/inventory': '/inventory',
-    },
-}));
-
-app.use('/api/v1/suppliers', createProxyMiddleware({
-    target: 'http://localhost:3004',
-    changeOrigin: true,
-    pathRewrite: {
-        '^/api/v1/suppliers': '/suppliers',
-    },
-}));
-
-app.use('/api/v1/appointments', createProxyMiddleware({
-    target: 'http://localhost:3005',
-    changeOrigin: true,
-    pathRewrite: {
-        '^/api/v1/appointments': '/appointments',
-    },
-}));
-
-app.use('/api/v1/medical-records', createProxyMiddleware({
-    target: 'http://localhost:3006',
-    changeOrigin: true,
-    pathRewrite: {
-        '^/api/v1/medical-records': '/medical-records',
-    },
-}));
-
-
-app.use('/api/v1/reports', createProxyMiddleware({
-    target: 'http://localhost:3007',
-    changeOrigin: true,
-    pathRewrite: {
-        '^/api/v1/reports': '/reports',
-    },
-}));
+registerProxy("/api/v1/auth", "http://localhost:3001/api/v1/auth");
+registerProxy("/api/v1/profile", "http://localhost:3001/api/v1/profile");
+registerProxy("/api/v1/staff", "http://localhost:3001/api/v1/staff");
+registerProxy("/api/v1/pets", "http://localhost:3002/api/v1/pets");
+registerProxy("/api/v1/catalog", "http://localhost:3003/catalog");
+registerProxy("/api/v1/suppliers", "http://localhost:3004/suppliers");
+registerProxy("/api/v1/medicine-inventory", "http://localhost:3004/medicine-inventory");
+registerProxy("/api/v1/inventory-transactions", "http://localhost:3004/inventory-transactions");
+registerProxy("/api/v1/appointments", "http://localhost:3005/appointments");
+registerProxy("/api/v1/medical-records", "http://localhost:3006/medical-records");
+registerProxy("/api/v1/prescriptions", "http://localhost:3006/prescriptions");
+registerProxy("/api/v1/re-examinations", "http://localhost:3006/re-examinations");
+registerProxy("/api/v1/reports", "http://localhost:3007/reports");
 
 app.listen(port, () => {
-    console.log(`API Gateway is running on port ${port}`);
+  console.log(`API Gateway is running on port ${port}`);
 });
