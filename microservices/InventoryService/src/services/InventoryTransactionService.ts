@@ -58,9 +58,13 @@ async function createInventoryTransaction(transactionData: CreateInventoryTransa
 }
 
 async function updateInventoryTransaction(id: number, transactionData: UpdateInventoryTransactionRequest): Promise<InventoryTransaction | null> {
-    const updateData = {
-        ...transactionData
-    };
+    const updateData = Object.fromEntries(
+        Object.entries(transactionData).filter(([, value]) => value !== undefined)
+    );
+
+    if (Object.keys(updateData).length === 0) {
+        return getInventoryTransactionById(id);
+    }
     
     await connection.query('UPDATE Inventory_Transaction SET ? WHERE transaction_id = ?', [updateData, id]);
     

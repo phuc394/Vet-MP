@@ -36,10 +36,9 @@ export interface UpdateAppointmentRequest {
 }
 
 export enum AppointmentStatus {
-    SCHEDULED = 'scheduled',
+    PENDING = 'pending',
     CONFIRMED = 'confirmed',
     CANCELLED = 'cancelled',
-    COMPLETED = 'completed',
-    NO_SHOW = 'no_show'
+    COMPLETED = 'completed'
 }
 

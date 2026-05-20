@@ -37,24 +37,40 @@ async function createMedicineInventory(inventoryData: CreateMedicineInventoryReq
 }
 
 async function updateMedicineInventory(id: number, inventoryData: UpdateMedicineInventoryRequest): Promise<MedicineInventory | null> {
-    const updateData = {
-        ...inventoryData,
+    const updateData = Object.fromEntries(
+        Object.entries(inventoryData).filter(([, value]) => value !== undefined)
+    );
+
+    if (Object.keys(updateData).length === 0) {
+        return getMedicineInventoryById(id);
+    }
+
+    const payload = {
+        ...updateData,
         updated_at: new Date()
     };
     
-    await connection.query('UPDATE Medicine_Inventory SET ? WHERE inventory_id = ?', [updateData, id]);
+    await connection.query('UPDATE Medicine_Inventory SET ? WHERE inventory_id = ?', [payload, id]);
     
     const updatedInventory = await getMedicineInventoryById(id);
     return updatedInventory;
 }
 
 async function updateMedicineInventoryByMedicineId(medicineId: number, inventoryData: UpdateMedicineInventoryRequest): Promise<MedicineInventory | null> {
-    const updateData = {
-        ...inventoryData,
+    const updateData = Object.fromEntries(
+        Object.entries(inventoryData).filter(([, value]) => value !== undefined)
+    );
+
+    if (Object.keys(updateData).length === 0) {
+        return getMedicineInventoryByMedicineId(medicineId);
+    }
+
+    const payload = {
+        ...updateData,
         updated_at: new Date()
     };
     
-    await connection.query('UPDATE Medicine_Inventory SET ? WHERE medicine_id = ?', [updateData, medicineId]);
+    await connection.query('UPDATE Medicine_Inventory SET ? WHERE medicine_id = ?', [payload, medicineId]);
     
     const updatedInventory = await getMedicineInventoryByMedicineId(medicineId);
     return updatedInventory;

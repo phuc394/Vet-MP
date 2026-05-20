@@ -20,7 +20,7 @@ async function createAppointment(appointmentData: CreateAppointmentRequest): Pro
         appointment_date: appointmentData.appointment_date,
         start_time: appointmentData.start_time,
         end_time: appointmentData.end_time,
-        status: AppointmentStatus.SCHEDULED,
+        status: AppointmentStatus.PENDING,
         service_price: appointmentData.service_price,
         created_at: new Date(),
         updated_at: new Date()
@@ -32,12 +32,20 @@ async function createAppointment(appointmentData: CreateAppointmentRequest): Pro
 }
 
 async function updateAppointment(id: number, appointmentData: UpdateAppointmentRequest): Promise<Appointment | null> {
-    const updateData = {
-        ...appointmentData,
+    const updateData = Object.fromEntries(
+        Object.entries(appointmentData).filter(([, value]) => value !== undefined)
+    );
+
+    if (Object.keys(updateData).length === 0) {
+        return getAppointmentById(id);
+    }
+
+    const payload = {
+        ...updateData,
         updated_at: new Date()
     };
     
-    await connection.query('UPDATE Appointment SET ? WHERE appointment_id = ?', [updateData, id]);
+    await connection.query('UPDATE Appointment SET ? WHERE appointment_id = ?', [payload, id]);
     
     const updatedAppointment = await getAppointmentById(id);
     return updatedAppointment;
