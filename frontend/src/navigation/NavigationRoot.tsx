@@ -21,7 +21,7 @@ const BottomTabs = createBottomTabNavigator({
 });
 
 const RootStack = createNativeStackNavigator({
-  initialRouteName: "Login",
+  initialRouteName: "MainTabs",
   screenOptions: {
     headerShown: false,
   },
