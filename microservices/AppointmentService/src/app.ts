@@ -1,6 +1,7 @@
-import dotenv from "dotenv";
-import express from "express";
-import AppointmentRoute from "./routes/AppointmentRoute";
+import dotenv from 'dotenv';
+import express from 'express';
+import appointmentRoute from './routes/appointment.route';
+import { errorHandler } from './middleware/error-handler.middleware';
 
 dotenv.config();
 
@@ -17,7 +18,8 @@ app.get("/health", (_request, response) => {
   });
 });
 
-app.use("/appointments", AppointmentRoute);
+app.use('/appointments', appointmentRoute);
+app.use(errorHandler);
 
 
 export default app;

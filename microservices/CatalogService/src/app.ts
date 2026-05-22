@@ -1,7 +1,8 @@
-import dotenv from "dotenv";
-import express from "express";
-import MedicineRoute from "./routes/MedicineRoute";
-import ServiceRoute from "./routes/ServiceRoute";
+import dotenv from 'dotenv';
+import express from 'express';
+import medicineRoute from './routes/medicine.route';
+import serviceRoute from './routes/service.route';
+import { errorHandler } from './middleware/error-handler.middleware';
 
 dotenv.config();
 
@@ -9,8 +10,8 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/catalog/medicines', MedicineRoute);
-app.use('/catalog/services', ServiceRoute);
+app.use('/catalog/medicines', medicineRoute);
+app.use('/catalog/services', serviceRoute);
 
 app.get("/health", (_request, response) => {
   response.json({
@@ -19,5 +20,7 @@ app.get("/health", (_request, response) => {
     port: Number(process.env.PORT ?? 3003),
   });
 });
+
+app.use(errorHandler);
 
 export default app;
