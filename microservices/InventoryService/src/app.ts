@@ -1,8 +1,9 @@
-import dotenv from "dotenv";
-import express from "express";
-import SupplierRoute from "./routes/SupplierRoute";
-import MedicineInventoryRoute from "./routes/MedicineInventoryRoute";
-import InventoryTransactionRoute from "./routes/InventoryTransactionRoute";
+import dotenv from 'dotenv';
+import express from 'express';
+import supplierRoute from './routes/supplier.route';
+import medicineInventoryRoute from './routes/medicine-inventory.route';
+import inventoryTransactionRoute from './routes/inventory-transaction.route';
+import { errorHandler } from './middleware/error-handler.middleware';
 
 dotenv.config();
 
@@ -19,8 +20,9 @@ app.get("/health", (_request, response) => {
   });
 });
 
-app.use("/suppliers", SupplierRoute);
-app.use("/medicine-inventory", MedicineInventoryRoute);
-app.use("/inventory-transactions", InventoryTransactionRoute);
+app.use('/suppliers', supplierRoute);
+app.use('/medicine-inventory', medicineInventoryRoute);
+app.use('/inventory-transactions', inventoryTransactionRoute);
+app.use(errorHandler);
 
 export default app;

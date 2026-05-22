@@ -1,8 +1,9 @@
-import dotenv from "dotenv";
-import express from "express";
-import MedicalRecordRoute from "./routes/MedicalRecordRoute";
-import PrescriptionRoute from "./routes/PrescriptionRoute";
-import ReExaminationRoute from "./routes/ReExaminationRoute";
+import dotenv from 'dotenv';
+import express from 'express';
+import medicalRecordRoute from './routes/medical-record.route';
+import prescriptionRoute from './routes/prescription.route';
+import reExaminationRoute from './routes/re-examination.route';
+import { errorHandler } from './middleware/error-handler.middleware';
 
 dotenv.config();
 
@@ -20,8 +21,9 @@ app.get("/health", (_request, response) => {
 });
 
 
-app.use("/medical-records", MedicalRecordRoute);
-app.use("/prescriptions", PrescriptionRoute);
-app.use("/re-examinations", ReExaminationRoute);
+app.use('/medical-records', medicalRecordRoute);
+app.use('/prescriptions', prescriptionRoute);
+app.use('/re-examinations', reExaminationRoute);
+app.use(errorHandler);
 
 export default app;
