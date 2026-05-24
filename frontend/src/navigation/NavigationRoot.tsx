@@ -6,6 +6,7 @@ import LoginScreen from "../screens/Login/LoginScreen";
 import RegisterScreen from "../screens/Register/RegisterScreen";
 import Home from "../screens/home/Home";
 import Pet from "../screens/pets/Pet";
+import PetDetail from "../screens/petDetail/PetDetail";
 import Profile from "../screens/profile/Profile";
 
 const BottomTabs = createBottomTabNavigator({
@@ -29,6 +30,7 @@ const RootStack = createNativeStackNavigator({
     Login: LoginScreen,
     Register: RegisterScreen,
     MainTabs: BottomTabs,
+    PetDetail,
   },
 });
 
