@@ -7,7 +7,8 @@ import RegisterScreen from "../screens/Register/RegisterScreen";
 import Home from "../screens/home/Home";
 import Pet from "../screens/pets/Pet";
 import Profile from "../screens/profile/Profile";
-
+import Calendar from "../screens/calendar/Calendar";
+import AppointmentDetail from "../screens/appointment/AppointmentDetail";
 const BottomTabs = createBottomTabNavigator({
   screenOptions: {
     headerShown: false,
@@ -17,6 +18,7 @@ const BottomTabs = createBottomTabNavigator({
     Home,
     Pets: Pet,
     Profile,
+    Calendar,
   },
 });
 
@@ -29,6 +31,7 @@ const RootStack = createNativeStackNavigator({
     Login: LoginScreen,
     Register: RegisterScreen,
     MainTabs: BottomTabs,
+    AppointmentDetail,
   },
 });
 
