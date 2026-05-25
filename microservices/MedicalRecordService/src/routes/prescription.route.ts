@@ -1,13 +1,17 @@
 import express from 'express';
 import * as PrescriptionController from '../controllers/prescription.controller';
+import { authorizeRoles } from '../middleware/authorize.middleware';
+import { identityMiddleware } from '../middleware/identity.middleware';
 
 const router = express.Router();
 
-router.get('/', PrescriptionController.getAllPrescriptions);
-router.get('/search', PrescriptionController.searchPrescriptions);
-router.get('/:id', PrescriptionController.getPrescriptionById);
-router.post('/', PrescriptionController.createPrescription);
-router.put('/:id', PrescriptionController.updatePrescription);
-router.delete('/:id', PrescriptionController.deletePrescription);
+router.use(identityMiddleware);
+
+router.get('/', authorizeRoles('admin', 'customer'), PrescriptionController.getAllPrescriptions);
+router.get('/search', authorizeRoles('admin', 'customer'), PrescriptionController.searchPrescriptions);
+router.get('/:id', authorizeRoles('admin', 'customer'), PrescriptionController.getPrescriptionById);
+router.post('/', authorizeRoles('admin'), PrescriptionController.createPrescription);
+router.put('/:id', authorizeRoles('admin'), PrescriptionController.updatePrescription);
+router.delete('/:id', authorizeRoles('admin'), PrescriptionController.deletePrescription);
 
 export default router;

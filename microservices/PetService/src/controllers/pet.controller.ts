@@ -6,9 +6,12 @@ import { validateUpdatePet } from "../utils/updatePet.validate";
 
 
 //  GET ALL 
-const getPets = async (_req: Request, res: Response): Promise<void> => {
+const getPets = async (req: Request, res: Response): Promise<void> => {
   try {
-    const pets = await petService.getAllPets();
+    const user = (req as any).user;
+    const pets = user.role === "admin"
+      ? await petService.getAllPets()
+      : await petService.getPetsByOwnerId(user.user_id);
 
     res.status(200).json({
       message: "Get pets successfully",
@@ -37,6 +40,12 @@ const getPetById = async (req: Request, res: Response): Promise<void> => {
 
     if (!pet) {
       res.status(404).json({ message: "Pet not found" });
+      return;
+    }
+
+    const user = (req as any).user;
+    if (user.role !== "admin" && pet.owner_id !== user.user_id) {
+      res.status(403).json({ message: "Forbidden" });
       return;
     }
 
@@ -192,7 +201,11 @@ const searchPet= async(
       });
       return;
     }
-      const pets = await petService.searchPet(keyword);
+      const user = (req as any).user;
+      const pets = await petService.searchPet(
+        keyword,
+        user.role === "admin" ? undefined : user.user_id,
+      );
       res.status(200).json({
       message: "Search pets successfully",
       total: pets.length,

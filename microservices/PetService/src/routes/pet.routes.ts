@@ -2,11 +2,11 @@ import { Router } from "express";
 
 import * as petController from "../controllers/pet.controller";
 
-import { authMiddleware }
-from "../middleware/auth.middleware";
+import { identityMiddleware }
+from "../middleware/identity.middleware";
 
 import { authorizeRoles }
-from "../middleware/role.middleware";
+from "../middleware/authorize.middleware";
 
 import { checkPetOwnership }
 from "../middleware/petOwner.middleware";
@@ -15,18 +15,25 @@ const router = Router();
 
 router.get(
   "/",
-  authMiddleware,
-  authorizeRoles("admin", "staff"),
+  identityMiddleware,
+  authorizeRoles("admin", "customer"),
   petController.getPets
 );
 
+// search pets
+router.get(
+  "/search",
+  identityMiddleware,
+  authorizeRoles("admin", "customer"),
+  petController.searchPet
+);
 
 // ADMIN + STAFF
 // xem pet theo id
 router.get(
   "/:id",
-  authMiddleware,
-  authorizeRoles("admin", "staff"),
+  identityMiddleware,
+  authorizeRoles("admin", "customer"),
   petController.getPetById
 );
 
@@ -35,8 +42,8 @@ router.get(
 // tạo pet cho chính mình
 router.post(
   "/",
-  authMiddleware,
-  authorizeRoles("user"),
+  identityMiddleware,
+  authorizeRoles("customer"),
   petController.createPet
 );
 
@@ -45,8 +52,8 @@ router.post(
 // update pet của mình
 router.put(
   "/:id",
-  authMiddleware,
-  authorizeRoles("user"),
+  identityMiddleware,
+  authorizeRoles("customer"),
   checkPetOwnership,
   petController.updatePet
 );
@@ -56,20 +63,10 @@ router.put(
 // delete pet của mình
 router.delete(
   "/:id",
-  authMiddleware,
-  authorizeRoles("user"),
+  identityMiddleware,
+  authorizeRoles("customer"),
   checkPetOwnership,
   petController.deletePet
-);
-
-
-// ADMIN + STAFF
-// search pets
-router.get(
-  "/search",
-  authMiddleware,
-  authorizeRoles("admin", "staff"),
-  petController.searchPet
 );
 
 

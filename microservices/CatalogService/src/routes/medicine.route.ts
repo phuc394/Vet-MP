@@ -1,13 +1,17 @@
 import express from 'express';
 import * as MedicineController from '../controllers/medicine.controller';
+import { authorizeRoles } from '../middleware/authorize.middleware';
+import { identityMiddleware } from '../middleware/identity.middleware';
 
 const router = express.Router();
 
-router.get('/', MedicineController.getAllMedicines);
-router.get('/search', MedicineController.searchMedicines);
-router.get('/:id', MedicineController.getMedicineById);
-router.post('/', MedicineController.createMedicine);
-router.put('/:id', MedicineController.updateMedicine);
-router.delete('/:id', MedicineController.deleteMedicine);
+router.use(identityMiddleware);
+
+router.get('/', authorizeRoles('admin', 'customer'), MedicineController.getAllMedicines);
+router.get('/search', authorizeRoles('admin', 'customer'), MedicineController.searchMedicines);
+router.get('/:id', authorizeRoles('admin', 'customer'), MedicineController.getMedicineById);
+router.post('/', authorizeRoles('admin'), MedicineController.createMedicine);
+router.put('/:id', authorizeRoles('admin'), MedicineController.updateMedicine);
+router.delete('/:id', authorizeRoles('admin'), MedicineController.deleteMedicine);
 
 export default router;

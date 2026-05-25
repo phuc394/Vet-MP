@@ -23,7 +23,10 @@ import {
 
 const getAllAppointments = asyncHandler(
     async (req: Request<{}, unknown, unknown, AppointmentSortQuery>, res: Response) => {
-        const appointments = await AppointmentService.getAllAppointments(req.query);
+        const user = (req as any).user;
+        const appointments = user.role === 'admin'
+            ? await AppointmentService.getAllAppointments(req.query)
+            : await AppointmentService.getAppointmentsByOwnerId(user.user_id, req.query);
         return sendSuccess(res, 200, 'Appointments retrieved', appointments);
     }
 );
@@ -33,6 +36,13 @@ const getAppointmentById = asyncHandler(async (req: Request<{ id: string }>, res
     const appointment = await AppointmentService.getAppointmentById(id);
     if (!appointment) {
         throw new HttpError(404, 'Appointment not found');
+    }
+    const user = (req as any).user;
+    if (
+        user.role !== 'admin' &&
+        !await AppointmentService.isAppointmentOwnedByUser(id, user.user_id)
+    ) {
+        throw new HttpError(403, 'Forbidden');
     }
     return sendSuccess(res, 200, 'Appointment retrieved', [appointment]);
 });
@@ -49,12 +59,21 @@ const createAppointment = asyncHandler(async (req: Request<{}, unknown, CreateAp
     const staffId = parseOptionalId(req.body.staff_id, 'staff_id');
     if (staffId !== undefined) payload.staff_id = staffId;
 
+    const user = (req as any).user;
+    if (!await AppointmentService.isPetOwnedByUser(payload.pet_id, user.user_id)) {
+        throw new HttpError(403, 'Forbidden');
+    }
+
     const appointment = await AppointmentService.createAppointment(payload);
     return sendSuccess(res, 201, 'Appointment created', [appointment]);
 });
 
 const updateAppointment = asyncHandler(async (req: Request<{ id: string }, unknown, UpdateAppointmentRequest>, res: Response) => {
     const id = parseId(req.params.id, 'id');
+    const user = (req as any).user;
+    if (!await AppointmentService.isAppointmentOwnedByUser(id, user.user_id)) {
+        throw new HttpError(403, 'Forbidden');
+    }
 
     const payload: UpdateAppointmentRequest = {};
     const petId = parseOptionalId(req.body.pet_id, 'pet_id');
@@ -80,6 +99,10 @@ const updateAppointment = asyncHandler(async (req: Request<{ id: string }, unkno
         throw new HttpError(400, 'No updatable fields provided');
     }
 
+    if (payload.pet_id !== undefined && !await AppointmentService.isPetOwnedByUser(payload.pet_id, user.user_id)) {
+        throw new HttpError(403, 'Forbidden');
+    }
+
     const appointment = await AppointmentService.updateAppointment(id, payload);
     if (!appointment) {
         throw new HttpError(404, 'Appointment not found');
@@ -89,6 +112,14 @@ const updateAppointment = asyncHandler(async (req: Request<{ id: string }, unkno
 
 const deleteAppointment = asyncHandler(async (req: Request<{ id: string }>, res: Response) => {
     const id = parseId(req.params.id, 'id');
+    const appointment = await AppointmentService.getAppointmentById(id);
+    if (!appointment) {
+        throw new HttpError(404, 'Appointment not found');
+    }
+    if (appointment.status !== AppointmentService.resolveAppointmentStatus('cancelled')) {
+        throw new HttpError(400, 'Chỉ có thể xóa lịch hẹn đã được hủy trước đó.');
+    }
+
     const deleted = await AppointmentService.deleteAppointment(id);
     if (!deleted) {
         throw new HttpError(404, 'Appointment not found');
@@ -117,7 +148,10 @@ const searchAppointments = asyncHandler(
         if (query.petId) filters.petId = parseId(query.petId, 'petId');
         if (query.staffId) filters.staffId = parseId(query.staffId, 'staffId');
 
-        const appointments = await AppointmentService.searchAppointments(filters);
+        const user = (req as any).user;
+        const appointments = user.role === 'admin'
+            ? await AppointmentService.searchAppointments(filters)
+            : await AppointmentService.searchAppointmentsByOwnerId(user.user_id, filters);
         return sendSuccess(res, 200, 'Appointments retrieved', appointments);
     }
 );

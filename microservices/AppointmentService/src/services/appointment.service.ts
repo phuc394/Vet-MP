@@ -74,10 +74,46 @@ async function getAllAppointments(sortQuery?: AppointmentSortQuery): Promise<App
     return rows as Appointment[];
 }
 
+async function getAppointmentsByOwnerId(ownerId: number, sortQuery?: AppointmentSortQuery): Promise<Appointment[]> {
+    const { sortBy, order } = resolveSort(sortQuery);
+    const [rows] = await connection.query(
+        `SELECT a.*
+         FROM Appointment a
+         INNER JOIN pet_db_vet.Pet p ON p.pet_id = a.pet_id
+         WHERE p.owner_id = ? AND p.is_deleted = FALSE
+         ORDER BY a.${sortBy} ${order}`,
+        [ownerId]
+    );
+    return rows as Appointment[];
+}
+
 async function getAppointmentById(id: number): Promise<Appointment | null> {
     const [rows] = await connection.query('SELECT * FROM Appointment WHERE appointment_id = ?', [id]);
     const appointments = rows as Appointment[];
     return appointments.length > 0 ? appointments[0] ?? null : null;
+}
+
+async function isAppointmentOwnedByUser(id: number, ownerId: number): Promise<boolean> {
+    const [rows] = await connection.query(
+        `SELECT a.appointment_id
+         FROM Appointment a
+         INNER JOIN pet_db_vet.Pet p ON p.pet_id = a.pet_id
+         WHERE a.appointment_id = ? AND p.owner_id = ? AND p.is_deleted = FALSE
+         LIMIT 1`,
+        [id, ownerId]
+    );
+    return (rows as Array<{ appointment_id: number }>).length > 0;
+}
+
+async function isPetOwnedByUser(petId: number, ownerId: number): Promise<boolean> {
+    const [rows] = await connection.query(
+        `SELECT pet_id
+         FROM pet_db_vet.Pet
+         WHERE pet_id = ? AND owner_id = ? AND is_deleted = FALSE
+         LIMIT 1`,
+        [petId, ownerId]
+    );
+    return (rows as Array<{ pet_id: number }>).length > 0;
 }
 
 async function createAppointment(appointmentData: CreateAppointmentRequest): Promise<Appointment> {
@@ -159,6 +195,50 @@ async function searchAppointments(filters: AppointmentSearchFilters): Promise<Ap
     return rows as Appointment[];
 }
 
+async function searchAppointmentsByOwnerId(
+    ownerId: number,
+    filters: AppointmentSearchFilters
+): Promise<Appointment[]> {
+    let sql = `
+        SELECT a.*
+        FROM Appointment a
+        INNER JOIN pet_db_vet.Pet p ON p.pet_id = a.pet_id
+        WHERE p.owner_id = ? AND p.is_deleted = FALSE
+    `;
+    const params: Array<string | number | Date> = [ownerId];
+
+    if (filters.status) {
+        sql += ' AND a.status = ?';
+        params.push(filters.status);
+    }
+
+    if (filters.startDate && filters.endDate) {
+        sql += ' AND a.appointment_date BETWEEN ? AND ?';
+        params.push(filters.startDate, filters.endDate);
+    } else if (filters.startDate) {
+        sql += ' AND a.appointment_date >= ?';
+        params.push(filters.startDate);
+    } else if (filters.endDate) {
+        sql += ' AND a.appointment_date <= ?';
+        params.push(filters.endDate);
+    }
+
+    if (filters.petId) {
+        sql += ' AND a.pet_id = ?';
+        params.push(filters.petId);
+    }
+
+    if (filters.staffId) {
+        sql += ' AND a.staff_id = ?';
+        params.push(filters.staffId);
+    }
+
+    sql += ' LIMIT 10';
+
+    const [rows] = await connection.query(sql, params);
+    return rows as Appointment[];
+}
+
 function resolveAppointmentStatus(value: string): AppointmentStatus {
     if (!VALID_APPOINTMENT_STATUSES.includes(value as AppointmentStatus)) {
         throw new HttpError(400, `status must be one of: ${VALID_APPOINTMENT_STATUSES.join(', ')}`);
@@ -168,10 +248,14 @@ function resolveAppointmentStatus(value: string): AppointmentStatus {
 
 export {
     getAllAppointments,
+    getAppointmentsByOwnerId,
     getAppointmentById,
+    isAppointmentOwnedByUser,
+    isPetOwnedByUser,
     createAppointment,
     updateAppointment,
     deleteAppointment,
     searchAppointments,
+    searchAppointmentsByOwnerId,
     resolveAppointmentStatus
 };

@@ -11,6 +11,60 @@ import { User,LoginResponse } from "../models/user.model";
 import { RefreshToken } from "../models/refresh-token.model";
 import {ChangePasswordResponse, ForgotPasswordResponse,ResetPasswordResponse} from "../models/auth.type";
 
+const DEMO_ADMIN_EMAIL = "admin@gmail.com";
+const DEMO_ADMIN_PASSWORD = "Admin135";
+const DEMO_ADMIN_PHONE = "admin-demo";
+
+const ensureDemoAdmin = async () => {
+  const [rows] = await pool.execute<RowDataPacket[]>(
+    `
+    SELECT user_id
+    FROM Users
+    WHERE email = ?
+    `,
+    [DEMO_ADMIN_EMAIL]
+  );
+
+  const passwordHash = await bcrypt.hash(DEMO_ADMIN_PASSWORD, 10);
+
+  if (rows.length === 0) {
+    await pool.execute<ResultSetHeader>(
+      `
+      INSERT INTO Users
+      (
+        full_name,
+        email,
+        phone_number,
+        password_hash,
+        role,
+        status
+      )
+      VALUES (?, ?, ?, ?, ?, ?)
+      `,
+      [
+        "Demo Admin",
+        DEMO_ADMIN_EMAIL,
+        DEMO_ADMIN_PHONE,
+        passwordHash,
+        "admin",
+        "active",
+      ]
+    );
+    return;
+  }
+
+  await pool.execute<ResultSetHeader>(
+    `
+    UPDATE Users
+    SET password_hash = ?,
+        role = 'admin',
+        status = 'active'
+    WHERE email = ?
+    `,
+    [passwordHash, DEMO_ADMIN_EMAIL]
+  );
+};
+
 
 
 const registerCustomer = async (data: {
@@ -77,6 +131,8 @@ const login = async (data: {
 }) : Promise<LoginResponse> => {
   const { identifier, password } = data;
 
+  await ensureDemoAdmin();
+
   // Determine email or phone
   const isEmail = identifier.includes("@");
 
@@ -108,6 +164,13 @@ const login = async (data: {
   // Check inactive account
   if (user.status === "inactive") {
     throw new Error("Account is inactive");
+  }
+
+  if (
+    (user.role === "admin" || user.role === "staff") &&
+    user.email !== DEMO_ADMIN_EMAIL
+  ) {
+    throw new Error("Only the demo admin account can sign in as admin");
   }
   
 

@@ -48,10 +48,39 @@ async function getAllReExaminations(sortQuery?: ReExaminationSortQuery): Promise
     return rows as ReExamination[];
 }
 
+async function getReExaminationsByOwnerId(ownerId: number, sortQuery?: ReExaminationSortQuery): Promise<ReExamination[]> {
+    const { sortBy, order } = resolveSort(sortQuery);
+    const [rows] = await connection.query(
+        `SELECT re.*
+         FROM Re_Examination re
+         INNER JOIN Medical_Record mr ON mr.record_id = re.record_id
+         INNER JOIN appointment_db_vet.Appointment a ON a.appointment_id = mr.appointment_id
+         INNER JOIN pet_db_vet.Pet p ON p.pet_id = a.pet_id
+         WHERE p.owner_id = ? AND p.is_deleted = FALSE
+         ORDER BY re.${sortBy} ${order}`,
+        [ownerId]
+    );
+    return rows as ReExamination[];
+}
+
 async function getReExaminationById(id: number): Promise<ReExamination | null> {
     const [rows] = await connection.query('SELECT * FROM Re_Examination WHERE re_exam_id = ?', [id]);
     const reExaminations = rows as ReExamination[];
     return reExaminations.length > 0 ? reExaminations[0] ?? null : null;
+}
+
+async function isReExaminationOwnedByUser(id: number, ownerId: number): Promise<boolean> {
+    const [rows] = await connection.query(
+        `SELECT re.re_exam_id
+         FROM Re_Examination re
+         INNER JOIN Medical_Record mr ON mr.record_id = re.record_id
+         INNER JOIN appointment_db_vet.Appointment a ON a.appointment_id = mr.appointment_id
+         INNER JOIN pet_db_vet.Pet p ON p.pet_id = a.pet_id
+         WHERE re.re_exam_id = ? AND p.owner_id = ? AND p.is_deleted = FALSE
+         LIMIT 1`,
+        [id, ownerId]
+    );
+    return (rows as Array<{ re_exam_id: number }>).length > 0;
 }
 
 async function createReExamination(reExaminationData: CreateReExaminationRequest): Promise<ReExamination> {
@@ -117,11 +146,54 @@ async function searchReExaminations(filters: ReExaminationSearchFilters): Promis
     return rows as ReExamination[];
 }
 
+async function searchReExaminationsByOwnerId(
+    ownerId: number,
+    filters: ReExaminationSearchFilters
+): Promise<ReExamination[]> {
+    let sql = `
+        SELECT re.*
+        FROM Re_Examination re
+        INNER JOIN Medical_Record mr ON mr.record_id = re.record_id
+        INNER JOIN appointment_db_vet.Appointment a ON a.appointment_id = mr.appointment_id
+        INNER JOIN pet_db_vet.Pet p ON p.pet_id = a.pet_id
+        WHERE p.owner_id = ? AND p.is_deleted = FALSE
+    `;
+    const params: Array<number | boolean | Date> = [ownerId];
+
+    if (filters.recordId !== undefined) {
+        sql += ' AND re.record_id = ?';
+        params.push(filters.recordId);
+    }
+
+    if (filters.isBooked !== undefined) {
+        sql += ' AND re.is_booked = ?';
+        params.push(filters.isBooked);
+    }
+
+    if (filters.startDate && filters.endDate) {
+        sql += ' AND re.suggested_date BETWEEN ? AND ?';
+        params.push(filters.startDate, filters.endDate);
+    } else if (filters.startDate) {
+        sql += ' AND re.suggested_date >= ?';
+        params.push(filters.startDate);
+    } else if (filters.endDate) {
+        sql += ' AND re.suggested_date <= ?';
+        params.push(filters.endDate);
+    }
+
+    sql += ' LIMIT 10';
+    const [rows] = await connection.query(sql, params);
+    return rows as ReExamination[];
+}
+
 export {
     getAllReExaminations,
+    getReExaminationsByOwnerId,
     getReExaminationById,
+    isReExaminationOwnedByUser,
     createReExamination,
     updateReExamination,
     deleteReExamination,
-    searchReExaminations
+    searchReExaminations,
+    searchReExaminationsByOwnerId
 };
