@@ -1,7 +1,7 @@
 import express from "express";
 
 import authController from "../controllers/auth.controller";
-import authenticate from "../middleware/authenticate.middleware";
+import identityMiddleware from "../middleware/identity.middleware";
 
 const router = express.Router();
 
@@ -22,7 +22,8 @@ router.post(
 );
 
 router.post(
-  "/logout",authenticate,
+  "/logout",
+  identityMiddleware,
   authController.logout
 );
 
@@ -37,7 +38,8 @@ router.post(
 );
 
 router.post(
-  "/change-password",authenticate,
+  "/change-password",
+  identityMiddleware,
   authController.changePassword
 );
 

@@ -2,11 +2,11 @@ import express from "express";
 
 import profileController from "../controllers/profile.controller";
 
-import authenticate from "../middleware/authenticate.middleware";
+import identityMiddleware from "../middleware/identity.middleware";
 
 const router = express.Router();
 
-router.use(authenticate);
+router.use(identityMiddleware);
 
 router.get(
   "/me",

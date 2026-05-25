@@ -9,7 +9,7 @@ import {
   errorResponse,
 } from "../utils/response.util";
 
-import {AuthRequest} from "../middleware/authenticate.middleware";
+import { AuthRequest } from "../middleware/identity.middleware";
 import profileValidator from "../validators/profile.validator";
 
 const getMyProfile = async (

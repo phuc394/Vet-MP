@@ -1,0 +1,381 @@
+openapi: 3.0.3
+info:
+  title: Catalog Service API
+  version: 1.0.0
+  description: API quan ly danh muc thuoc va dich vu.
+servers:
+  - url: http://localhost:3003
+tags:
+  - name: Medicines
+  - name: Services
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: Service is healthy
+  /catalog/medicines:
+    get:
+      tags: [Medicines]
+      summary: Lay danh sach thuoc
+      parameters:
+        - $ref: "#/components/parameters/SortBy"
+        - $ref: "#/components/parameters/Order"
+      responses:
+        "200":
+          $ref: "#/components/responses/MedicineList"
+    post:
+      tags: [Medicines]
+      summary: Tao thuoc
+      requestBody:
+        $ref: "#/components/requestBodies/CreateMedicine"
+      responses:
+        "201":
+          $ref: "#/components/responses/MedicineList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /catalog/medicines/search:
+    get:
+      tags: [Medicines]
+      summary: Tim kiem thuoc
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: ingredients
+          in: query
+          schema:
+            type: string
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          $ref: "#/components/responses/MedicineList"
+  /catalog/medicines/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Medicines]
+      summary: Lay thuoc theo id
+      responses:
+        "200":
+          $ref: "#/components/responses/MedicineList"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags: [Medicines]
+      summary: Cap nhat thuoc
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateMedicine"
+      responses:
+        "200":
+          $ref: "#/components/responses/MedicineList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Medicines]
+      summary: Xoa thuoc
+      responses:
+        "200":
+          $ref: "#/components/responses/EmptyList"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /catalog/services:
+    get:
+      tags: [Services]
+      summary: Lay danh sach dich vu
+      parameters:
+        - $ref: "#/components/parameters/SortBy"
+        - $ref: "#/components/parameters/Order"
+      responses:
+        "200":
+          $ref: "#/components/responses/ServiceList"
+    post:
+      tags: [Services]
+      summary: Tao dich vu
+      requestBody:
+        $ref: "#/components/requestBodies/CreateService"
+      responses:
+        "201":
+          $ref: "#/components/responses/ServiceList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /catalog/services/search:
+    get:
+      tags: [Services]
+      summary: Tim kiem dich vu
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: description
+          in: query
+          schema:
+            type: string
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          $ref: "#/components/responses/ServiceList"
+  /catalog/services/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Services]
+      summary: Lay dich vu theo id
+      responses:
+        "200":
+          $ref: "#/components/responses/ServiceList"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags: [Services]
+      summary: Cap nhat dich vu
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateService"
+      responses:
+        "200":
+          $ref: "#/components/responses/ServiceList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Services]
+      summary: Xoa dich vu
+      responses:
+        "200":
+          $ref: "#/components/responses/EmptyList"
+        "404":
+          $ref: "#/components/responses/NotFound"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    SortBy:
+      name: sortBy
+      in: query
+      schema:
+        type: string
+    Order:
+      name: order
+      in: query
+      schema:
+        type: string
+        enum: [asc, desc]
+  requestBodies:
+    CreateMedicine:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateMedicineRequest"
+    UpdateMedicine:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UpdateMedicineRequest"
+    CreateService:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateServiceRequest"
+    UpdateService:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UpdateServiceRequest"
+  responses:
+    MedicineList:
+      description: Medicine response
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/SuccessResponse"
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Medicine"
+    ServiceList:
+      description: Service response
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/SuccessResponse"
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Service"
+    EmptyList:
+      description: Empty successful response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SuccessResponse"
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    Medicine:
+      type: object
+      required: [name, unit, selling_price, is_active]
+      properties:
+        medicine_id:
+          type: integer
+        name:
+          type: string
+        unit:
+          type: string
+        selling_price:
+          type: number
+          format: float
+        ingredients:
+          type: string
+          nullable: true
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    CreateMedicineRequest:
+      type: object
+      required: [name, unit, selling_price, is_active]
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        unit:
+          type: string
+        selling_price:
+          type: number
+          format: float
+        ingredients:
+          type: string
+        is_active:
+          type: boolean
+    UpdateMedicineRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        unit:
+          type: string
+        selling_price:
+          type: number
+          format: float
+        ingredients:
+          type: string
+        is_active:
+          type: boolean
+    Service:
+      type: object
+      required: [name, price, is_active]
+      properties:
+        service_id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        price:
+          type: number
+          format: float
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    CreateServiceRequest:
+      type: object
+      required: [name, price, is_active]
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+        is_active:
+          type: boolean
+    UpdateServiceRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+        is_active:
+          type: boolean
+    SuccessResponse:
+      type: object
+      required: [status, message, data]
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        data:
+          type: array
+          items: {}
+    ErrorResponse:
+      type: object
+      required: [status, message]
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
