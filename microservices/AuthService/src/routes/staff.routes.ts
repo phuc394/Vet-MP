@@ -2,13 +2,13 @@ import express from "express";
 
 import staffController from "../controllers/staff.controller";
 
-import authenticate from "../middleware/authenticate.middleware";
+import identityMiddleware from "../middleware/identity.middleware";
 
 import authorizeRoles from "../middleware/authorize.middleware";
 
 const router = express.Router();
 
-router.use(authenticate);
+router.use(identityMiddleware);
 
 router.use(
   authorizeRoles("admin")

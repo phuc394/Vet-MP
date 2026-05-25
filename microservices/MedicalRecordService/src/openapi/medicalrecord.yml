@@ -1,0 +1,488 @@
+openapi: 3.0.3
+info:
+  title: Medical Record Service API
+  version: 1.0.0
+  description: API quan ly ho so kham, don thuoc va lich tai kham.
+servers:
+  - url: http://localhost:3006
+tags:
+  - name: MedicalRecords
+  - name: Prescriptions
+  - name: ReExaminations
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: Service is healthy
+  /medical-records:
+    get:
+      tags: [MedicalRecords]
+      summary: Lay danh sach ho so kham
+      parameters:
+        - $ref: "#/components/parameters/SortBy"
+        - $ref: "#/components/parameters/Order"
+      responses:
+        "200":
+          $ref: "#/components/responses/MedicalRecordList"
+    post:
+      tags: [MedicalRecords]
+      summary: Tao ho so kham
+      requestBody:
+        $ref: "#/components/requestBodies/CreateMedicalRecord"
+      responses:
+        "201":
+          $ref: "#/components/responses/MedicalRecordList"
+  /medical-records/search:
+    get:
+      tags: [MedicalRecords]
+      summary: Tim kiem ho so kham
+      parameters:
+        - name: appointmentId
+          in: query
+          schema:
+            type: integer
+        - name: symptoms
+          in: query
+          schema:
+            type: string
+        - name: diagnosis
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/MedicalRecordStatus"
+      responses:
+        "200":
+          $ref: "#/components/responses/MedicalRecordList"
+  /medical-records/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [MedicalRecords]
+      summary: Lay ho so kham theo id
+      responses:
+        "200":
+          $ref: "#/components/responses/MedicalRecordList"
+    put:
+      tags: [MedicalRecords]
+      summary: Cap nhat ho so kham
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateMedicalRecord"
+      responses:
+        "200":
+          $ref: "#/components/responses/MedicalRecordList"
+    delete:
+      tags: [MedicalRecords]
+      summary: Xoa ho so kham
+      responses:
+        "200":
+          $ref: "#/components/responses/EmptyList"
+  /prescriptions:
+    get:
+      tags: [Prescriptions]
+      summary: Lay danh sach don thuoc
+      responses:
+        "200":
+          $ref: "#/components/responses/PrescriptionList"
+    post:
+      tags: [Prescriptions]
+      summary: Tao don thuoc
+      requestBody:
+        $ref: "#/components/requestBodies/CreatePrescription"
+      responses:
+        "201":
+          $ref: "#/components/responses/PrescriptionList"
+  /prescriptions/search:
+    get:
+      tags: [Prescriptions]
+      summary: Tim kiem don thuoc
+      parameters:
+        - name: recordId
+          in: query
+          schema:
+            type: integer
+        - name: medicineId
+          in: query
+          schema:
+            type: integer
+        - name: dosage
+          in: query
+          schema:
+            type: string
+        - name: usageInstructions
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/PrescriptionList"
+  /prescriptions/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Prescriptions]
+      summary: Lay don thuoc theo id
+      responses:
+        "200":
+          $ref: "#/components/responses/PrescriptionList"
+    put:
+      tags: [Prescriptions]
+      summary: Cap nhat don thuoc
+      requestBody:
+        $ref: "#/components/requestBodies/UpdatePrescription"
+      responses:
+        "200":
+          $ref: "#/components/responses/PrescriptionList"
+    delete:
+      tags: [Prescriptions]
+      summary: Xoa don thuoc
+      responses:
+        "200":
+          $ref: "#/components/responses/EmptyList"
+  /re-examinations:
+    get:
+      tags: [ReExaminations]
+      summary: Lay danh sach lich tai kham
+      responses:
+        "200":
+          $ref: "#/components/responses/ReExaminationList"
+    post:
+      tags: [ReExaminations]
+      summary: Tao lich tai kham
+      requestBody:
+        $ref: "#/components/requestBodies/CreateReExamination"
+      responses:
+        "201":
+          $ref: "#/components/responses/ReExaminationList"
+  /re-examinations/search:
+    get:
+      tags: [ReExaminations]
+      summary: Tim kiem lich tai kham
+      parameters:
+        - name: recordId
+          in: query
+          schema:
+            type: integer
+        - name: isBooked
+          in: query
+          schema:
+            type: boolean
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          $ref: "#/components/responses/ReExaminationList"
+  /re-examinations/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [ReExaminations]
+      summary: Lay lich tai kham theo id
+      responses:
+        "200":
+          $ref: "#/components/responses/ReExaminationList"
+    put:
+      tags: [ReExaminations]
+      summary: Cap nhat lich tai kham
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateReExamination"
+      responses:
+        "200":
+          $ref: "#/components/responses/ReExaminationList"
+    delete:
+      tags: [ReExaminations]
+      summary: Xoa lich tai kham
+      responses:
+        "200":
+          $ref: "#/components/responses/EmptyList"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    SortBy:
+      name: sortBy
+      in: query
+      schema:
+        type: string
+    Order:
+      name: order
+      in: query
+      schema:
+        type: string
+        enum: [asc, desc]
+  requestBodies:
+    CreateMedicalRecord:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateMedicalRecordRequest"
+    UpdateMedicalRecord:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UpdateMedicalRecordRequest"
+    CreatePrescription:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreatePrescriptionRequest"
+    UpdatePrescription:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UpdatePrescriptionRequest"
+    CreateReExamination:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateReExaminationRequest"
+    UpdateReExamination:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UpdateReExaminationRequest"
+  responses:
+    MedicalRecordList:
+      description: Medical record response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/MedicalRecordSuccess"
+    PrescriptionList:
+      description: Prescription response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PrescriptionSuccess"
+    ReExaminationList:
+      description: Re-examination response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ReExaminationSuccess"
+    EmptyList:
+      description: Empty successful response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SuccessResponse"
+  schemas:
+    MedicalRecordStatus:
+      type: string
+      enum: [in_progress, completed]
+    MedicalRecord:
+      type: object
+      properties:
+        record_id:
+          type: integer
+        appointment_id:
+          type: integer
+        symptoms:
+          type: string
+          nullable: true
+        diagnosis:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        status:
+          $ref: "#/components/schemas/MedicalRecordStatus"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    CreateMedicalRecordRequest:
+      type: object
+      required: [appointment_id]
+      additionalProperties: false
+      properties:
+        appointment_id:
+          type: integer
+        symptoms:
+          type: string
+        diagnosis:
+          type: string
+        notes:
+          type: string
+        status:
+          $ref: "#/components/schemas/MedicalRecordStatus"
+    UpdateMedicalRecordRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        symptoms:
+          type: string
+        diagnosis:
+          type: string
+        notes:
+          type: string
+        status:
+          $ref: "#/components/schemas/MedicalRecordStatus"
+    Prescription:
+      type: object
+      properties:
+        prescription_id:
+          type: integer
+        record_id:
+          type: integer
+        medicine_id:
+          type: integer
+        quantity:
+          type: integer
+        dosage:
+          type: string
+          nullable: true
+        usage_instructions:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+    CreatePrescriptionRequest:
+      type: object
+      required: [record_id, medicine_id, quantity]
+      additionalProperties: false
+      properties:
+        record_id:
+          type: integer
+        medicine_id:
+          type: integer
+        quantity:
+          type: integer
+        dosage:
+          type: string
+        usage_instructions:
+          type: string
+        notes:
+          type: string
+    UpdatePrescriptionRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        medicine_id:
+          type: integer
+        quantity:
+          type: integer
+        dosage:
+          type: string
+        usage_instructions:
+          type: string
+        notes:
+          type: string
+    ReExamination:
+      type: object
+      properties:
+        re_exam_id:
+          type: integer
+        record_id:
+          type: integer
+        suggested_date:
+          type: string
+          format: date-time
+        reason:
+          type: string
+        is_booked:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+    CreateReExaminationRequest:
+      type: object
+      required: [record_id, suggested_date, reason, is_booked]
+      additionalProperties: false
+      properties:
+        record_id:
+          type: integer
+        suggested_date:
+          type: string
+          format: date-time
+        reason:
+          type: string
+        is_booked:
+          type: boolean
+    UpdateReExaminationRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        suggested_date:
+          type: string
+          format: date-time
+        reason:
+          type: string
+        is_booked:
+          type: boolean
+    SuccessResponse:
+      type: object
+      required: [status, message, data]
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        data:
+          type: array
+          items: {}
+    MedicalRecordSuccess:
+      allOf:
+        - $ref: "#/components/schemas/SuccessResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/MedicalRecord"
+    PrescriptionSuccess:
+      allOf:
+        - $ref: "#/components/schemas/SuccessResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/Prescription"
+    ReExaminationSuccess:
+      allOf:
+        - $ref: "#/components/schemas/SuccessResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/ReExamination"

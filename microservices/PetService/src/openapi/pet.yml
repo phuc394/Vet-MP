@@ -1,0 +1,255 @@
+openapi: 3.0.3
+info:
+  title: Pet Service API
+  version: 1.0.0
+  description: API quan ly thu cung cua khach hang.
+servers:
+  - url: http://localhost:3002
+tags:
+  - name: Pets
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: Service is healthy
+  /api/v1/pets:
+    get:
+      tags: [Pets]
+      summary: Lay danh sach thu cung
+      responses:
+        "200":
+          $ref: "#/components/responses/PetList"
+    post:
+      tags: [Pets]
+      summary: Tao thu cung
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePetRequest"
+      responses:
+        "201":
+          $ref: "#/components/responses/PetSingle"
+        "400":
+          $ref: "#/components/responses/Error"
+  /api/v1/pets/search:
+    get:
+      tags: [Pets]
+      summary: Tim kiem thu cung theo ten
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/PetSearch"
+        "400":
+          $ref: "#/components/responses/Error"
+  /api/v1/pets/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Pets]
+      summary: Lay thu cung theo id
+      responses:
+        "200":
+          $ref: "#/components/responses/PetSingle"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+    put:
+      tags: [Pets]
+      summary: Cap nhat thu cung
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePetRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/PetSingle"
+        "400":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+    delete:
+      tags: [Pets]
+      summary: Xoa mem thu cung
+      responses:
+        "200":
+          $ref: "#/components/responses/Message"
+        "404":
+          $ref: "#/components/responses/Error"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+  responses:
+    PetList:
+      description: Pet list
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/MessageResponse"
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Pet"
+    PetSearch:
+      description: Pet search result
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/MessageResponse"
+              - type: object
+                properties:
+                  total:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Pet"
+    PetSingle:
+      description: Pet detail
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/MessageResponse"
+              - type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Pet"
+    Message:
+      description: Message response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/MessageResponse"
+    Error:
+      description: Error response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/MessageResponse"
+  schemas:
+    Pet:
+      type: object
+      required: [pet_id, owner_id, name, sex, is_deleted, created_at, updated_at]
+      properties:
+        pet_id:
+          type: integer
+        owner_id:
+          type: integer
+        name:
+          type: string
+        species:
+          type: string
+          nullable: true
+        breed:
+          type: string
+          nullable: true
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+        weight:
+          type: number
+          format: float
+          nullable: true
+        sex:
+          type: string
+          enum: [male, female]
+        notes:
+          type: string
+          nullable: true
+        avatar:
+          type: string
+          nullable: true
+        is_deleted:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    CreatePetRequest:
+      type: object
+      required: [name, sex]
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        species:
+          type: string
+        breed:
+          type: string
+        birth_date:
+          type: string
+          format: date
+        weight:
+          type: number
+          format: float
+        sex:
+          type: string
+          enum: [male, female]
+        notes:
+          type: string
+        avatar:
+          type: string
+    UpdatePetRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        species:
+          type: string
+        breed:
+          type: string
+        birth_date:
+          type: string
+          format: date
+        weight:
+          type: number
+          format: float
+        sex:
+          type: string
+          enum: [male, female]
+        notes:
+          type: string
+        avatar:
+          type: string
+    MessageResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+        error:
+          nullable: true
