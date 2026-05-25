@@ -8,12 +8,14 @@ import {
   TouchableOpacity, 
   SafeAreaView 
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './PetStyle';
 import { MOCK_PETS, PetType } from './PetUtils';
 
 const PetScreen = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const navigation = useNavigation<any>();
 
   // Xử lý logic tìm kiếm thú cưng theo tên
   const filteredPets = MOCK_PETS.filter((pet) =>
@@ -22,7 +24,11 @@ const PetScreen = () => {
 
   // Render từng card thú cưng
   const renderPetCard = ({ item }: { item: PetType }) => (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.85}
+      onPress={() => navigation.navigate('PetDetail', { pet: item })}
+    >
       <Image
         source={{ uri: item.avatar || 'https://via.placeholder.com/65' }}
         style={styles.petImage}
@@ -30,9 +36,14 @@ const PetScreen = () => {
       />
       <View style={styles.petInfo}>
         <Text style={styles.petName}>{item.name}</Text>
-        <Text style={styles.petDetail}>{item.species}</Text>
+        <Text style={styles.petDetail}>
+          {[item.species, item.breed].filter(Boolean).join(' • ') || 'Unknown'}
+        </Text>
+        <Text style={styles.petDetail}>
+          Weight: {item.weight != null ? `${item.weight.toFixed(2)} kg` : 'N/A'}
+        </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
