@@ -35,11 +35,7 @@ const checkPetOwnership = async (
 
     const user = (req as any).user;
 
-    // admin bypass
-    if (
-      user.role === "admin" ||
-      user.role === "staff"
-    ) {
+    if (user.role === "admin") {
       next();
       return;
     }

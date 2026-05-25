@@ -10,6 +10,15 @@ const getAllPets = async (): Promise<Pet[]> => {
   return rows as Pet[];
 };
 
+const getPetsByOwnerId = async (ownerId: number): Promise<Pet[]> => {
+  const [rows] = await pool.query(
+    "SELECT * FROM Pet WHERE owner_id = ? AND is_deleted = FALSE",
+    [ownerId]
+  );
+
+  return rows as Pet[];
+};
+
 
 //GET BY ID
 const getPetById = async (id: number): Promise<Pet | null> => {
@@ -92,13 +101,22 @@ const deletePet = async (id: number): Promise<boolean> => {
 };
 
 
-const searchPet = async(keyword : string) : Promise<Pet[]> =>{
-    const [rows]= await pool.query(`SELECT * FROM Pet Where name LIKE ? AND is_deleted = FALSE`,[`%${keyword}%`]);
+const searchPet = async(keyword : string, ownerId?: number) : Promise<Pet[]> =>{
+    const params: Array<string | number> = [`%${keyword}%`];
+    let sql = "SELECT * FROM Pet WHERE name LIKE ? AND is_deleted = FALSE";
+
+    if (ownerId !== undefined) {
+      sql += " AND owner_id = ?";
+      params.push(ownerId);
+    }
+
+    const [rows]= await pool.query(sql, params);
     return rows as Pet[];
 }
 
 export {
   getAllPets,
+  getPetsByOwnerId,
   getPetById,
   createPet,
   updatePet,

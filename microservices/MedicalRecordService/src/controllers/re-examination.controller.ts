@@ -22,7 +22,10 @@ import {
 
 const getAllReExaminations = asyncHandler(
     async (req: Request<{}, unknown, unknown, ReExaminationSortQuery>, res: Response) => {
-        const reExaminations = await ReExaminationService.getAllReExaminations(req.query);
+        const user = (req as any).user;
+        const reExaminations = user.role === 'admin'
+            ? await ReExaminationService.getAllReExaminations(req.query)
+            : await ReExaminationService.getReExaminationsByOwnerId(user.user_id, req.query);
         return sendSuccess(res, 200, 'Re-examinations retrieved', reExaminations);
     }
 );
@@ -32,6 +35,13 @@ const getReExaminationById = asyncHandler(async (req: Request<{ id: string }>, r
     const reExamination = await ReExaminationService.getReExaminationById(id);
     if (!reExamination) {
         throw new HttpError(404, 'Re-examination not found');
+    }
+    const user = (req as any).user;
+    if (
+        user.role !== 'admin' &&
+        !await ReExaminationService.isReExaminationOwnedByUser(id, user.user_id)
+    ) {
+        throw new HttpError(403, 'Forbidden');
     }
     return sendSuccess(res, 200, 'Re-examination retrieved', [reExamination]);
 });
@@ -94,7 +104,10 @@ const searchReExaminations = asyncHandler(
         const endDate = parseOptionalDate(req.query.endDate, 'endDate');
         if (endDate !== undefined) filters.endDate = endDate;
 
-        const reExaminations = await ReExaminationService.searchReExaminations(filters);
+        const user = (req as any).user;
+        const reExaminations = user.role === 'admin'
+            ? await ReExaminationService.searchReExaminations(filters)
+            : await ReExaminationService.searchReExaminationsByOwnerId(user.user_id, filters);
         return sendSuccess(res, 200, 'Re-examinations retrieved', reExaminations);
     }
 );

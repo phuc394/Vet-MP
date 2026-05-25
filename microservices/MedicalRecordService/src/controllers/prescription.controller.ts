@@ -14,7 +14,10 @@ import { parseId, parseNumber, parseOptionalId, parseOptionalNumber, parseOption
 
 const getAllPrescriptions = asyncHandler(
     async (req: Request<{}, unknown, unknown, PrescriptionSortQuery>, res: Response) => {
-        const prescriptions = await PrescriptionService.getAllPrescriptions(req.query);
+        const user = (req as any).user;
+        const prescriptions = user.role === 'admin'
+            ? await PrescriptionService.getAllPrescriptions(req.query)
+            : await PrescriptionService.getPrescriptionsByOwnerId(user.user_id, req.query);
         return sendSuccess(res, 200, 'Prescriptions retrieved', prescriptions);
     }
 );
@@ -24,6 +27,13 @@ const getPrescriptionById = asyncHandler(async (req: Request<{ id: string }>, re
     const prescription = await PrescriptionService.getPrescriptionById(id);
     if (!prescription) {
         throw new HttpError(404, 'Prescription not found');
+    }
+    const user = (req as any).user;
+    if (
+        user.role !== 'admin' &&
+        !await PrescriptionService.isPrescriptionOwnedByUser(id, user.user_id)
+    ) {
+        throw new HttpError(403, 'Forbidden');
     }
     return sendSuccess(res, 200, 'Prescription retrieved', [prescription]);
 });
@@ -94,7 +104,10 @@ const searchPrescriptions = asyncHandler(
         const usageInstructionsFilter = parseOptionalString(req.query.usageInstructions, 'usageInstructions');
         if (usageInstructionsFilter !== undefined) filters.usageInstructions = usageInstructionsFilter;
 
-        const prescriptions = await PrescriptionService.searchPrescriptions(filters);
+        const user = (req as any).user;
+        const prescriptions = user.role === 'admin'
+            ? await PrescriptionService.searchPrescriptions(filters)
+            : await PrescriptionService.searchPrescriptionsByOwnerId(user.user_id, filters);
         return sendSuccess(res, 200, 'Prescriptions retrieved', prescriptions);
     }
 );

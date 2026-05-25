@@ -11,8 +11,13 @@ import {
   calculateRevenueReport,
   getRevenueReport,
 } from "../controllers/report.controller";
+import { authorizeRoles } from "../middleware/authorize.middleware";
+import { identityMiddleware } from "../middleware/identity.middleware";
 
 const router = express.Router();
+
+router.use(identityMiddleware);
+router.use(authorizeRoles("admin"));
 
 // Pie chart endpoints
 router.get("/pie/auth/role", userRoleDist);

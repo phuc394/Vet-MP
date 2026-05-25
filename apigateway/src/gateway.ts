@@ -1,11 +1,43 @@
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import dotenv from "dotenv";
+import cors, { CorsOptions } from "cors";
+import {
+  GatewayAuthRequest,
+  gatewayAuthMiddleware,
+} from "./middleware/gateway-auth.middleware";
 
 dotenv.config();
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
+
+const defaultAllowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:19006",
+  "http://localhost:8081",
+];
+
+const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS ?? defaultAllowedOrigins.join(","))
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions: CorsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error("Not allowed by CORS"));
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-User-Id", "X-User-Role"],
+};
+
+app.use(cors(corsOptions));
+app.use(gatewayAuthMiddleware);
 
 function registerProxy(route: string, target: string) {
   app.use(
@@ -13,6 +45,17 @@ function registerProxy(route: string, target: string) {
     createProxyMiddleware({
       target,
       changeOrigin: true,
+      on: {
+        proxyReq(proxyReq, req) {
+          const user = (req as GatewayAuthRequest).user;
+          if (!user) {
+            return;
+          }
+
+          proxyReq.setHeader("X-User-Id", String(user.user_id));
+          proxyReq.setHeader("X-User-Role", user.role);
+        },
+      },
     }),
   );
 }

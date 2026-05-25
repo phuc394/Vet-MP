@@ -14,7 +14,10 @@ import { parseId, parseOptionalString } from '../utils/validation.util';
 
 const getAllMedicalRecords = asyncHandler(
     async (req: Request<{}, unknown, unknown, MedicalRecordSortQuery>, res: Response) => {
-        const records = await MedicalRecordService.getAllMedicalRecords(req.query);
+        const user = (req as any).user;
+        const records = user.role === 'admin'
+            ? await MedicalRecordService.getAllMedicalRecords(req.query)
+            : await MedicalRecordService.getMedicalRecordsByOwnerId(user.user_id, req.query);
         return sendSuccess(res, 200, 'Medical records retrieved', records);
     }
 );
@@ -24,6 +27,13 @@ const getMedicalRecordById = asyncHandler(async (req: Request<{ id: string }>, r
     const record = await MedicalRecordService.getMedicalRecordById(id);
     if (!record) {
         throw new HttpError(404, 'Medical record not found');
+    }
+    const user = (req as any).user;
+    if (
+        user.role !== 'admin' &&
+        !await MedicalRecordService.isMedicalRecordOwnedByUser(id, user.user_id)
+    ) {
+        throw new HttpError(403, 'Forbidden');
     }
     return sendSuccess(res, 200, 'Medical record retrieved', [record]);
 });
@@ -95,7 +105,10 @@ const searchMedicalRecords = asyncHandler(
         const statusFilter = parseOptionalString(req.query.status, 'status');
         if (statusFilter !== undefined) filters.status = MedicalRecordService.resolveMedicalRecordStatus(statusFilter);
 
-        const records = await MedicalRecordService.searchMedicalRecords(filters);
+        const user = (req as any).user;
+        const records = user.role === 'admin'
+            ? await MedicalRecordService.searchMedicalRecords(filters)
+            : await MedicalRecordService.searchMedicalRecordsByOwnerId(user.user_id, filters);
         return sendSuccess(res, 200, 'Medical records retrieved', records);
     }
 );
