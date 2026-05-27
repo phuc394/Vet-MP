@@ -1,7 +1,11 @@
 import "./Home.css";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Footer from "../../components/Footer";
+import HamburgerMenu from "../../components/HamburgerMenu";
+import HamburgerMenuToggle from "../../components/HamburgerMenuToggle";
+import PageHeader from "../../components/PageHeader";
 import { ReportService } from "../../utils/axios";
-import DashboardHeader from "./components/DashboardHeader";
 import InventorySection from "./components/InventorySection";
 import MetricGrid from "./components/MetricGrid";
 import RevenueSection from "./components/RevenueSection";
@@ -15,6 +19,7 @@ import {
 import { toChartData } from "./components/dashboardUtils";
 
 const Home = () => {
+    const navigate = useNavigate();
     const [revenueSummary, setRevenueSummary] = useState<RevenueSummary | null>(null);
     const [revenueTrend, setRevenueTrend] = useState<ChartDatum[]>([]);
     const [topServices, setTopServices] = useState<ChartDatum[]>([]);
@@ -27,6 +32,23 @@ const Home = () => {
     const [appointmentStatus, setAppointmentStatus] = useState<ChartDatum[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
+    const [adminEmail] = useState(() => localStorage.getItem("adminEmail") ?? "admin@vetcare.com");
+
+    const handleToggleDarkMode = useCallback(() => {
+        setIsDarkMode((currentValue) => {
+            const nextValue = !currentValue;
+            localStorage.setItem("darkMode", String(nextValue));
+            return nextValue;
+        });
+    }, []);
+
+    const handleLogout = useCallback(() => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("adminEmail");
+        navigate("/");
+    }, [navigate]);
 
     useEffect(() => {
         const loadReports = async () => {
@@ -95,8 +117,19 @@ const Home = () => {
     const cancelledCount = cancelledAppointments?.rows.length ?? 0;
 
     return (
-        <div className="dashboard">
-            <DashboardHeader />
+        <div className={`dashboard${isDarkMode ? " is-dark" : ""}`}>
+            <HamburgerMenu
+                adminEmail={adminEmail}
+                isDarkMode={isDarkMode}
+                isOpen={isMenuOpen}
+                onClose={() => setIsMenuOpen(false)}
+                onLogout={handleLogout}
+                onToggleDarkMode={handleToggleDarkMode}
+            />
+            <div className="dashboard-topbar">
+                <HamburgerMenuToggle onClick={() => setIsMenuOpen(true)} />
+                <PageHeader title="Dashboard" />
+            </div>
 
             {error && <div className="dashboard-alert">{error}</div>}
 
@@ -122,6 +155,7 @@ const Home = () => {
                     />
                 </>
             )}
+            <Footer />
         </div>
     );
 };

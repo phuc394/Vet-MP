@@ -12,7 +12,7 @@ import {
     YAxis,
 } from "recharts";
 import { ChartDatum } from "./dashboardTypes";
-import { chartColors, formatNumber } from "./dashboardUtils";
+import { chartColors, formatNumber, getAppointmentStatusColor } from "./dashboardUtils";
 
 type UserSectionProps = {
     userRoles: ChartDatum[];
@@ -101,7 +101,11 @@ const UserSection = ({
                                 <XAxis dataKey="name" tickLine={false} axisLine={false} />
                                 <YAxis tickLine={false} axisLine={false} />
                                 <Tooltip />
-                                <Bar dataKey="value" name="Số lịch hẹn" fill="#22c55e" radius={[6, 6, 0, 0]} />
+                                <Bar dataKey="value" name="Số lịch hẹn" radius={[6, 6, 0, 0]}>
+                                    {appointmentStatus.map((entry) => (
+                                        <Cell key={entry.name} fill={getAppointmentStatusColor(entry.name)} />
+                                    ))}
+                                </Bar>
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

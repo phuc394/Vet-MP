@@ -2,6 +2,17 @@ import { ChartDatum, ChartResponse } from "./dashboardTypes";
 
 export const chartColors = ["#0ea5e9", "#22c55e", "#f97316", "#8b5cf6", "#ef4444", "#14b8a6", "#eab308"];
 
+export const appointmentStatusColors: Record<string, string> = {
+    completed: "#22c55e",
+    cancelled: "#ef4444",
+    pending: "#f97316",
+    confirmed: "#0ea5e9",
+};
+
+export const getAppointmentStatusColor = (status: string) => {
+    return appointmentStatusColors[status.toLowerCase()] ?? "#64748b";
+};
+
 export const toChartData = (response?: ChartResponse): ChartDatum[] => {
     if (!response) {
         return [];

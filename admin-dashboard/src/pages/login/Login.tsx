@@ -24,6 +24,7 @@ const Login = () => {
                 localStorage.setItem("accessToken", token);
             }
 
+            localStorage.setItem("adminEmail", email);
             navigate("/home");
         } catch (error) {
             const message = axios.isAxiosError(error)
