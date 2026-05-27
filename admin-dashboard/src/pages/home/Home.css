@@ -5,36 +5,16 @@
     padding: 32px;
 }
 
-.dashboard-header {
+.dashboard.is-dark {
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+.dashboard-topbar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 16px;
     margin-bottom: 28px;
-}
-
-.dashboard-kicker {
-    margin: 0 0 6px;
-    color: #64748b;
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-.dashboard-header h1 {
-    margin: 0;
-    color: #064e3b;
-    font-size: 34px;
-    line-height: 1.1;
-}
-
-.dashboard-period {
-    border: 1px solid #dbe4ee;
-    border-radius: 6px;
-    background: #ffffff;
-    color: #64748b;
-    padding: 10px 14px;
-    font-size: 14px;
 }
 
 .dashboard-alert,
@@ -51,6 +31,57 @@
     background: #ffffff;
     color: #475569;
     border-color: #dbe4ee;
+}
+
+.dashboard.is-dark .page-header-kicker,
+.dashboard.is-dark .metric-label,
+.dashboard.is-dark .metric-card small,
+.dashboard.is-dark .section-title span,
+.dashboard.is-dark .empty-text {
+    color: #94a3b8;
+}
+
+.dashboard.is-dark .page-header h1,
+.dashboard.is-dark .metric-card strong,
+.dashboard.is-dark .section-title h2,
+.dashboard.is-dark .chart-panel h3,
+.dashboard.is-dark .table-row strong {
+    color: #d1fae5;
+}
+
+.dashboard.is-dark .page-header-description,
+.dashboard.is-dark .hamburger-menu-toggle,
+.dashboard.is-dark .metric-card,
+.dashboard.is-dark .chart-panel,
+.dashboard.is-dark .dashboard-loading {
+    border-color: #334155;
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+.dashboard.is-dark .hamburger-menu-toggle:hover {
+    background: #064e3b;
+    color: #ffffff;
+}
+
+.dashboard.is-dark .low-stock-row,
+.dashboard.is-dark .table-row {
+    border-bottom-color: #334155;
+    color: #cbd5e1;
+}
+
+.dashboard.is-dark .recharts-xAxis .recharts-cartesian-axis-tick-value {
+    fill: #f8fafc;
+    font-weight: 700;
+}
+
+.dashboard.is-dark .recharts-yAxis .recharts-cartesian-axis-tick-value {
+    fill: #cbd5e1;
+    font-weight: 600;
+}
+
+.dashboard.is-dark .recharts-cartesian-grid line {
+    stroke: #334155;
 }
 
 .metric-grid {
@@ -243,7 +274,7 @@
         padding: 20px;
     }
 
-    .dashboard-header,
+    .dashboard-topbar,
     .section-title {
         align-items: flex-start;
         flex-direction: column;
