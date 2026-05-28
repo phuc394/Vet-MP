@@ -18,8 +18,9 @@ const BottomTabs = createBottomTabNavigator({
   screens: {
     Home,
     Pets: Pet,
-    Profile,
     Calendar,
+    Profile
+    
   },
 });
 

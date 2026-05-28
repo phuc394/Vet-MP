@@ -1,7 +1,0 @@
-npm warn Unknown project config "strict-peer-dependencies". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
-- Getting package manager...
-
-✗ Refine Devtools server (http) failed to start. Port 5001 is already in use.
-
-
-✗ Refine Devtools server (websocket) failed to start. Port 5001 is already in use.

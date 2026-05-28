@@ -16,6 +16,18 @@ import {
   StaffDetail,
 } from "../models/staff.model";
 
+const staffSelectFields = `
+  u.user_id,
+  u.full_name,
+  u.email,
+  u.phone_number,
+  u.role,
+  u.status,
+  e.employee_id,
+  e.position,
+  e.license_number
+`;
+
 const createStaff = async (
   data: CreateStaffPayload
 ) => {
@@ -119,16 +131,7 @@ const getAllStaff = async () => {
       (StaffDetail & RowDataPacket)[]
     >(
       `
-      SELECT
-        u.user_id,
-        u.full_name,
-        u.email,
-        u.phone_number,
-        u.role,
-        u.status,
-        e.employee_id,
-        e.position,
-        e.license_number
+      SELECT ${staffSelectFields}
       FROM Users u
       INNER JOIN Employee e
       ON u.user_id = e.user_id
@@ -147,16 +150,7 @@ const getStaffById = async (
       (StaffDetail & RowDataPacket)[]
     >(
       `
-      SELECT
-        u.user_id,
-        u.full_name,
-        u.email,
-        u.phone_number,
-        u.role,
-        u.status,
-        e.employee_id,
-        e.position,
-        e.license_number
+      SELECT ${staffSelectFields}
       FROM Users u
       INNER JOIN Employee e
       ON u.user_id = e.user_id
@@ -172,6 +166,46 @@ const getStaffById = async (
   }
 
   return rows[0]!;
+};
+
+const searchStaff = async (
+  keyword: string
+) => {
+  const searchKeyword =
+    `%${keyword.trim().toLowerCase()}%`;
+
+  const [rows] =
+    await pool.execute<
+      (StaffDetail & RowDataPacket)[]
+    >(
+      `
+      SELECT ${staffSelectFields}
+      FROM Users u
+      INNER JOIN Employee e
+      ON u.user_id = e.user_id
+      WHERE u.role IN ('staff', 'admin')
+      AND (
+        LOWER(u.full_name) LIKE ?
+        OR LOWER(u.email) LIKE ?
+        OR LOWER(u.phone_number) LIKE ?
+        OR LOWER(u.role) LIKE ?
+        OR LOWER(u.status) LIKE ?
+        OR LOWER(e.position) LIKE ?
+        OR LOWER(e.license_number) LIKE ?
+      )
+      `,
+      [
+        searchKeyword,
+        searchKeyword,
+        searchKeyword,
+        searchKeyword,
+        searchKeyword,
+        searchKeyword,
+        searchKeyword,
+      ]
+    );
+
+  return rows;
 };
 
 const updateStaff = async (
@@ -266,6 +300,7 @@ export default {
   createStaff,
   getAllStaff,
   getStaffById,
+  searchStaff,
   updateStaff,
   deactivateStaff,
 };

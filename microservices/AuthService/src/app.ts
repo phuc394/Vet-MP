@@ -4,6 +4,7 @@ import cors from "cors";
 import staffRoutes from "./routes/staff.routes";
 import authRoutes from "./routes/auth.routes";
 import profileRoutes from "./routes/profile.routes";
+import usersRoutes from "./routes/users.routes";
 
 
 dotenv.config();
@@ -26,5 +27,6 @@ app.get("/health", (_request, response) => {
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/profile", profileRoutes);
 app.use("/api/v1/staff", staffRoutes);
+app.use("/api/v1/users", usersRoutes);
 
 export default app;
