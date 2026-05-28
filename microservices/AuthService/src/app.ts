@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import express from "express";
-import cors from "cors";
+import cors, { CorsOptions } from "cors";
 import staffRoutes from "./routes/staff.routes";
 import authRoutes from "./routes/auth.routes";
 import profileRoutes from "./routes/profile.routes";
@@ -11,7 +11,31 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+const defaultAllowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:19006",
+  "http://localhost:8081",
+];
+
+const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS ?? defaultAllowedOrigins.join(","))
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions: CorsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error("Not allowed by CORS"));
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-User-Id", "X-User-Role"],
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

@@ -12,6 +12,20 @@ dotenv.config();
 const app = express();
 const port = Number(process.env.PORT) || 3000;
 
+function getServiceUrl(envName: string, fallback: string) {
+  return (process.env[envName] ?? fallback).replace(/\/+$/, "");
+}
+
+const serviceUrls = {
+  auth: getServiceUrl("AUTH_SERVICE_URL", "http://localhost:3001"),
+  pet: getServiceUrl("PET_SERVICE_URL", "http://localhost:3002"),
+  catalog: getServiceUrl("CATALOG_SERVICE_URL", "http://localhost:3003"),
+  inventory: getServiceUrl("INVENTORY_SERVICE_URL", "http://localhost:3004"),
+  appointment: getServiceUrl("APPOINTMENT_SERVICE_URL", "http://localhost:3005"),
+  medicalRecord: getServiceUrl("MEDICAL_RECORD_SERVICE_URL", "http://localhost:3006"),
+  report: getServiceUrl("REPORT_SERVICE_URL", "http://localhost:3007"),
+};
+
 const defaultAllowedOrigins = [
   "http://localhost:5173",
   "http://localhost:19006",
@@ -37,6 +51,15 @@ const corsOptions: CorsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+app.get("/health", (_request, response) => {
+  response.json({
+    service: "ApiGateway",
+    status: "ok",
+    port,
+  });
+});
+
 app.use(gatewayAuthMiddleware);
 
 function registerProxy(route: string, target: string) {
@@ -60,19 +83,19 @@ function registerProxy(route: string, target: string) {
   );
 }
 
-registerProxy("/api/v1/auth", "http://localhost:3001/api/v1/auth");
-registerProxy("/api/v1/profile", "http://localhost:3001/api/v1/profile");
-registerProxy("/api/v1/staff", "http://localhost:3001/api/v1/staff");
-registerProxy("/api/v1/pets", "http://localhost:3002/api/v1/pets");
-registerProxy("/api/v1/catalog", "http://localhost:3003/catalog");
-registerProxy("/api/v1/suppliers", "http://localhost:3004/suppliers");
-registerProxy("/api/v1/medicine-inventory", "http://localhost:3004/medicine-inventory");
-registerProxy("/api/v1/inventory-transactions", "http://localhost:3004/inventory-transactions");
-registerProxy("/api/v1/appointments", "http://localhost:3005/appointments");
-registerProxy("/api/v1/medical-records", "http://localhost:3006/medical-records");
-registerProxy("/api/v1/prescriptions", "http://localhost:3006/prescriptions");
-registerProxy("/api/v1/re-examinations", "http://localhost:3006/re-examinations");
-registerProxy("/api/v1/reports", "http://localhost:3007/reports");
+registerProxy("/api/v1/auth", `${serviceUrls.auth}/api/v1/auth`);
+registerProxy("/api/v1/profile", `${serviceUrls.auth}/api/v1/profile`);
+registerProxy("/api/v1/staff", `${serviceUrls.auth}/api/v1/staff`);
+registerProxy("/api/v1/pets", `${serviceUrls.pet}/api/v1/pets`);
+registerProxy("/api/v1/catalog", `${serviceUrls.catalog}/catalog`);
+registerProxy("/api/v1/suppliers", `${serviceUrls.inventory}/suppliers`);
+registerProxy("/api/v1/medicine-inventory", `${serviceUrls.inventory}/medicine-inventory`);
+registerProxy("/api/v1/inventory-transactions", `${serviceUrls.inventory}/inventory-transactions`);
+registerProxy("/api/v1/appointments", `${serviceUrls.appointment}/appointments`);
+registerProxy("/api/v1/medical-records", `${serviceUrls.medicalRecord}/medical-records`);
+registerProxy("/api/v1/prescriptions", `${serviceUrls.medicalRecord}/prescriptions`);
+registerProxy("/api/v1/re-examinations", `${serviceUrls.medicalRecord}/re-examinations`);
+registerProxy("/api/v1/reports", `${serviceUrls.report}/reports`);
 
 app.listen(port, () => {
   console.log(`API Gateway is running on port ${port}`);

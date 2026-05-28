@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, RequestHandler, Response } from "express";
 import {
   getUserRoleDistribution,
   getPetSpeciesDistribution,
@@ -19,59 +19,59 @@ function getQueryValue(value: unknown): string | undefined {
 }
 
 // ---------- PIE ----------
-export const userRoleDist = asyncHandler(async (_req: Request, res: Response) => {
+export const userRoleDist: RequestHandler = asyncHandler(async (_req: Request, res: Response) => {
   const data = await getUserRoleDistribution();
   return sendSuccess(res, 200, "User role distribution retrieved", data);
 });
 
-export const petSpeciesDist = asyncHandler(async (_req: Request, res: Response) => {
+export const petSpeciesDist: RequestHandler = asyncHandler(async (_req: Request, res: Response) => {
   const data = await getPetSpeciesDistribution();
   return sendSuccess(res, 200, "Pet species distribution retrieved", data);
 });
 
-export const appointmentStatusDist = asyncHandler(async (_req: Request, res: Response) => {
+export const appointmentStatusDist: RequestHandler = asyncHandler(async (_req: Request, res: Response) => {
   const data = await getAppointmentStatusDistribution();
   return sendSuccess(res, 200, "Appointment status distribution retrieved", data);
 });
 
 // ---------- BAR ----------
-export const medicineStock = asyncHandler(async (_req: Request, res: Response) => {
+export const medicineStock: RequestHandler = asyncHandler(async (_req: Request, res: Response) => {
   const data = await getMedicineStockLevels();
   return sendSuccess(res, 200, "Medicine stock levels retrieved", data);
 });
 
-export const topServices = asyncHandler(async (req: Request, res: Response) => {
+export const topServices: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
   const limit = Number(req.query.limit ?? 5);
   const data = await getTopRevenueServices(limit);
   return sendSuccess(res, 200, "Top revenue services retrieved", data);
 });
 
 // ---------- LINE ----------
-export const revenueTrend = asyncHandler(async (req: Request, res: Response) => {
+export const revenueTrend: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
   const { startDate, endDate, groupBy } = req.query as any;
   const data = await getRevenueTrend(startDate, endDate, groupBy);
   return sendSuccess(res, 200, "Revenue trend retrieved", data);
 });
 
 // ---------- TABLE ----------
-export const lowStock = asyncHandler(async (_req: Request, res: Response) => {
+export const lowStock: RequestHandler = asyncHandler(async (_req: Request, res: Response) => {
   const data = await getLowStockMedicines();
   return sendSuccess(res, 200, "Low stock medicines retrieved", data);
 });
 
-export const cancelledAppointments = asyncHandler(async (_req: Request, res: Response) => {
+export const cancelledAppointments: RequestHandler = asyncHandler(async (_req: Request, res: Response) => {
   const data = await getCancelledAppointmentsWithReasons();
   return sendSuccess(res, 200, "Cancelled appointments retrieved", data);
 });
 
-export const calculateRevenueReport = asyncHandler(async (req: Request, res: Response) => {
+export const calculateRevenueReport: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
   const startDate = getQueryValue(req.query.startDate);
   const endDate = getQueryValue(req.query.endDate);
   const data = await calculateRevenue(startDate, endDate);
   return sendSuccess(res, 200, "Revenue calculated", data);
 });
 
-export const getRevenueReport = asyncHandler(async (req: Request, res: Response) => {
+export const getRevenueReport: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
   const startDate = getQueryValue(req.query.startDate);
   const endDate = getQueryValue(req.query.endDate);
   const data = await getRevenue(startDate, endDate);

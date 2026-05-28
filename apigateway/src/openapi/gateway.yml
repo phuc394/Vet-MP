@@ -4,7 +4,8 @@ info:
   version: 1.0.0
   description: OpenAPI tong hop cac service Auth, Pet, Catalog, Inventory, Appointment, MedicalRecord va Report.
 servers:
-  - url: http://localhost:3000
+  - url: /
+    description: Current API Gateway host
 tags:
   - name: Auth
   - name: Profile
@@ -18,6 +19,13 @@ tags:
 security:
   - bearerAuth: []
 paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      responses:
+        "200":
+          description: Gateway is healthy
   /api/v1/auth/register:
     $ref: "../../../microservices/AuthService/openapi/auth.yml#/paths/~1api~1v1~1auth~1register"
   /api/v1/auth/login:

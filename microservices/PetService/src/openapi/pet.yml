@@ -4,7 +4,8 @@ info:
   version: 1.0.0
   description: API quan ly thu cung cua khach hang.
 servers:
-  - url: http://localhost:3002
+  - url: /
+    description: Current Pet Service host
 tags:
   - name: Pets
 security:

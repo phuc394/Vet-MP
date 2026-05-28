@@ -6,6 +6,9 @@
   "author": "",
   "type": "commonjs",
   "main": "dist/server.js",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",

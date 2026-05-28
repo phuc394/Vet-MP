@@ -4,7 +4,8 @@ info:
   version: 1.0.0
   description: API quan ly danh muc thuoc va dich vu.
 servers:
-  - url: http://localhost:3003
+  - url: /
+    description: Current Catalog Service host
 tags:
   - name: Medicines
   - name: Services
