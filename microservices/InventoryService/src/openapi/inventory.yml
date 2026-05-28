@@ -4,7 +4,8 @@ info:
   version: 1.0.0
   description: API quan ly nha cung cap, ton kho thuoc va giao dich kho.
 servers:
-  - url: http://localhost:3004
+  - url: /
+    description: Current Inventory Service host
 tags:
   - name: Suppliers
   - name: MedicineInventory

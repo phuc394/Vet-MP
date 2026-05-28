@@ -4,7 +4,8 @@ info:
   version: 1.0.0
   description: API quan ly lich hen kham thu y.
 servers:
-  - url: http://localhost:3005
+  - url: /
+    description: Current Appointment Service host
 tags:
   - name: Appointments
 security:

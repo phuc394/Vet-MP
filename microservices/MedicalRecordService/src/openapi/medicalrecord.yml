@@ -4,7 +4,8 @@ info:
   version: 1.0.0
   description: API quan ly ho so kham, don thuoc va lich tai kham.
 servers:
-  - url: http://localhost:3006
+  - url: /
+    description: Current Medical Record Service host
 tags:
   - name: MedicalRecords
   - name: Prescriptions

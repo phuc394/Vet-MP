@@ -306,8 +306,12 @@ const forgotPassword = async (email: string): Promise<ForgotPasswordResponse> =>
   // 5. Gọi Model để lưu token đã băm vào DB
   await AuthModel.saveResetToken(user.user_id, hashedToken, expiredAt);
 
-  // 6. Tạo đường dẫn gửi tới Client (Cổng 3000 hoặc theo biến môi trường CLIENT_URL của Frontend)
-  const clientUrl = process.env.CLIENT_URL || "http://localhost:3000"; // có thể chỉnh sửa sau khi mà lên giao diện
+  // 6. Tạo đường dẫn gửi tới Client theo biến môi trường CLIENT_URL của Frontend
+  const clientUrl = process.env.CLIENT_URL;
+  if (!clientUrl) {
+    throw new Error("Missing CLIENT_URL");
+  }
+
   const resetLink = `${clientUrl}/reset-password?token=${rawToken}`;
 
  
