@@ -25,6 +25,11 @@ router.get(
 );
 
 router.get(
+  "/search",
+  staffController.searchStaff
+);
+
+router.get(
   "/:id",
   staffController.getStaffById
 );

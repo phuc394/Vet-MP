@@ -2,13 +2,14 @@ openapi: 3.0.3
 info:
   title: Auth Service API
   version: 1.0.0
-  description: API dang ky, dang nhap, profile va nhan vien.
+  description: API dang ky, dang nhap, profile, nhan vien va users.
 servers:
   - url: http://localhost:3001
 tags:
   - name: Auth
   - name: Profile
   - name: Staff
+  - name: Users
 paths:
   /health:
     get:
@@ -227,6 +228,38 @@ paths:
           $ref: "#/components/responses/MessageSuccess"
         "400":
           $ref: "#/components/responses/Error"
+  /api/v1/staff/search:
+    get:
+      tags: [Staff]
+      summary: Tim kiem nhan vien
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Staff search list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Staff"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
   /api/v1/staff/{id}:
     parameters:
       - $ref: "#/components/parameters/Id"
@@ -276,6 +309,106 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/MessageSuccess"
+  /api/v1/users:
+    get:
+      tags: [Users]
+      summary: Lay danh sach users
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+  /api/v1/users/search:
+    get:
+      tags: [Users]
+      summary: Tim kiem users
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User search list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+  /api/v1/users/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Users]
+      summary: Lay user theo id
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User detail
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+    delete:
+      tags: [Users]
+      summary: Xoa user neu status inactive
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/MessageSuccess"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
 components:
   securitySchemes:
     bearerAuth:
@@ -472,6 +605,36 @@ components:
         license_number:
           type: string
           nullable: true
+    User:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        full_name:
+          type: string
+        phone_number:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [admin, staff, customer]
+        status:
+          type: string
+          enum: [active, inactive]
+        avatar:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
     SuccessResponse:
       type: object
       required: [success, message]

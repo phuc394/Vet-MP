@@ -96,6 +96,39 @@ const getStaffById = async (
   }
 };
 
+const searchStaff = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const keyword = String(req.query.q ?? "").trim();
+
+    if (!keyword) {
+      return errorResponse(
+        res,
+        400,
+        "Search keyword is required"
+      );
+    }
+
+    const result =
+      await staffService.searchStaff(keyword);
+
+    return successResponse(
+      res,
+      200,
+      "Search staff successful",
+      result
+    );
+  } catch (error: any) {
+    return errorResponse(
+      res,
+      500,
+      error.message
+    );
+  }
+};
+
 const updateStaff = async (
   req: Request,
   res: Response
@@ -166,6 +199,7 @@ export default {
   createStaff,
   getAllStaff,
   getStaffById,
+  searchStaff,
   updateStaff,
   deactivateStaff,
 };
