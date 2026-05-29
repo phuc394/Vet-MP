@@ -28,7 +28,7 @@ const Login = () => {
             navigate("/home");
         } catch (error) {
             const message = axios.isAxiosError(error)
-                ? error.response?.data?.message
+                ? error.response?.data?.message ?? (error.request ? "Cannot reach the API. Please check API Gateway/CORS." : undefined)
                 : undefined;
 
             setError(message ?? "Email hoặc mật khẩu không đúng.");

@@ -34,12 +34,12 @@ const UserSection = ({
     return (
         <section className="dashboard-section">
             <div className="section-title">
-                <h2>Người dùng và nhân viên</h2>
+                <h2>Users and Staff</h2>
                 <span>User reports</span>
             </div>
             <div className="user-grid">
                 <article className="chart-panel">
-                    <h3>Phân bổ vai trò</h3>
+                    <h3>Role Distribution</h3>
                     <div className="chart-frame">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
@@ -57,17 +57,17 @@ const UserSection = ({
 
                 <div className="role-summary">
                     <article className="metric-card">
-                        <span className="metric-label">Tổng người dùng</span>
+                        <span className="metric-label">Total Users</span>
                         <strong>{formatNumber(totalUsers)}</strong>
-                        <small>Tất cả role trong hệ thống</small>
+                        <small>All roles in the system</small>
                     </article>
                     <article className="metric-card">
-                        <span className="metric-label">Nhân viên</span>
+                        <span className="metric-label">Staff</span>
                         <strong>{formatNumber(staffCount)}</strong>
-                        <small>Bao gồm admin và staff</small>
+                        <small>Includes admin and staff</small>
                     </article>
                     <article className="metric-card">
-                        <span className="metric-label">Khách hàng</span>
+                        <span className="metric-label">Customers</span>
                         <strong>{formatNumber(customerCount)}</strong>
                         <small>Role customer</small>
                     </article>
@@ -76,7 +76,7 @@ const UserSection = ({
 
             <div className="chart-grid operation-grid">
                 <article className="chart-panel">
-                    <h3>Loài thú cưng</h3>
+                    <h3>Pet Species</h3>
                     <div className="chart-frame">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
@@ -93,7 +93,7 @@ const UserSection = ({
                 </article>
 
                 <article className="chart-panel">
-                    <h3>Trạng thái lịch hẹn</h3>
+                    <h3>Appointment Status</h3>
                     <div className="chart-frame">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={appointmentStatus} margin={{ top: 16, right: 24, bottom: 8, left: 8 }}>
@@ -101,7 +101,7 @@ const UserSection = ({
                                 <XAxis dataKey="name" tickLine={false} axisLine={false} />
                                 <YAxis tickLine={false} axisLine={false} />
                                 <Tooltip />
-                                <Bar dataKey="value" name="Số lịch hẹn" radius={[6, 6, 0, 0]}>
+                                <Bar dataKey="value" name="Appointment Count" radius={[6, 6, 0, 0]}>
                                     {appointmentStatus.map((entry) => (
                                         <Cell key={entry.name} fill={getAppointmentStatusColor(entry.name)} />
                                     ))}

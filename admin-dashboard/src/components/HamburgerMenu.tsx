@@ -10,6 +10,7 @@ import PetsIcon from "@mui/icons-material/Pets";
 import ToggleOffIcon from "@mui/icons-material/ToggleOff";
 import ToggleOnIcon from "@mui/icons-material/ToggleOn";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 type HamburgerMenuProps = {
     adminEmail: string;
@@ -21,13 +22,29 @@ type HamburgerMenuProps = {
 };
 
 const menuItems = [
-    { label: "Users", icon: PeopleAltIcon },
-    { label: "Appointments", icon: EventAvailableIcon },
-    { label: "Catalog", icon: CategoryIcon },
-    { label: "Inventory", icon: Inventory2Icon },
-    { label: "Medical Record", icon: MedicalServicesIcon },
-    { label: "Pet", icon: PetsIcon },
-    { label: "Report", icon: AssessmentIcon },
+    { label: "Appointments", icon: EventAvailableIcon, path: "/appointments" },
+    { label: "Medical Records", icon: MedicalServicesIcon, path: "/medical-records" },
+    { label: "Pets and Customers", icon: PetsIcon, path: "/pets-customers" },
+    {
+        label: "Catalog",
+        icon: CategoryIcon,
+        children: [
+            { label: "Medicine", path: "/catalog/medicine" },
+            { label: "Service", path: "/catalog/service" },
+        ],
+    },
+    {
+        label: "Inventory",
+        icon: Inventory2Icon,
+        children: [
+            { label: "Medicine_Inventory", path: "/inventory/medicine" },
+            { label: "Suppliers", path: "/inventory/suppliers" },
+            { label: "Inventory_Transaction", path: "/inventory/transactions" },
+        ],
+    },
+    { label: "Staff", icon: LocalHospitalIcon, path: "/staff" },
+    { label: "Account", icon: PeopleAltIcon, path: "/account" },
+    { label: "Report", icon: AssessmentIcon, path: "/home" },
 ];
 
 const HamburgerMenu = ({
@@ -38,6 +55,13 @@ const HamburgerMenu = ({
     onLogout,
     onToggleDarkMode,
 }: HamburgerMenuProps) => {
+    const navigate = useNavigate();
+
+    const handleNavigate = (path: string) => {
+        navigate(path);
+        onClose();
+    };
+
     useEffect(() => {
         if (!isOpen) {
             return;
@@ -75,10 +99,25 @@ const HamburgerMenu = ({
                         const Icon = item.icon;
 
                         return (
-                            <button className="hamburger-menu-item" type="button" key={item.label}>
-                                <Icon fontSize="small" />
-                                <span>{item.label}</span>
-                            </button>
+                            <div className="hamburger-menu-group" key={item.label}>
+                                <button
+                                    className="hamburger-menu-item"
+                                    type="button"
+                                    onClick={() => item.path && handleNavigate(item.path)}
+                                >
+                                    <Icon fontSize="small" />
+                                    <span>{item.label}</span>
+                                </button>
+                                {item.children && (
+                                    <div className="hamburger-submenu">
+                                        {item.children.map((child) => (
+                                            <button type="button" key={child.path} onClick={() => handleNavigate(child.path)}>
+                                                {child.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         );
                     })}
                 </nav>

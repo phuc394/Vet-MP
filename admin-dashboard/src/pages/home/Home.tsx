@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Footer from "../../components/Footer";
 import HamburgerMenu from "../../components/HamburgerMenu";
 import HamburgerMenuToggle from "../../components/HamburgerMenuToggle";
-import PageHeader from "../../components/PageHeader";
+import Header from "../../components/Header";
 import { ReportService } from "../../utils/axios";
 import InventorySection from "./components/InventorySection";
 import MetricGrid from "./components/MetricGrid";
@@ -91,7 +91,7 @@ const Home = () => {
                 setPetSpecies(toChartData(petSpeciesResponse.data.data));
                 setAppointmentStatus(toChartData(appointmentStatusResponse.data.data));
             } catch {
-                setError("Không thể tải dữ liệu báo cáo. Vui lòng kiểm tra token admin, API Gateway và ReportService.");
+                setError("Could not load report data. Please check the admin token, API Gateway, and ReportService.");
             } finally {
                 setIsLoading(false);
             }
@@ -128,13 +128,13 @@ const Home = () => {
             />
             <div className="dashboard-topbar">
                 <HamburgerMenuToggle onClick={() => setIsMenuOpen(true)} />
-                <PageHeader title="Dashboard" />
+                <Header title="Dashboard" />
             </div>
 
             {error && <div className="dashboard-alert">{error}</div>}
 
             {isLoading ? (
-                <div className="dashboard-loading">Đang tải dữ liệu...</div>
+                <div className="dashboard-loading">Loading data...</div>
             ) : (
                 <>
                     <MetricGrid revenueSummary={revenueSummary} cancelledCount={cancelledCount} />

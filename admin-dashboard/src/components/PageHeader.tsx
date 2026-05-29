@@ -7,7 +7,7 @@ type PageHeaderProps = {
 const PageHeader = ({
     title,
     kicker = "Report overview",
-    description = "Cập nhật theo dữ liệu hiện tại",
+    description = "Updated with current data",
 }: PageHeaderProps) => {
     return (
         <header className="page-header">

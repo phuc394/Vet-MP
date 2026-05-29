@@ -28,6 +28,7 @@ const serviceUrls = {
 
 const defaultAllowedOrigins = [
   "http://localhost:5173",
+  "http://127.0.0.1:5173",
   "http://localhost:19006",
   "http://localhost:8081",
 ];
@@ -86,6 +87,7 @@ function registerProxy(route: string, target: string) {
 registerProxy("/api/v1/auth", `${serviceUrls.auth}/api/v1/auth`);
 registerProxy("/api/v1/profile", `${serviceUrls.auth}/api/v1/profile`);
 registerProxy("/api/v1/staff", `${serviceUrls.auth}/api/v1/staff`);
+registerProxy("/api/v1/users", `${serviceUrls.auth}/api/v1/users`);
 registerProxy("/api/v1/pets", `${serviceUrls.pet}/api/v1/pets`);
 registerProxy("/api/v1/catalog", `${serviceUrls.catalog}/catalog`);
 registerProxy("/api/v1/suppliers", `${serviceUrls.inventory}/suppliers`);
