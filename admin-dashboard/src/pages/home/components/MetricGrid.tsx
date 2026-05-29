@@ -10,24 +10,24 @@ const MetricGrid = ({ revenueSummary, cancelledCount }: MetricGridProps) => {
     return (
         <section className="metric-grid" aria-label="Revenue summary">
             <article className="metric-card">
-                <span className="metric-label">Tổng doanh thu</span>
+                <span className="metric-label">Total Revenue</span>
                 <strong>{formatCurrency(revenueSummary?.totalRevenue ?? 0)}</strong>
-                <small>Doanh thu từ lịch hẹn hoàn tất</small>
+                <small>Revenue from completed appointments</small>
             </article>
             <article className="metric-card">
-                <span className="metric-label">Lịch hẹn hoàn tất</span>
+                <span className="metric-label">Completed Appointments</span>
                 <strong>{formatNumber(revenueSummary?.appointmentCount ?? 0)}</strong>
-                <small>Số đơn có trạng thái completed</small>
+                <small>Appointments with completed status</small>
             </article>
             <article className="metric-card">
-                <span className="metric-label">Doanh thu trung bình</span>
+                <span className="metric-label">Average Revenue</span>
                 <strong>{formatCurrency(revenueSummary?.averageRevenue ?? 0)}</strong>
-                <small>Giá trị trung bình mỗi lịch hẹn</small>
+                <small>Average value per appointment</small>
             </article>
             <article className="metric-card">
-                <span className="metric-label">Lịch hẹn đã hủy</span>
+                <span className="metric-label">Cancelled Appointments</span>
                 <strong>{formatNumber(cancelledCount)}</strong>
-                <small>Có ghi nhận lý do hủy</small>
+                <small>Appointments with cancellation reasons</small>
             </article>
         </section>
     );
