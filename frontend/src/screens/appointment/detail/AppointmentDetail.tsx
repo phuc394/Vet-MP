@@ -3,9 +3,9 @@ import { SafeAreaView, View, Text, TouchableOpacity, Image, ScrollView, Modal } 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { styles } from './AppointmentDetailStyle';
-import { MOCK_PETS } from '../home/HomeUtils';
-import { formatDateTime } from '../calendar/CalenderUtils';
-import { formatAppointmentId, getAppointmentStatusBackground, formatAppointmentDatetime } from './AppointmentUtils';
+import { MOCK_PETS } from '../../home/HomeUtils';
+import { formatDateTime } from '../../calendar/CalenderUtils';
+import { formatAppointmentId, getAppointmentStatusBackground, formatAppointmentDatetime } from '../AppointmentUtils';
 
 export default function AppointmentDetail() {
   const navigation: any = useNavigation();
@@ -107,7 +107,6 @@ export default function AppointmentDetail() {
           </TouchableOpacity>
         </View>
 
-        {/* Cancel card shown only for upcoming / pending appointments */}
         {appointment.status === 'Pending' && source !== 'history' && (
           <View style={styles.actionRow}>
             <View style={styles.cancelCard}>
@@ -122,7 +121,6 @@ export default function AppointmentDetail() {
           </View>
         )}
 
-        {/* Static Need to reschedule section */}
         <View style={{ marginTop: 18 }}>
           <View style={styles.rescheduleCard}>
             <View style={{ flex: 1 }}>

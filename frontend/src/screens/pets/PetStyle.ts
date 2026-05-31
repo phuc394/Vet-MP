@@ -25,7 +25,7 @@ export const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 25,
     borderWidth: 1,
-    borderColor: '#333333',
+    borderColor: '#E2D6C7',
     paddingHorizontal: 15,
     height: 45,
     marginBottom: 20,
@@ -35,6 +35,12 @@ export const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 16,
     color: '#333333',
+    paddingVertical: 0,
+    outlineStyle: 'none',
+    outlineWidth: 0,
+    outlineColor: 'transparent',
+    borderWidth: 0,
+    borderColor: 'transparent',
   },
   listContainer: {
     paddingBottom: 90, // Để tránh card cuối bị FAB che lấp

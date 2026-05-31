@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
   },
 
   header: {
-  paddingTop: 38,
+  paddingTop: 18,
   paddingHorizontal: 24,
   alignItems: "center",
   },
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
 },
 
   formContainer: {
-  marginTop: 24,
+  marginTop: 6,
   paddingHorizontal: 38,
 },
 

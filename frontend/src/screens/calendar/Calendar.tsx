@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { SafeAreaView, ScrollView, View, Text, TouchableOpacity, Image } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { SafeAreaView, ScrollView, View, Text, TouchableOpacity, Image, TextInput } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { styles } from './CalendarStyle';
@@ -29,10 +29,35 @@ const MOCK_APPOINTMENTS: Appointment[] = [
 export default function Calendar() {
   const navigation: any = useNavigation();
   const [tab, setTab] = useState<'upcoming' | 'history'>('upcoming');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const appointments = MOCK_APPOINTMENTS.filter((a) =>
-    tab === 'upcoming' ? a.status === 'Pending' : a.status !== 'Pending'
-  );
+  const appointments = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+
+    return MOCK_APPOINTMENTS.filter((a) => {
+      const tabMatch = tab === 'upcoming' ? a.status === 'Pending' : a.status !== 'Pending';
+
+      if (!tabMatch) {
+        return false;
+      }
+
+      if (!normalizedQuery) {
+        return true;
+      }
+
+      const petName = MOCK_PETS[a.petIndex]?.name?.toLowerCase() ?? '';
+      const service = a.service.toLowerCase();
+      const doctor = a.doctor.toLowerCase();
+      const datetime = a.datetime.toLowerCase();
+
+      return (
+        petName.includes(normalizedQuery) ||
+        service.includes(normalizedQuery) ||
+        doctor.includes(normalizedQuery) ||
+        datetime.includes(normalizedQuery)
+      );
+    });
+  }, [searchQuery, tab]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -58,83 +83,111 @@ export default function Calendar() {
           </View>
         </View>
 
-        {appointments.map((a) => {
-          const pet = MOCK_PETS[a.petIndex];
-          const cardContent = (
-            <>
-              <View style={styles.cardHeader}>
-                <View style={styles.petRow}>
-                  <Image source={{ uri: pet.avatar }} style={styles.petAvatar} />
-                  <View>
-                    <Text style={styles.petName}>{pet.name}</Text>
-                    <Text style={styles.petService}>{a.service}</Text>
-                  </View>
-                </View>
-                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(a.status) }]}> 
-                  <Text style={styles.statusText}>{a.status}</Text>
-                </View>
-              </View>
-
-              <View style={styles.cardBodyRow}>
-                <View style={styles.infoCell}>
-                  <View style={styles.iconArea}>
-                    <View style={styles.iconCircle}>
-                      <MaterialCommunityIcons name="calendar-clock" size={22} color="#835300" />
-                    </View>
-                  </View>
-                  <View style={styles.innerDivider} />
-                  <View style={styles.infoCellContent}>
-                    <Text style={styles.infoLabel}>DATE&TIME</Text>
-                    <Text style={styles.infoValue}>{formatDateTime(a.datetime)}</Text>
-                  </View>
-                </View>
-
-                <View style={[styles.infoCell, styles.infoCellRight]}>
-                  <View style={styles.iconArea}>
-                    <View style={styles.iconCircle}>
-                      <Ionicons name="person-circle" size={22} color="#835300" />
-                    </View>
-                  </View>
-                  <View style={styles.innerDivider} />
-                  <View style={styles.infoCellContent}>
-                    <Text style={styles.infoLabel}>DOCTOR</Text>
-                    <Text style={styles.infoValue}>{a.doctor}</Text>
-                  </View>
-                </View>
-              </View>
-              <View style={styles.divider} />
-
-              {tab === 'upcoming' && (
-                <View style={styles.cardFooter}>
-                  <TouchableOpacity style={styles.viewButton} activeOpacity={0.8} onPress={() => navigation.navigate('AppointmentDetail', { appointment: a, source: 'upcoming' })}>
-                    <Text style={styles.viewButtonText}>View Details</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.cancelButton} activeOpacity={0.8}>
-                    <Text style={styles.cancelButtonText}>Cancel</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </>
-          );
-
-          if (tab === 'history') {
-            return (
-              <TouchableOpacity key={a.id} style={styles.appointmentCard} activeOpacity={0.9} onPress={() => navigation.navigate('AppointmentDetail', { appointment: a, source: 'history' })}>
-                {cardContent}
+        <View style={styles.searchBarWrap}>
+          <View style={styles.searchBar}>
+            <Ionicons name="search" size={20} color="#9A8C7A" />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search appointment"
+              placeholderTextColor="#9A8C7A"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              returnKeyType="search"
+            />
+            {!!searchQuery && (
+              <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={10}>
+                <Ionicons name="close-circle" size={20} color="#9A8C7A" />
               </TouchableOpacity>
-            );
-          }
+            )}
+          </View>
+        </View>
 
-          return (
-            <View key={a.id} style={styles.appointmentCard}>
-              {cardContent}
-            </View>
-          );
-        })}
+        <View style={styles.appointmentListFrame}>
+          <ScrollView
+            style={styles.appointmentListScroll}
+            contentContainerStyle={styles.appointmentListContent}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled
+          >
+            {appointments.map((a) => {
+              const pet = MOCK_PETS[a.petIndex];
+              const cardContent = (
+                <>
+                  <View style={styles.cardHeader}>
+                    <View style={styles.petRow}>
+                      <Image source={{ uri: pet.avatar }} style={styles.petAvatar} />
+                      <View>
+                        <Text style={styles.petName}>{pet.name}</Text>
+                        <Text style={styles.petService}>{a.service}</Text>
+                      </View>
+                    </View>
+                    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(a.status) }]}> 
+                      <Text style={styles.statusText}>{a.status}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.cardBodyRow}>
+                    <View style={styles.infoCell}>
+                      <View style={styles.iconArea}>
+                        <View style={styles.iconCircle}>
+                          <MaterialCommunityIcons name="calendar-clock" size={22} color="#835300" />
+                        </View>
+                      </View>
+                      <View style={styles.innerDivider} />
+                      <View style={styles.infoCellContent}>
+                        <Text style={styles.infoLabel}>DATE&TIME</Text>
+                        <Text style={styles.infoValue}>{formatDateTime(a.datetime)}</Text>
+                      </View>
+                    </View>
+
+                    <View style={[styles.infoCell, styles.infoCellRight]}>
+                      <View style={styles.iconArea}>
+                        <View style={styles.iconCircle}>
+                          <Ionicons name="person-circle" size={22} color="#835300" />
+                        </View>
+                      </View>
+                      <View style={styles.innerDivider} />
+                      <View style={styles.infoCellContent}>
+                        <Text style={styles.infoLabel}>DOCTOR</Text>
+                        <Text style={styles.infoValue}>{a.doctor}</Text>
+                      </View>
+                    </View>
+                  </View>
+                  <View style={styles.divider} />
+
+                  {tab === 'upcoming' && (
+                    <View style={styles.cardFooter}>
+                      <TouchableOpacity style={styles.viewButton} activeOpacity={0.8} onPress={() => navigation.navigate('AppointmentDetail', { appointment: a, source: 'upcoming' })}>
+                        <Text style={styles.viewButtonText}>View Details</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.cancelButton} activeOpacity={0.8}>
+                        <Text style={styles.cancelButtonText}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </>
+              );
+
+              if (tab === 'history') {
+                return (
+                  <TouchableOpacity key={a.id} style={styles.appointmentCard} activeOpacity={0.9} onPress={() => navigation.navigate('AppointmentDetail', { appointment: a, source: 'history' })}>
+                    {cardContent}
+                  </TouchableOpacity>
+                );
+              }
+
+              return (
+                <View key={a.id} style={styles.appointmentCard}>
+                  {cardContent}
+                </View>
+              );
+            })}
+          </ScrollView>
+        </View>
 
       </ScrollView>
 
-      <TouchableOpacity style={styles.fab} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.fab} activeOpacity={0.8} onPress={() => navigation.navigate('AddAppointment')}>
         <MaterialCommunityIcons name="calendar-plus" size={26} color="#FFFFFF" />
       </TouchableOpacity>
     </SafeAreaView>

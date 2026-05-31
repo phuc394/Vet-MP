@@ -1,12 +1,37 @@
 
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, SafeAreaView, FlatList } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { styles } from './HomeStyle';
-import { MOCK_PETS } from './HomeUtils';
+import { MOCK_PETS, MOCK_SERVICES, ServiceItem } from './HomeUtils';
 import SupportCard from '../../components/SupportCard';
 
 export default function Home() {
+  const navigation = useNavigation<any>();
+
+  const renderServiceCard = ({ item }: { item: ServiceItem }) => (
+    <TouchableOpacity
+      style={styles.serviceCard}
+      activeOpacity={0.85}
+      onPress={() => navigation.navigate('ServiceDetail', { service: item })}
+    >
+      <View style={styles.serviceIconWrap}>
+        <MaterialCommunityIcons name={item.icon as any} size={22} color="#835300" />
+      </View>
+      <View style={styles.serviceCardBody}>
+        <Text style={styles.serviceCategory}>{item.category}</Text>
+        <Text style={styles.serviceName}>{item.name}</Text>
+        <Text style={styles.serviceDescription} numberOfLines={2}>{item.description}</Text>
+        <View style={styles.serviceMetaRow}>
+          <Text style={styles.servicePrice}>{item.price}</Text>
+          <Text style={styles.serviceDuration}>{item.duration}</Text>
+        </View>
+      </View>
+      <MaterialCommunityIcons name="chevron-right" size={24} color="#7D4600" />
+    </TouchableOpacity>
+  );
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView 
@@ -14,6 +39,10 @@ export default function Home() {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
+
+        <View style={styles.pageLabelRow}>
+          <Text style={styles.pageLabelText}>Home</Text>
+        </View>
 
         {/* Bảng Upcoming Visit */}
         <View style={styles.upcomingCard}>
@@ -50,6 +79,25 @@ export default function Home() {
             </View>
           ))}
         </ScrollView>
+
+        {/* Khu vực Services */}
+        <View style={styles.servicesHeader}>
+          <Text style={styles.servicesTitle}>Services</Text>
+          <TouchableOpacity activeOpacity={0.7}>
+            <Text style={styles.seeAllText}>see all</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.servicesFrame}>
+          <FlatList
+            data={MOCK_SERVICES}
+            keyExtractor={(item) => item.service_id.toString()}
+            renderItem={renderServiceCard}
+            nestedScrollEnabled
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.servicesList}
+          />
+        </View>
 
         {/* Bảng Hỗ trợ / Reschedule */}
         <SupportCard />

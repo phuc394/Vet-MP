@@ -50,6 +50,7 @@ const AuthInput = ({
           value={value}
           onChangeText={onChangeText}
           secureTextEntry={hidden}
+          underlineColorAndroid="transparent"
         />
   {secureTextEntry && (
           <TouchableOpacity
@@ -99,6 +100,12 @@ const styles = StyleSheet.create({
     flex: 1,
     color: colors.text,
     fontSize: 12,
+    paddingVertical: 0,
+    outlineStyle: "none",
+    outlineWidth: 0,
+    outlineColor: "transparent",
+    borderWidth: 0,
+    borderColor: "transparent",
   },
 });
 
