@@ -1,0 +1,206 @@
+name: vet-mp
+
+x-mysql-root-password: &mysql_root_password ${MYSQL_ROOT_PASSWORD:-123456789}
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: vet-mp-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: *mysql_root_password
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./microservices/scripts.schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./microservices/scripts.seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  auth-service:
+    build:
+      context: ./microservices/AuthService
+      dockerfile: dockerfile
+    container_name: vet-mp-auth-service
+    restart: unless-stopped
+    environment:
+      PORT: 3001
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: *mysql_root_password
+      DB_NAME: auth_db_vet
+      SECRET_KEY: ${AUTH_SECRET_KEY:-vet-mp-auth-secret-key}
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET:-vet-mp-access-token-secret}
+      REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET:-vet-mp-refresh-token-secret}
+    ports:
+      - "3001:3001"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  pet-service:
+    build:
+      context: ./microservices/PetService
+      dockerfile: dockerfile
+    container_name: vet-mp-pet-service
+    restart: unless-stopped
+    environment:
+      PORT: 3002
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: *mysql_root_password
+      DB_NAME: pet_db_vet
+      SECRET_KEY: ${PET_SECRET_KEY:-vet-mp-pet-secret-key}
+    ports:
+      - "3002:3002"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  catalog-service:
+    build:
+      context: ./microservices/CatalogService
+      dockerfile: dockerfile
+    container_name: vet-mp-catalog-service
+    restart: unless-stopped
+    environment:
+      PORT: 3003
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: *mysql_root_password
+      DB_NAME: catalog_db_vet
+    ports:
+      - "3003:3003"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  inventory-service:
+    build:
+      context: ./microservices/InventoryService
+      dockerfile: dockerfile
+    container_name: vet-mp-inventory-service
+    restart: unless-stopped
+    environment:
+      PORT: 3004
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: *mysql_root_password
+      DB_NAME: inventory_db_vet
+    ports:
+      - "3004:3004"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  appointment-service:
+    build:
+      context: ./microservices/AppointmentService
+      dockerfile: dockerfile
+    container_name: vet-mp-appointment-service
+    restart: unless-stopped
+    environment:
+      PORT: 3005
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: *mysql_root_password
+      DB_NAME: appointment_db_vet
+    ports:
+      - "3005:3005"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  medical-record-service:
+    build:
+      context: ./microservices/MedicalRecordService
+      dockerfile: dockerfile
+    container_name: vet-mp-medical-record-service
+    restart: unless-stopped
+    environment:
+      PORT: 3006
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: *mysql_root_password
+      DB_NAME: medical_record_db_vet
+    ports:
+      - "3006:3006"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  report-service:
+    build:
+      context: ./microservices/ReportService
+      dockerfile: dockerfile
+    container_name: vet-mp-report-service
+    restart: unless-stopped
+    environment:
+      PORT: 3007
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: *mysql_root_password
+      DB_AUTH_NAME: auth_db_vet
+      DB_PET_NAME: pet_db_vet
+      DB_CATALOG_NAME: catalog_db_vet
+      DB_INVENTORY_NAME: inventory_db_vet
+      DB_APPOINTMENT_NAME: appointment_db_vet
+      DB_MEDICAL_RECORD_NAME: medical_record_db_vet
+    ports:
+      - "3007:3007"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  api-gateway:
+    build:
+      context: ./apigateway
+      dockerfile: Dockerfile
+    container_name: vet-mp-api-gateway
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET:-vet-mp-access-token-secret}
+      AUTH_SERVICE_URL: http://auth-service:3001
+      PET_SERVICE_URL: http://pet-service:3002
+      CATALOG_SERVICE_URL: http://catalog-service:3003
+      INVENTORY_SERVICE_URL: http://inventory-service:3004
+      APPOINTMENT_SERVICE_URL: http://appointment-service:3005
+      MEDICAL_RECORD_SERVICE_URL: http://medical-record-service:3006
+      REPORT_SERVICE_URL: http://report-service:3007
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://localhost:19006,http://localhost:8081
+    ports:
+      - "3000:3000"
+    depends_on:
+      auth-service:
+        condition: service_started
+      pet-service:
+        condition: service_started
+      catalog-service:
+        condition: service_started
+      inventory-service:
+        condition: service_started
+      appointment-service:
+        condition: service_started
+      medical-record-service:
+        condition: service_started
+      report-service:
+        condition: service_started
+
+volumes:
+  mysql_data:
