@@ -1,104 +1,50 @@
 import "./Home.css";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../components/Footer";
 import HamburgerMenu from "../../components/HamburgerMenu";
 import HamburgerMenuToggle from "../../components/HamburgerMenuToggle";
 import Header from "../../components/Header";
-import { ReportService } from "../../utils/axios";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { closeMenu, fetchDashboardReports, logoutAdmin, openMenu, toggleDarkMode } from "../../redux/slices/home.slice";
 import InventorySection from "./components/InventorySection";
 import MetricGrid from "./components/MetricGrid";
 import RevenueSection from "./components/RevenueSection";
 import UserSection from "./components/UserSection";
-import {
-    ChartDatum,
-    RevenueItem,
-    RevenueSummary,
-    TableResponse,
-} from "./components/dashboardTypes";
-import { toChartData } from "./components/dashboardUtils";
 
 const Home = () => {
     const navigate = useNavigate();
-    const [revenueSummary, setRevenueSummary] = useState<RevenueSummary | null>(null);
-    const [revenueTrend, setRevenueTrend] = useState<ChartDatum[]>([]);
-    const [topServices, setTopServices] = useState<ChartDatum[]>([]);
-    const [revenueItems, setRevenueItems] = useState<RevenueItem[]>([]);
-    const [medicineStock, setMedicineStock] = useState<ChartDatum[]>([]);
-    const [lowStock, setLowStock] = useState<TableResponse | null>(null);
-    const [cancelledAppointments, setCancelledAppointments] = useState<TableResponse | null>(null);
-    const [userRoles, setUserRoles] = useState<ChartDatum[]>([]);
-    const [petSpecies, setPetSpecies] = useState<ChartDatum[]>([]);
-    const [appointmentStatus, setAppointmentStatus] = useState<ChartDatum[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState("");
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
-    const [adminEmail] = useState(() => localStorage.getItem("adminEmail") ?? "admin@vetcare.com");
+    const dispatch = useAppDispatch();
+    const {
+        revenueSummary,
+        revenueTrend,
+        topServices,
+        revenueItems,
+        medicineStock,
+        lowStock,
+        cancelledAppointments,
+        userRoles,
+        petSpecies,
+        appointmentStatus,
+        isLoading,
+        error,
+        isMenuOpen,
+        isDarkMode,
+        adminEmail,
+    } = useAppSelector((state) => state.home);
 
     const handleToggleDarkMode = useCallback(() => {
-        setIsDarkMode((currentValue) => {
-            const nextValue = !currentValue;
-            localStorage.setItem("darkMode", String(nextValue));
-            return nextValue;
-        });
-    }, []);
+        dispatch(toggleDarkMode());
+    }, [dispatch]);
 
     const handleLogout = useCallback(() => {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("adminEmail");
+        dispatch(logoutAdmin());
         navigate("/");
-    }, [navigate]);
+    }, [dispatch, navigate]);
 
     useEffect(() => {
-        const loadReports = async () => {
-            setIsLoading(true);
-            setError("");
-
-            try {
-                const [
-                    revenueSummaryResponse,
-                    revenueItemsResponse,
-                    revenueTrendResponse,
-                    topServicesResponse,
-                    medicineStockResponse,
-                    lowStockResponse,
-                    cancelledAppointmentsResponse,
-                    userRolesResponse,
-                    petSpeciesResponse,
-                    appointmentStatusResponse,
-                ] = await Promise.all([
-                    ReportService.getRevenueSummary(),
-                    ReportService.getRevenueItems(),
-                    ReportService.getRevenueTrend(),
-                    ReportService.getTopRevenueServices(),
-                    ReportService.getMedicineStock(),
-                    ReportService.getLowStockMedicines(),
-                    ReportService.getCancelledAppointments(),
-                    ReportService.getUserRoleDistribution(),
-                    ReportService.getPetSpeciesDistribution(),
-                    ReportService.getAppointmentStatusDistribution(),
-                ]);
-
-                setRevenueSummary(revenueSummaryResponse.data.data);
-                setRevenueItems(revenueItemsResponse.data.data);
-                setRevenueTrend(toChartData(revenueTrendResponse.data.data));
-                setTopServices(toChartData(topServicesResponse.data.data));
-                setMedicineStock(toChartData(medicineStockResponse.data.data));
-                setLowStock(lowStockResponse.data.data);
-                setCancelledAppointments(cancelledAppointmentsResponse.data.data);
-                setUserRoles(toChartData(userRolesResponse.data.data));
-                setPetSpecies(toChartData(petSpeciesResponse.data.data));
-                setAppointmentStatus(toChartData(appointmentStatusResponse.data.data));
-            } catch {
-                setError("Could not load report data. Please check the admin token, API Gateway, and ReportService.");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        loadReports();
-    }, []);
+        dispatch(fetchDashboardReports());
+    }, [dispatch]);
 
     const totalUsers = useMemo(() => {
         return userRoles.reduce((sum, item) => sum + item.value, 0);
@@ -122,12 +68,12 @@ const Home = () => {
                 adminEmail={adminEmail}
                 isDarkMode={isDarkMode}
                 isOpen={isMenuOpen}
-                onClose={() => setIsMenuOpen(false)}
+                onClose={() => dispatch(closeMenu())}
                 onLogout={handleLogout}
                 onToggleDarkMode={handleToggleDarkMode}
             />
             <div className="dashboard-topbar">
-                <HamburgerMenuToggle onClick={() => setIsMenuOpen(true)} />
+                <HamburgerMenuToggle onClick={() => dispatch(openMenu())} />
                 <Header title="Dashboard" />
             </div>
 

@@ -16,7 +16,7 @@ const AdminLayout = ({ title, kicker = "Admin management", description, children
     const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
-    const [adminEmail] = useState(() => localStorage.getItem("adminEmail") ?? "admin@vetcare.com");
+    const [adminEmail] = useState(() => localStorage.getItem("adminEmail") ?? "admin@gmail.com");
 
     const handleToggleDarkMode = useCallback(() => {
         setIsDarkMode((currentValue) => {
