@@ -549,6 +549,15 @@ select {
     border-top-color: #334155;
 }
 
+.dashboard.is-dark .admin-search input {
+    background: transparent;
+    color: #e2e8f0;
+}
+
+.dashboard.is-dark .admin-search input::placeholder {
+    color: #94a3b8;
+}
+
 @media (max-width: 720px) {
     .page-header {
         align-items: flex-start;
