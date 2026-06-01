@@ -82,7 +82,7 @@ const PetScreen = () => {
       <TouchableOpacity 
         style={styles.fab} 
         activeOpacity={0.8}
-        onPress={() => console.log('Navigate to Add Pet')}
+        onPress={() => navigation.navigate('AddPet')}
       >
         <Ionicons name="add" size={36} color="#FFFFFF" />
       </TouchableOpacity>

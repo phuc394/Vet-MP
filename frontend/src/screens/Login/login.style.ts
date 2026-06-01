@@ -11,15 +11,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     width: "100%",
-    height: "40%",
+    height: "38%",
     backgroundColor: colors.backgroundTop,
   },
 
   middleBackground: {
     position: "absolute",
-    top: "40%",
+    top: "38%",
     width: "100%",
-    height: "50%",
+    height: "52%",
     backgroundColor: colors.backgroundMiddle,
   },
 
@@ -27,20 +27,20 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     width: "100%",
-    height: "10%",
+    height: "12%",
     backgroundColor: colors.backgroundBottom,
   },
 
   content: {
     flex: 1,
-    
+    justifyContent: "flex-start",
   },
 
   topSection: {
-    height: "42%",
+    height: "40%",
     alignItems: "center",
     justifyContent: "flex-start",
-    paddingTop: 30,
+    paddingTop: 18,
   },
 
   avatar: {
@@ -58,7 +58,8 @@ const styles = StyleSheet.create({
   },
 
   formContainer: {
-    marginTop: -120,
+    flex: 1,
+    marginTop: -56,
     paddingHorizontal: 47,
   },
 
@@ -81,10 +82,12 @@ const styles = StyleSheet.create({
   },
 
   footer: {
-    marginTop: 190,
+    marginTop: "auto",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    paddingBottom: 0,
+    marginBottom: 35,
   },
 
   footerText: {

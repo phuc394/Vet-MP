@@ -36,3 +36,43 @@ export const MOCK_PETS: Pet[] = [
     updated_at: "2026-05-08T00:00:00Z"
   }
 ];
+
+export interface ServiceItem {
+  service_id: number;
+  name: string;
+  category: string;
+  price: string;
+  duration: string;
+  description: string;
+  icon: string;
+}
+
+export const MOCK_SERVICES: ServiceItem[] = [
+  {
+    service_id: 1,
+    name: 'Vaccination',
+    category: 'Prevention',
+    price: '$25',
+    duration: '20 min',
+    description: 'Routine vaccines to keep your pet protected and healthy all year long.',
+    icon: 'shield-check',
+  },
+  {
+    service_id: 2,
+    name: 'Check-up',
+    category: 'General care',
+    price: '$30',
+    duration: '30 min',
+    description: 'A complete wellness check for early detection and regular follow-up.',
+    icon: 'stethoscope',
+  },
+  {
+    service_id: 3,
+    name: 'Dental Cleaning',
+    category: 'Oral health',
+    price: '$45',
+    duration: '45 min',
+    description: 'Professional cleaning to support gum health and fresh breath.',
+    icon: 'tooth',
+  },
+];
