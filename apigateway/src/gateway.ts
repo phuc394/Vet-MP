@@ -9,7 +9,7 @@ import {
 
 dotenv.config();
 
-const app = express();
+export const app = express();
 const port = Number(process.env.PORT) || 3000;
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -110,6 +110,8 @@ registerProxy("/api/v1/prescriptions", `${serviceUrls.medicalRecord}/prescriptio
 registerProxy("/api/v1/re-examinations", `${serviceUrls.medicalRecord}/re-examinations`);
 registerProxy("/api/v1/reports", `${serviceUrls.report}/reports`);
 
-app.listen(port, () => {
-  console.log(`API Gateway is running on port ${port}`);
-});
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`API Gateway is running on port ${port}`);
+  });
+}
