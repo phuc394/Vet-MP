@@ -17,26 +17,17 @@ const getMyProfile = async (
   res: Response
 ) => {
   try {
-    const userId =
-      req.user!.user_id;
+    if (!req.user || !req.user.user_id) {
+      return errorResponse(res, 401, "Unauthorized: Missing or invalid token");
+    }
+    const userId =req.user!.user_id;
 
-    const result =
-      await profileService.getMyProfile(
-        userId
-      );
+    const result =await profileService.getMyProfile(userId);
 
-    return successResponse(
-      res,
-      200,
-      "Get profile successful",
-      result
-    );
+    return successResponse(res,200,"Get profile successful",result);
   } catch (error: any) {
-    return errorResponse(
-      res,
-      500,
-      error.message
-    );
+    console.error("🔥 Lỗi tại getMyProfile Controller:", error);
+    return errorResponse(res,500,error.message);
   }
 };
 

@@ -1,20 +1,12 @@
-// import Navigation from "../src/navigation/Navigation"
-
-// export default function App() {
-//   return <Navigation />;
-// }
 
 import React from "react";
-
-import LoginScreen from "./screens/Login/LoginScreen";
-import RegisterScreen from "./screens/Register/RegisterScreen"
 import {
   Provider,
 } from "react-redux";
 import Navigation from "./navigation/Navigation"
-
+import { injectStore } from "./config/api"
 import store from "./redux/store";
-
+injectStore(store);
 const App = () => {
   return (
     <Provider store={store}>

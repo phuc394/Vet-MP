@@ -4,6 +4,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { CustomTabBar } from "../components/BottomTabNavigation";
 import LoginScreen from "../screens/Login/LoginScreen";
 import RegisterScreen from "../screens/Register/RegisterScreen";
+import ForgetPasswordScreen from "../screens/forgetpassword/ForgetPasswordScreen"; 
+import ResetPasswordScreen from "../screens/resetpassword/ResetPasswordScreen";
 import Home from "../screens/home/Home";
 import Pet from "../screens/pets/Pet";
 import PetDetail from "../screens/petDetail/PetDetail";
@@ -25,13 +27,19 @@ const BottomTabs = createBottomTabNavigator({
 });
 
 const RootStack = createNativeStackNavigator({
-  initialRouteName: "MainTabs",
+  // Mặc định ban đầu nếu chưa đăng nhập thì nên để "Login" làm màn hình đầu tiên
+  initialRouteName: "Login", 
   screenOptions: {
     headerShown: false,
   },
   screens: {
+    // Luồng Auth 
     Login: LoginScreen,
     Register: RegisterScreen,
+    ForgetPassword: ForgetPasswordScreen, 
+    ResetPassword: ResetPasswordScreen,   
+
+    // Luồng Main App 
     MainTabs: BottomTabs,
     AppointmentDetail,
     PetDetail,

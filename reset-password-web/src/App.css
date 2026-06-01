@@ -1,0 +1,162 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(
+    135deg,
+    #f8e9cf,
+    #f6f1e8,
+    #e9eadf
+  );
+
+  font-family:
+    Arial,
+    sans-serif;
+}
+
+.container {
+  min-height: 100vh;
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  padding: 20px;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+
+  background: white;
+
+  padding: 32px;
+
+  border-radius: 20px;
+
+  box-shadow:
+    0 12px 30px
+    rgba(0, 0, 0, 0.12);
+}
+
+.card h1 {
+  text-align: center;
+
+  color: #4a6741;
+
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  text-align: center;
+
+  color: #666;
+
+  margin-bottom: 24px;
+
+  font-size: 14px;
+
+  line-height: 20px;
+}
+
+.card input {
+  width: 100%;
+
+  padding: 14px;
+
+  margin-bottom: 14px;
+
+  border: 1px solid #ddd;
+
+  border-radius: 10px;
+
+  font-size: 14px;
+}
+
+.card input:focus {
+  outline: none;
+
+  border-color: #4caf50;
+}
+
+.card button {
+  width: 100%;
+
+  padding: 14px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: #4caf50;
+
+  color: white;
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.card button:hover {
+  background: #43a047;
+}
+
+.message {
+  margin-top: 16px;
+
+  text-align: center;
+
+  font-size: 14px;
+}
+
+.success {
+  color: #2e7d32;
+}
+
+.error {
+  color: #d32f2f;
+}
+
+.return-box {
+  margin-top: 20px;
+
+  padding: 16px;
+
+  border-radius: 12px;
+
+  background: #f3faf3;
+
+  text-align: center;
+}
+
+.return-box p {
+  margin-bottom: 12px;
+
+  color: #444;
+
+  line-height: 22px;
+}
+
+.return-button {
+  display: inline-block;
+
+  text-decoration: none;
+
+  background: #4caf50;
+
+  color: white;
+
+  padding: 10px 18px;
+
+  border-radius: 8px;
+
+  font-weight: 600;
+}

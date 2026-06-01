@@ -39,7 +39,7 @@ const findUserByResetToken = async (
 ): Promise<User | null> => {
   const sql = `
     SELECT *
-    export FROM Users
+   FROM Users
     WHERE reset_token_hash = ?
   `;
 
