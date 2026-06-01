@@ -11,9 +11,16 @@ dotenv.config();
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
+const isProduction = process.env.NODE_ENV === "production";
 
 function getServiceUrl(envName: string, fallback: string) {
-  return (process.env[envName] ?? fallback).replace(/\/+$/, "");
+  const value = process.env[envName];
+
+  if (isProduction && !value) {
+    throw new Error(`Missing ${envName}. Set the Railway service URL before deploying.`);
+  }
+
+  return (value ?? fallback).replace(/\/+$/, "");
 }
 
 const serviceUrls = {
@@ -32,6 +39,10 @@ const defaultAllowedOrigins = [
   "http://localhost:19006",
   "http://localhost:8081",
 ];
+
+if (isProduction && !process.env.CORS_ALLOWED_ORIGINS) {
+  throw new Error("Missing CORS_ALLOWED_ORIGINS. Add your frontend/admin domains before deploying.");
+}
 
 const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS ?? defaultAllowedOrigins.join(","))
   .split(",")
