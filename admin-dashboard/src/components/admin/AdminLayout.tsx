@@ -1,5 +1,7 @@
 import { ReactNode, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { toggleDarkMode } from "../../redux/slices/home.slice";
 import Footer from "../Footer";
 import HamburgerMenu from "../HamburgerMenu";
 import HamburgerMenuToggle from "../HamburgerMenuToggle";
@@ -14,17 +16,14 @@ type AdminLayoutProps = {
 
 const AdminLayout = ({ title, kicker = "Admin management", description, children }: AdminLayoutProps) => {
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
+    const isDarkMode = useAppSelector((state) => state.home.isDarkMode);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
     const [adminEmail] = useState(() => localStorage.getItem("adminEmail") ?? "admin@gmail.com");
 
     const handleToggleDarkMode = useCallback(() => {
-        setIsDarkMode((currentValue) => {
-            const nextValue = !currentValue;
-            localStorage.setItem("darkMode", String(nextValue));
-            return nextValue;
-        });
-    }, []);
+        dispatch(toggleDarkMode());
+    }, [dispatch]);
 
     const handleLogout = useCallback(() => {
         localStorage.removeItem("accessToken");
