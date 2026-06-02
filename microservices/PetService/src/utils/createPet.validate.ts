@@ -9,6 +9,12 @@ const validateCreatePet = (data: any): string | null => {
     return "name must be a string";
   }
 
+  if (!data.sex) return "sex is required";
+
+  if (data.sex !== "male" && data.sex !== "female") {
+    return "sex must be male or female";
+  }
+
   if (data.weight !== undefined) {
     if (typeof data.weight !== "number") {
       return "weight must be a number";

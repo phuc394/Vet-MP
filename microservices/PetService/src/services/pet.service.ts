@@ -41,15 +41,16 @@ const createPet = async (data: CreatePet): Promise<Pet> => {
     breed = null,
     birth_date = null,
     weight = null,
+    sex,
     notes = null,
     avatar = null,
   } = data;
 
   const [result] = await pool.query(
     `INSERT INTO Pet 
-    (owner_id, name, species, breed, birth_date, weight, notes, avatar) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    [owner_id, name, species, breed, birth_date, weight, notes, avatar]
+    (owner_id, name, sex, species, breed, birth_date, weight, notes, avatar) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [owner_id, name, sex, species, breed, birth_date, weight, notes, avatar]
   );
 
   const insertId = (result as any).insertId;

@@ -36,9 +36,6 @@ export const styles = StyleSheet.create({
     color: '#2F3B2E',
     fontSize: 14,
     paddingVertical: 0,
-    outlineStyle: 'none',
-    outlineWidth: 0,
-    outlineColor: 'transparent',
     borderWidth: 0,
     borderColor: 'transparent',
   },
@@ -109,6 +106,8 @@ export const styles = StyleSheet.create({
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   petRow: { flexDirection: 'row', alignItems: 'center' },
   petAvatar: { width: 48, height: 48, borderRadius: 24, marginRight: 10, backgroundColor: '#EEE' },
+  petAvatarPlaceholder: { width: 48, height: 48, borderRadius: 24, marginRight: 10, backgroundColor: '#FFF3E6', borderWidth: 1, borderColor: '#F0D7B0', alignItems: 'center', justifyContent: 'center' },
+  petCopy: { flex: 1, minWidth: 0 },
   petName: { fontWeight: '700', color: '#2F3B2E', fontSize: 14 },
   petService: { color: '#8A8A8A', fontSize: 11 },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10 },
@@ -165,8 +164,17 @@ export const styles = StyleSheet.create({
   viewButtonText: { color: '#fff', fontWeight: '700', fontSize: 14 },
   cancelButton: { backgroundColor: '#FFFFFF', borderColor: '#D34D3D', borderWidth: 1, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 16, alignItems: 'center' },
   cancelButtonText: { color: '#D34D3D', fontWeight: '700' },
+  disabledButton: { opacity: 0.6 },
 
   divider: { height: 1, backgroundColor: '#F3EEE9', marginVertical: 12 },
+
+  errorBox: { backgroundColor: '#FFF1EA', borderColor: '#F0B8A7', borderWidth: 1, borderRadius: 16, padding: 12, marginBottom: 14, alignItems: 'center' },
+  errorText: { color: '#B8472B', fontWeight: '700', textAlign: 'center', marginBottom: 8 },
+  retryButton: { backgroundColor: '#F0B15A', paddingVertical: 8, paddingHorizontal: 16, borderRadius: 16 },
+  retryText: { color: '#FFFFFF', fontWeight: '800' },
+  centerState: { minHeight: 180, alignItems: 'center', justifyContent: 'center', padding: 24 },
+  emptyTitle: { color: '#465F4D', fontWeight: '900', fontSize: 16, textAlign: 'center' },
+  emptyText: { color: '#726E66', marginTop: 6, textAlign: 'center' },
 
   fab: {
     position: 'absolute',

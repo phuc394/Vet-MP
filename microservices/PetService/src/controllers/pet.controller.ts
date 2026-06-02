@@ -129,6 +129,7 @@ const updatePet = async (req: Request, res: Response): Promise<void> => {
     if (body.breed !== undefined) data.breed = body.breed;
     if (body.birth_date !== undefined) data.birth_date = body.birth_date;
     if (body.weight !== undefined) data.weight = body.weight;
+    if (body.sex !== undefined) data.sex = body.sex;
     if (body.notes !== undefined) data.notes = body.notes;
     if (body.avatar !== undefined) data.avatar = body.avatar;
 

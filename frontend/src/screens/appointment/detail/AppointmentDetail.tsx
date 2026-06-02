@@ -1,32 +1,120 @@
-import React, { useState } from 'react';
-import { SafeAreaView, View, Text, TouchableOpacity, Image, ScrollView, Modal } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
 import { styles } from './AppointmentDetailStyle';
-import { MOCK_PETS } from '../../home/HomeUtils';
-import { formatDateTime } from '../../calendar/CalenderUtils';
-import { formatAppointmentId, getAppointmentStatusBackground, formatAppointmentDatetime } from '../AppointmentUtils';
+import {
+  formatAppointmentDatetime,
+  formatAppointmentId,
+  formatAppointmentStatus,
+  getAppointmentStatusBackground,
+} from '../AppointmentUtils';
+import { AppDispatch, RootState } from '../../../redux/store';
+import {
+  fetchAppointmentByIdThunk,
+  setSelectedAppointment,
+  updateAppointmentThunk,
+} from '../../../redux/slices/appointment.slice';
+import type { Appointment } from '../../../types/appointment.type';
+import type { Pet } from '../../../types/pet.type';
 
 function formatWeight(weight: number | string | null | undefined) {
   if (weight === null || weight === undefined || weight === '') {
-    return 'weight';
+    return 'N/A';
   }
 
   const numericWeight = Number(weight);
   if (Number.isNaN(numericWeight)) {
-    return 'weight';
+    return 'N/A';
   }
 
-  return `${numericWeight.toFixed(2)}kg`;
+  return `${numericWeight.toFixed(2)} kg`;
 }
 
 export default function AppointmentDetail() {
+  const dispatch = useDispatch<AppDispatch>();
   const navigation: any = useNavigation();
   const route: any = useRoute();
-  const appointment = route.params?.appointment;
-  const [noteVisible, setNoteVisible] = useState(false);
+  const routeAppointment = route.params?.appointment as Appointment | undefined;
+  const routePet = route.params?.pet as Pet | undefined;
+  const serviceName = route.params?.serviceName as string | undefined;
   const source = route.params?.source;
-  const pet = MOCK_PETS[appointment.petIndex];
+  const [noteVisible, setNoteVisible] = useState(false);
+  const { selectedAppointment, detailLoading, detailError, updating, updateError } = useSelector(
+    (state: RootState) => state.appointment
+  );
+  const { pets } = useSelector((state: RootState) => state.pet);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (routeAppointment) {
+        dispatch(setSelectedAppointment(routeAppointment));
+        dispatch(fetchAppointmentByIdThunk(routeAppointment.appointment_id));
+      }
+    }, [dispatch, routeAppointment])
+  );
+
+  const appointment = useMemo<Appointment | undefined>(() => {
+    if (selectedAppointment && selectedAppointment.appointment_id === routeAppointment?.appointment_id) {
+      return selectedAppointment;
+    }
+
+    return routeAppointment ?? selectedAppointment ?? undefined;
+  }, [routeAppointment, selectedAppointment]);
+
+  const pet = useMemo(
+    () => routePet ?? pets.find((candidate) => candidate.pet_id === appointment?.pet_id),
+    [appointment?.pet_id, pets, routePet]
+  );
+
+  const handleCancel = () => {
+    if (!appointment || updating) return;
+
+    Alert.alert('Cancel appointment', 'Do you want to cancel this appointment?', [
+      { text: 'No', style: 'cancel' },
+      {
+        text: 'Cancel appointment',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await dispatch(
+              updateAppointmentThunk({
+                appointmentId: appointment.appointment_id,
+                payload: {
+                  status: 'cancelled',
+                  cancellation_reason: 'Cancelled by customer',
+                },
+              })
+            ).unwrap();
+          } catch (err) {
+            const message = typeof err === 'string' ? err : 'Cancel appointment failed';
+            Alert.alert('Cancel failed', message);
+          }
+        },
+      },
+    ]);
+  };
+
+  if (!appointment && detailLoading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.centerState}>
+          <ActivityIndicator size="large" color="#465F4D" />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (!appointment) {
     return (
@@ -39,6 +127,9 @@ export default function AppointmentDetail() {
     );
   }
 
+  const statusLabel = formatAppointmentStatus(appointment.status);
+  const canCancel = (appointment.status === 'pending' || appointment.status === 'confirmed') && source !== 'history';
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
@@ -49,17 +140,23 @@ export default function AppointmentDetail() {
           <Text style={styles.headerTitle}>Appointment detail</Text>
         </View>
 
+        {(detailError || updateError) && (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{detailError || updateError}</Text>
+          </View>
+        )}
+
         <View style={styles.topCard}>
           <View style={styles.topHeaderRow}>
             <View style={styles.topIconCircle}>
               <MaterialCommunityIcons name="calendar" size={20} color="#835300" />
             </View>
             <View style={styles.topIdStatus}>
-              <Text style={styles.smallLabel}>id: {formatAppointmentId(appointment.id)}</Text>
+              <Text style={styles.smallLabel}>id: {formatAppointmentId(appointment.appointment_id)}</Text>
               <View style={styles.statusRow}>
                 <Text style={styles.smallLabel}>status:</Text>
-                <View style={[styles.statusBadge, { backgroundColor: getAppointmentStatusBackground(appointment.status), marginLeft: 8 }]}> 
-                  <Text style={styles.statusText}>{appointment.status}</Text>
+                <View style={[styles.statusBadge, { backgroundColor: getAppointmentStatusBackground(appointment.status), marginLeft: 8 }]}>
+                  <Text style={styles.statusText}>{statusLabel}</Text>
                 </View>
               </View>
             </View>
@@ -68,10 +165,18 @@ export default function AppointmentDetail() {
           <View style={styles.topDivider} />
 
           <View style={styles.topRow}>
-            <Image source={{ uri: pet.avatar }} style={styles.petAvatarPlaceholder} />
+            {pet?.avatar ? (
+              <Image source={{ uri: pet.avatar }} style={styles.petAvatarPlaceholder} />
+            ) : (
+              <View style={styles.petAvatarPlaceholder}>
+                <MaterialCommunityIcons name="paw" size={20} color="#835300" />
+              </View>
+            )}
             <View style={styles.topInfo}>
-              <Text style={styles.petNameLarge}>{pet.name}</Text>
-              <Text style={styles.petMeta}>{pet.species ?? 'species'}   breed   {formatWeight(pet.weight)}</Text>
+              <Text style={styles.petNameLarge}>{pet?.name ?? `Pet #${appointment.pet_id}`}</Text>
+              <Text style={styles.petMeta}>
+                {[pet?.species, pet?.breed].filter(Boolean).join(' / ') || 'Pet details'} / {formatWeight(pet?.weight)}
+              </Text>
             </View>
           </View>
         </View>
@@ -84,7 +189,13 @@ export default function AppointmentDetail() {
               </View>
               <Text style={styles.rowLabel}>Time</Text>
             </View>
-            <Text style={styles.rowValue}>{formatAppointmentDatetime(appointment.datetime)}</Text>
+            <Text style={styles.rowValue}>
+              {formatAppointmentDatetime(
+                appointment.appointment_date,
+                appointment.start_time,
+                appointment.end_time
+              )}
+            </Text>
           </View>
 
           <View style={styles.rowItem}>
@@ -94,7 +205,7 @@ export default function AppointmentDetail() {
               </View>
               <Text style={styles.rowLabel}>Service</Text>
             </View>
-            <Text style={styles.rowValue}>{appointment.service}</Text>
+            <Text style={styles.rowValue}>{serviceName ?? `Service #${appointment.service_id}`}</Text>
           </View>
 
           <View style={styles.rowItem}>
@@ -102,9 +213,9 @@ export default function AppointmentDetail() {
               <View style={styles.iconBox}>
                 <MaterialCommunityIcons name="stethoscope" size={20} color="#835300" />
               </View>
-              <Text style={styles.rowLabel}>Doctor</Text>
+              <Text style={styles.rowLabel}>Staff</Text>
             </View>
-            <Text style={styles.rowValue}>{appointment.doctor}</Text>
+            <Text style={styles.rowValue}>{appointment.staff_id ? `#${appointment.staff_id}` : 'Unassigned'}</Text>
           </View>
 
           <TouchableOpacity style={styles.rowItem} activeOpacity={0.8} onPress={() => setNoteVisible(true)}>
@@ -112,23 +223,34 @@ export default function AppointmentDetail() {
               <View style={styles.iconBox}>
                 <MaterialCommunityIcons name="note-outline" size={20} color="#835300" />
               </View>
-              <Text style={styles.rowLabel}>Note</Text>
+              <Text style={styles.rowLabel}>Cancellation</Text>
             </View>
             <View style={styles.notePreviewWrapper}>
-              <Text style={styles.rowValueNote} numberOfLines={2} ellipsizeMode="tail">{appointment.note ?? 'No additional notes available for this appointment. Customer Note max show 2 lines.'}</Text>
+              <Text style={styles.rowValueNote} numberOfLines={2} ellipsizeMode="tail">
+                {appointment.cancellation_reason ?? 'No cancellation reason.'}
+              </Text>
             </View>
           </TouchableOpacity>
         </View>
 
-        {appointment.status === 'Pending' && source !== 'history' && (
+        {canCancel && (
           <View style={styles.actionRow}>
             <View style={styles.cancelCard}>
               <View style={styles.cancelInfo}>
                 <Text style={styles.cancelTitle}>Cancel Appointment</Text>
-                <Text style={styles.cancelNote}>appointment can only be cancelled before the schedule 24h</Text>
+                <Text style={styles.cancelNote}>Appointments can be cancelled before the schedule.</Text>
               </View>
-              <TouchableOpacity style={styles.cancelPrimaryButton} activeOpacity={0.8}>
-                <Text style={styles.cancelPrimaryText}>Cancel</Text>
+              <TouchableOpacity
+                style={[styles.cancelPrimaryButton, updating && styles.disabledButton]}
+                activeOpacity={0.8}
+                disabled={updating}
+                onPress={handleCancel}
+              >
+                {updating ? (
+                  <ActivityIndicator color="#D34D3D" />
+                ) : (
+                  <Text style={styles.cancelPrimaryText}>Cancel</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -150,8 +272,8 @@ export default function AppointmentDetail() {
       <Modal visible={noteVisible} transparent animationType="fade" onRequestClose={() => setNoteVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Note</Text>
-            <Text style={styles.modalText}>{appointment.note ?? 'No additional notes available for this appointment.'}</Text>
+            <Text style={styles.modalTitle}>Cancellation reason</Text>
+            <Text style={styles.modalText}>{appointment.cancellation_reason ?? 'No cancellation reason.'}</Text>
             <TouchableOpacity style={styles.modalCloseButton} onPress={() => setNoteVisible(false)} activeOpacity={0.8}>
               <Text style={styles.modalCloseText}>Close</Text>
             </TouchableOpacity>
@@ -161,3 +283,4 @@ export default function AppointmentDetail() {
     </SafeAreaView>
   );
 }
+

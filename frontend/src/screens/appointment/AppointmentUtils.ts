@@ -1,6 +1,9 @@
-import { formatDateTime as formatFromCalendar } from '../calendar/CalenderUtils';
-
-export type AppointmentStatus = 'Pending' | 'Completed' | 'Cancelled';
+import type { AppointmentStatus } from '../../types/appointment.type';
+import {
+  combineAppointmentDateTime,
+  formatAppointmentRange,
+  normalizeAppointmentStatus,
+} from '../calendar/CalenderUtils';
 
 export function formatAppointmentId(id: number | string) {
   return String(id);
@@ -8,18 +11,27 @@ export function formatAppointmentId(id: number | string) {
 
 export function getAppointmentStatusBackground(status: AppointmentStatus) {
   switch (status) {
-    case 'Pending':
+    case 'pending':
+    case 'confirmed':
       return '#F7E9D6';
-    case 'Completed':
+    case 'completed':
       return '#E8F6EF';
-    case 'Cancelled':
+    case 'cancelled':
       return '#FFF1F0';
     default:
       return '#F3F3F3';
   }
 }
 
-export function formatAppointmentDatetime(iso?: string) {
-  if (!iso) return '';
-  return formatFromCalendar(iso);
+export function formatAppointmentStatus(status: AppointmentStatus) {
+  return normalizeAppointmentStatus(status);
+}
+
+export function formatAppointmentDatetime(date?: string, startTime?: string, endTime?: string) {
+  if (!date || !startTime) return '';
+  return formatAppointmentRange(date, startTime, endTime);
+}
+
+export function toAppointmentDateTime(date: string, time: string) {
+  return combineAppointmentDateTime(date, time);
 }
