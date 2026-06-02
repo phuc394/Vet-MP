@@ -1,9 +1,29 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
 import { styles } from './PetDetailStyle';
-import { usePetDetail } from './PetDetailUtils';
+import {
+  TabState,
+  Vaccination,
+  calculateAge,
+  checkVaccineStatus,
+  emptyPet,
+  formatDisplayDate,
+} from './PetDetailUtils';
+import { AppDispatch, RootState } from '../../redux/store';
+import { deletePetThunk, fetchPetByIdThunk, setSelectedPet } from '../../redux/slices/pet.slice';
+import type { Pet } from '../../types/pet.type';
 
 function formatWeight(weight: number | string | null | undefined) {
   if (weight === null || weight === undefined || weight === '') {
@@ -18,109 +38,225 @@ function formatWeight(weight: number | string | null | undefined) {
   return `${numericWeight.toFixed(2)} kg`;
 }
 
+function formatValue(value: string | number | null | undefined) {
+  if (value === null || value === undefined || value === '') {
+    return 'N/A';
+  }
+
+  return String(value);
+}
+
 export default function PetDetail() {
+  const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { pet, vaccinations, activeTab, setActiveTab, calculateAge, checkVaccineStatus } = usePetDetail(route.params?.pet);
+  const routePet = route.params?.pet as Pet | undefined;
+  const routeVaccinations = (route.params?.vaccinations ?? []) as Vaccination[];
+  const [activeTab, setActiveTab] = useState<TabState>('Information');
+
+  const { selectedPet, detailLoading, detailError, deleting, deleteError } = useSelector(
+    (state: RootState) => state.pet
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      if (routePet) {
+        dispatch(setSelectedPet(routePet));
+        dispatch(fetchPetByIdThunk(routePet.pet_id));
+      }
+    }, [dispatch, routePet])
+  );
+
+  const pet = useMemo<Pet>(() => {
+    if (selectedPet && selectedPet.pet_id === routePet?.pet_id) {
+      return selectedPet;
+    }
+
+    return routePet ?? selectedPet ?? emptyPet;
+  }, [routePet, selectedPet]);
+
+  const handleDelete = () => {
+    if (!pet.pet_id || deleting) return;
+
+    Alert.alert('Delete pet', `Delete ${pet.name}? This pet will be removed from your list.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await dispatch(deletePetThunk(pet.pet_id)).unwrap();
+            navigation.goBack();
+          } catch (error) {
+            const message = typeof error === 'string' ? error : 'Delete pet failed';
+            Alert.alert('Delete pet failed', message);
+          }
+        },
+      },
+    ]);
+  };
+
+  if (!routePet && !selectedPet && detailLoading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.centerState}>
+          <ActivityIndicator size="large" color="#465F4D" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!pet.pet_id) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={10} style={styles.backButton}>
+              <Ionicons name="chevron-back" size={22} color="#465F4D" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Pet detail</Text>
+          </View>
+          <View style={styles.centerState}>
+            <Text style={styles.emptyTitle}>No pet data</Text>
+            <Text style={styles.emptyText}>Please open pet detail from your pet list.</Text>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={10}>
-          <Text style={styles.backArrow}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>My Pets</Text>
-      </View>
-
-      {/* Tabs Menu */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tabButton, activeTab === 'Information' && styles.activeTabButton]}
-          onPress={() => setActiveTab('Information')}
-        >
-          <Text style={styles.tabText}>Information</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tabButton, activeTab === 'Vaccinations' && styles.activeTabButton]}
-          onPress={() => setActiveTab('Vaccinations')}
-        >
-          <Text style={styles.tabText}>Vaccinations</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Tab Content: Information */}
-      {activeTab === 'Information' && (
-        <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
-          <View style={styles.basicInfoContainer}>
-            {pet.avatar ? (
-              <Image source={{ uri: pet.avatar }} style={styles.avatarPlaceholder} />
-            ) : (
-              <View style={styles.avatarPlaceholder} />
-            )}
-            <View style={styles.detailsContainer}>
-              <Text style={styles.detailText}>ID: {pet.pet_id}</Text>
-              <Text style={styles.detailText}>Name: {pet.name}</Text>
-              <Text style={styles.detailText}>Gender: {pet.sex}</Text>
-              <Text style={styles.detailText}>Species: {pet.species}</Text>
-              <Text style={styles.detailText}>Breed: {pet.breed}</Text>
-              <Text style={styles.detailText}>Age: {calculateAge(pet.birth_date)}</Text>
-              <Text style={styles.detailText}>Weight: {formatWeight(pet.weight)}</Text>
-            </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={10} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={22} color="#465F4D" />
+          </TouchableOpacity>
+          <View style={styles.headerCopy}>
+            <Text style={styles.headerTitle}>Pet detail</Text>
+            <Text style={styles.headerSubtitle}>{pet.name}</Text>
           </View>
+          <TouchableOpacity onPress={handleDelete} hitSlop={10} style={styles.deleteButton} disabled={deleting}>
+            {deleting ? (
+              <ActivityIndicator color="#B8472B" />
+            ) : (
+              <Ionicons name="trash-outline" size={20} color="#B8472B" />
+            )}
+          </TouchableOpacity>
+        </View>
 
-          <Text style={styles.sectionTitle}>Key Medical Info</Text>
-          <Text style={styles.medicalText}>
-            Spayed / Neutered: {pet.spayed_neutered ? 'Yes' : 'No'}
-          </Text>
-          <Text style={styles.medicalText}>Blood Type: {pet.blood_type || ''}</Text>
+        {(detailError || deleteError) && (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{detailError || deleteError}</Text>
+          </View>
+        )}
 
-          {pet.notes && (
-            <View style={styles.notesBox}>
-              <Text style={styles.notesText}>{pet.notes}</Text>
+        <View style={styles.profileCard}>
+          {pet.avatar ? (
+            <Image source={{ uri: pet.avatar }} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatarPlaceholder}>
+              <Ionicons name="paw-outline" size={34} color="#8CA694" />
             </View>
           )}
-        </ScrollView>
-      )}
+          <View style={styles.profileCopy}>
+            <Text style={styles.petName}>{pet.name}</Text>
+            <Text style={styles.petMeta}>
+              {[pet.species, pet.breed].filter(Boolean).join(' / ') || 'Species not set'}
+            </Text>
+            <Text style={styles.petMeta}>{formatWeight(pet.weight)}</Text>
+          </View>
+        </View>
 
-      {/* Tab Content: Vaccinations */}
-      {activeTab === 'Vaccinations' && (
-        <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
-          {vaccinations.map((vaccine, index) => {
-            const status = checkVaccineStatus(vaccine.expiration_date);
-            const isExpired = status === 'Expired';
-            const statusColor = isExpired ? '#ff3b30' : '#34c759';
-
+        <View style={styles.tabContainer}>
+          {(['Information', 'Vaccinations'] as TabState[]).map((tab) => {
+            const isActive = activeTab === tab;
             return (
-              <View key={index} style={styles.vaccineCard}>
-                <View style={styles.vaccineHeader}>
-                  <View>
-                    <Text style={styles.vaccineLabel}>Vaccine Name:</Text>
-                    <Text style={styles.vaccineName}>{vaccine.name}</Text>
-                  </View>
-                  <View style={styles.statusBadge}>
-                    <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-                    <Text style={[styles.statusText, { color: statusColor }]}>{status}</Text>
-                  </View>
-                </View>
-                
-                <View style={styles.divider} />
-
-                <View style={styles.vaccineDates}>
-                  <View style={styles.dateCol}>
-                    <Text style={styles.vaccineLabel}>Date Given:</Text>
-                    <Text style={styles.dateValue}>{vaccine.date_given}</Text>
-                  </View>
-                  <View style={styles.dateCol}>
-                    <Text style={styles.vaccineLabel}>Expiration Date:</Text>
-                    <Text style={styles.dateValue}>{vaccine.expiration_date}</Text>
-                  </View>
-                </View>
-              </View>
+              <TouchableOpacity
+                key={tab}
+                style={[styles.tabButton, isActive && styles.activeTabButton]}
+                onPress={() => setActiveTab(tab)}
+                activeOpacity={0.85}
+              >
+                <Text style={[styles.tabText, isActive && styles.activeTabText]}>{tab}</Text>
+              </TouchableOpacity>
             );
           })}
-        </ScrollView>
-      )}
+        </View>
+
+        {activeTab === 'Information' && (
+          <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
+            <View style={styles.infoGrid}>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>ID</Text>
+                <Text style={styles.infoValue}>{pet.pet_id}</Text>
+              </View>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Sex</Text>
+                <Text style={styles.infoValue}>{formatValue(pet.sex)}</Text>
+              </View>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Age</Text>
+                <Text style={styles.infoValue}>{calculateAge(pet.birth_date)}</Text>
+              </View>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Birth date</Text>
+                <Text style={styles.infoValue}>{formatDisplayDate(pet.birth_date)}</Text>
+              </View>
+            </View>
+
+            <Text style={styles.sectionTitle}>Medical notes</Text>
+            <View style={styles.notesBox}>
+              <Text style={styles.notesText}>{pet.notes?.trim() || 'No notes recorded yet.'}</Text>
+            </View>
+          </ScrollView>
+        )}
+
+        {activeTab === 'Vaccinations' && (
+          <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
+            {routeVaccinations.length === 0 ? (
+              <View style={styles.emptyPanel}>
+                <Ionicons name="medkit-outline" size={30} color="#8CA694" />
+                <Text style={styles.emptyTitle}>No vaccination records</Text>
+                <Text style={styles.emptyText}>Vaccination data is not connected for this pet yet.</Text>
+              </View>
+            ) : (
+              routeVaccinations.map((vaccine) => {
+                const status = checkVaccineStatus(vaccine.expiration_date);
+                const statusColor = status === 'Expired' ? '#B8472B' : '#2F7D4F';
+
+                return (
+                  <View key={vaccine.id} style={styles.vaccineCard}>
+                    <View style={styles.vaccineHeader}>
+                      <View style={styles.vaccineNameWrap}>
+                        <Text style={styles.vaccineLabel}>Vaccine name</Text>
+                        <Text style={styles.vaccineName}>{vaccine.name}</Text>
+                      </View>
+                      <View style={[styles.statusBadge, { borderColor: statusColor }]}>
+                        <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+                        <Text style={[styles.statusText, { color: statusColor }]}>{status}</Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.divider} />
+
+                    <View style={styles.vaccineDates}>
+                      <View style={styles.dateCol}>
+                        <Text style={styles.vaccineLabel}>Date given</Text>
+                        <Text style={styles.dateValue}>{formatDisplayDate(vaccine.date_given)}</Text>
+                      </View>
+                      <View style={styles.dateCol}>
+                        <Text style={styles.vaccineLabel}>Expiration</Text>
+                        <Text style={styles.dateValue}>{formatDisplayDate(vaccine.expiration_date)}</Text>
+                      </View>
+                    </View>
+                  </View>
+                );
+              })
+            )}
+          </ScrollView>
+        )}
+      </View>
     </SafeAreaView>
   );
 }

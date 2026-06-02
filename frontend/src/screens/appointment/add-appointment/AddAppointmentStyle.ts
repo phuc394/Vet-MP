@@ -130,6 +130,17 @@ export const styles = StyleSheet.create({
     backgroundColor: '#EEE',
     marginLeft: 12,
   },
+  petPickerAvatarPlaceholder: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFF3E6',
+    borderWidth: 1,
+    borderColor: '#F0D7B0',
+    marginLeft: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   dateInput: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
@@ -145,6 +156,13 @@ export const styles = StyleSheet.create({
     marginLeft: 10,
     color: '#5A4D3B',
     fontWeight: '700',
+  },
+  dateTextInput: {
+    flex: 1,
+    marginLeft: 10,
+    color: '#5A4D3B',
+    fontWeight: '700',
+    paddingVertical: 0,
   },
   timeGrid: {
     flexDirection: 'row',
@@ -265,6 +283,16 @@ export const styles = StyleSheet.create({
     borderRadius: 21,
     backgroundColor: '#EEE',
   },
+  modalPetAvatarPlaceholder: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#FFF3E6',
+    borderWidth: 1,
+    borderColor: '#F0D7B0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   modalPetTextWrap: {
     flex: 1,
     marginLeft: 10,
@@ -278,5 +306,23 @@ export const styles = StyleSheet.create({
     marginTop: 2,
     fontSize: 12,
     color: '#8A8A8A',
+  },
+  errorBox: {
+    backgroundColor: '#FFF1EA',
+    borderColor: '#F0B8A7',
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: '#B8472B',
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  centerState: {
+    minHeight: 220,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

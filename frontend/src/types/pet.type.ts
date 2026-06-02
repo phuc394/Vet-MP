@@ -27,6 +27,17 @@ export interface CreatePetPayload {
   avatar?: string;
 }
 
+export interface UpdatePetPayload {
+  name?: string;
+  sex?: "male" | "female";
+  species?: string;
+  breed?: string;
+  birth_date?: string;
+  weight?: number;
+  notes?: string;
+  avatar?: string;
+}
+
 export interface ApiResponse<T> {
   message: string;
   data: T;

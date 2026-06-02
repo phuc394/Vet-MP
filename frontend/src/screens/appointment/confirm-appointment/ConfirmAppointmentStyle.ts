@@ -146,4 +146,20 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     fontSize: 16,
   },
+  disabledButton: {
+    opacity: 0.7,
+  },
+  errorBox: {
+    backgroundColor: '#FFF1EA',
+    borderColor: '#F0B8A7',
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: '#B8472B',
+    fontWeight: '700',
+    textAlign: 'center',
+  },
 });

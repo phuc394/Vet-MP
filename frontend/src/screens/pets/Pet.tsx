@@ -8,6 +8,7 @@ import {
   TouchableOpacity, 
   SafeAreaView,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -71,7 +72,7 @@ const PetScreen = () => {
       <View style={styles.petInfo}>
         <Text style={styles.petName}>{item.name}</Text>
         <Text style={styles.petDetail}>
-          {[item.species, item.breed].filter(Boolean).join(' • ') || 'Unknown'}
+          {[item.species, item.breed].filter(Boolean).join(' / ') || 'Unknown'}
         </Text>
         <Text style={styles.petDetail}>
           Weight: {formatWeight(item.weight)}
@@ -130,6 +131,14 @@ const PetScreen = () => {
           renderItem={renderPetCard}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={loading && pets.length > 0}
+              onRefresh={() => dispatch(fetchPetsThunk())}
+              tintColor="#465F4D"
+              colors={['#465F4D']}
+            />
+          }
           ListEmptyComponent={
             <View style={{ paddingVertical: 40, alignItems: 'center' }}>
               <Text style={{ color: '#7A6B56', fontWeight: '600' }}>

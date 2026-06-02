@@ -40,10 +40,6 @@ export default function AddPet() {
   const handleSave = async () => {
     setLocalError(null);
 
-    // Debugging: print current token
-    // eslint-disable-next-line no-console
-    console.log('AddPet: accessToken=', accessToken);
-    // Ensure user is logged in
     if (!accessToken) {
       setLocalError('Please login before creating a pet');
       Alert.alert('Not logged in', 'Please login to create a pet.', [
@@ -57,13 +53,11 @@ export default function AddPet() {
       return;
     }
 
-    // sex is controlled via UI, but validate defensively
     if (sex !== 'male' && sex !== 'female') {
       setLocalError('Select pet sex');
       return;
     }
 
-    // birth date optional, if provided must match YYYY-MM-DD
     if (birthDate.trim()) {
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (!dateRegex.test(birthDate.trim())) {
@@ -90,7 +84,6 @@ export default function AddPet() {
       }
     }
 
-    // basic avatar URL sanity check
     if (avatarUrl.trim()) {
       try {
         // eslint-disable-next-line no-new
@@ -121,16 +114,8 @@ export default function AddPet() {
         },
       ]);
     } catch (error) {
-      // Log full error/response for debugging
-      // eslint-disable-next-line no-console
-      console.error('Create pet failed (error):', error);
-      // Axios errors often have `response` with details
-      // eslint-disable-next-line no-console
-      console.error('Create pet failed (response):', (error as any)?.response);
-
       const msg = (error as any)?.response?.data?.message ?? (error as any)?.message ?? 'Create pet failed';
       setLocalError(String(msg));
-      // Also show a short alert so user notices
       Alert.alert('Create pet failed', String(msg));
     }
   };
@@ -159,7 +144,7 @@ export default function AddPet() {
             )}
             <Text style={styles.previewName}>{name.trim() || 'Pet name preview'}</Text>
             <Text style={styles.previewDetail}>
-              {[species, breed].filter(Boolean).join(' • ') || 'Species • Breed'}
+              {[species, breed].filter(Boolean).join(' / ') || 'Species / Breed'}
             </Text>
           </View>
 

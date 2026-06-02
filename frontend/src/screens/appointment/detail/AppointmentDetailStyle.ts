@@ -37,8 +37,12 @@ export const styles = StyleSheet.create({
   cancelNote: { color: '#8A8A8A', fontSize: 12 },
   cancelPrimaryButton: { backgroundColor: '#FFFFFF', borderColor: '#D34D3D', borderWidth: 2, paddingVertical: 10, paddingHorizontal: 18, borderRadius: 18 },
   cancelPrimaryText: { color: '#D34D3D', fontWeight: '900' },
+  disabledButton: { opacity: 0.7 },
 
   empty: { color: '#8A8A8A' },
+  centerState: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
+  errorBox: { backgroundColor: '#FFF1EA', borderColor: '#F0B8A7', borderWidth: 1, borderRadius: 16, padding: 12, marginBottom: 16 },
+  errorText: { color: '#B8472B', fontWeight: '700', textAlign: 'center' },
   rescheduleCard: { backgroundColor: '#6E8A76', borderRadius: 18, padding: 16, flexDirection: 'row', alignItems: 'center' },
   rescheduleTitle: { color: '#FFFFFF', fontWeight: '800', marginBottom: 6, fontSize: 16 },
   rescheduleText: { color: '#F3F7F5', maxWidth: 200 },

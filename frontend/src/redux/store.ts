@@ -10,6 +10,7 @@ import logoutReducer from "./slices/logout.slice";
 import profileReducer from "./slices/profile.slice";
 import changePasswordReducer from "./slices/changePassword.slice"
 import petReducer from "./slices/pet.slice";
+import appointmentReducer from "./slices/appointment.slice";
 import { injectStore } from "../config/api";
 const store = configureStore({
   reducer: {
@@ -21,6 +22,7 @@ const store = configureStore({
     profile: profileReducer,
     changePassword: changePasswordReducer,
     pet: petReducer,
+    appointment: appointmentReducer,
     
 
   },
