@@ -9,9 +9,13 @@ import ResetPasswordScreen from "../screens/resetpassword/ResetPasswordScreen";
 import Home from "../screens/home/Home";
 import Pet from "../screens/pets/Pet";
 import PetDetail from "../screens/petDetail/PetDetail";
+import AddPet from "../screens/addPet/AddPet";
+import AddAppointment from "../screens/appointment/add-appointment/AddAppointment";
+import ConfirmAppointment from "../screens/appointment/confirm-appointment/ConfirmAppointment";
 import Profile from "../screens/profile/Profile";
 import Calendar from "../screens/calendar/Calendar";
-import AppointmentDetail from "../screens/appointment/AppointmentDetail";
+import AppointmentDetail from "../screens/appointment/detail/AppointmentDetail";
+import ServiceDetail from "../screens/home/service-detail/ServiceDetail";
 const BottomTabs = createBottomTabNavigator({
   screenOptions: {
     headerShown: false,
@@ -43,6 +47,10 @@ const RootStack = createNativeStackNavigator({
     MainTabs: BottomTabs,
     AppointmentDetail,
     PetDetail,
+    AddPet,
+    AddAppointment,
+    ConfirmAppointment,
+    ServiceDetail,
   },
 });
 

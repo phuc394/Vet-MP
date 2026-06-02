@@ -12,8 +12,19 @@ export const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 20,
-    paddingTop: 40,
+    paddingTop: 24,
     paddingBottom: 40,
+  },
+
+  pageLabelRow: {
+    alignItems: 'flex-start',
+    marginBottom: 18,
+  },
+  pageLabelText: {
+    fontSize: 33,
+    fontWeight: '900',
+    color: '#4D6453',
+    letterSpacing: 0.2,
   },
 
   // --- UPCOMING VISIT CARD ---
@@ -95,6 +106,93 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#000000',
     marginLeft: 4,
+  },
+
+  // --- SERVICES SECTION ---
+  servicesHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  servicesTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#4D6453',
+  },
+  servicesFrame: {
+    backgroundColor: '#FFF6E8',
+    borderRadius: 26,
+    borderWidth: 1,
+    borderColor: '#E8DDCF',
+    padding: 12,
+    marginBottom: 30,
+    maxHeight: 320,
+  },
+  servicesList: {
+    paddingBottom: 8,
+  },
+  serviceCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 14,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#E8DDCF',
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  serviceIconWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: 18,
+    backgroundColor: '#FFF3E6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#F0D7B0',
+    marginRight: 12,
+  },
+  serviceCardBody: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  serviceCategory: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#7D4600',
+    marginBottom: 2,
+  },
+  serviceName: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#2F3B2E',
+    marginBottom: 4,
+  },
+  serviceDescription: {
+    fontSize: 13,
+    color: '#6E6E6E',
+    lineHeight: 18,
+    marginBottom: 10,
+  },
+  serviceMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  servicePrice: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#465F4D',
+  },
+  serviceDuration: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#8A8A8A',
   },
 
   
