@@ -58,9 +58,14 @@ const createAppointment = asyncHandler(async (req: Request<{}, unknown, CreateAp
     };
     const staffId = parseOptionalId(req.body.staff_id, 'staff_id');
     if (staffId !== undefined) payload.staff_id = staffId;
+    const note = parseOptionalString(req.body.note, 'note');
+    if (note !== undefined) payload.note = note;
 
     const user = (req as any).user;
-    if (!await AppointmentService.isPetOwnedByUser(payload.pet_id, user.user_id)) {
+    if (
+        user.role !== 'admin' &&
+        !await AppointmentService.isPetOwnedByUser(payload.pet_id, user.user_id)
+    ) {
         throw new HttpError(403, 'Forbidden');
     }
 
@@ -71,7 +76,10 @@ const createAppointment = asyncHandler(async (req: Request<{}, unknown, CreateAp
 const updateAppointment = asyncHandler(async (req: Request<{ id: string }, unknown, UpdateAppointmentRequest>, res: Response) => {
     const id = parseId(req.params.id, 'id');
     const user = (req as any).user;
-    if (!await AppointmentService.isAppointmentOwnedByUser(id, user.user_id)) {
+    if (
+        user.role !== 'admin' &&
+        !await AppointmentService.isAppointmentOwnedByUser(id, user.user_id)
+    ) {
         throw new HttpError(403, 'Forbidden');
     }
 
@@ -92,6 +100,8 @@ const updateAppointment = asyncHandler(async (req: Request<{ id: string }, unkno
     if (status !== undefined) payload.status = AppointmentService.resolveAppointmentStatus(status);
     const cancellationReason = parseOptionalString(req.body.cancellation_reason, 'cancellation_reason');
     if (cancellationReason !== undefined) payload.cancellation_reason = cancellationReason;
+    const note = parseOptionalString(req.body.note, 'note');
+    if (note !== undefined) payload.note = note;
     const servicePrice = parseOptionalNumber(req.body.service_price, 'service_price');
     if (servicePrice !== undefined) payload.service_price = servicePrice;
 
@@ -99,7 +109,11 @@ const updateAppointment = asyncHandler(async (req: Request<{ id: string }, unkno
         throw new HttpError(400, 'No updatable fields provided');
     }
 
-    if (payload.pet_id !== undefined && !await AppointmentService.isPetOwnedByUser(payload.pet_id, user.user_id)) {
+    if (
+        user.role !== 'admin' &&
+        payload.pet_id !== undefined &&
+        !await AppointmentService.isPetOwnedByUser(payload.pet_id, user.user_id)
+    ) {
         throw new HttpError(403, 'Forbidden');
     }
 

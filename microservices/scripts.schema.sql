@@ -134,6 +134,7 @@ CREATE TABLE Appointment (
     end_time TIME NOT NULL,
     status ENUM('pending', 'confirmed', 'cancelled', 'completed') DEFAULT 'pending',
     cancellation_reason TEXT NULL,
+    note TEXT NULL,
     service_price DECIMAL(10,2) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

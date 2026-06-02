@@ -36,7 +36,7 @@ const routeRules: RouteRule[] = [
   { prefix: "/api/v1/pets", methods: ["POST", "PUT", "PATCH", "DELETE"], roles: ["admin", "customer"] },
 
   { prefix: "/api/v1/appointments", methods: ["GET"], roles: ["admin", "customer"] },
-  { prefix: "/api/v1/appointments", methods: ["POST", "PUT", "PATCH"], roles: ["customer"] },
+  { prefix: "/api/v1/appointments", methods: ["POST", "PUT", "PATCH"], roles: ["admin", "customer"] },
   { prefix: "/api/v1/appointments", methods: ["DELETE"], roles: ["admin"] },
 
   { prefix: "/api/v1/medical-records", methods: ["GET"], roles: ["admin", "customer"] },

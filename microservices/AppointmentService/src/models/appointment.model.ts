@@ -8,6 +8,7 @@ export interface Appointment {
     end_time: Date;
     status: AppointmentStatus;
     cancellation_reason?: string;
+    note?: string;
     service_price: number;
     created_at?: Date;
     updated_at?: Date;
@@ -21,6 +22,7 @@ export interface CreateAppointmentRequest {
     start_time: Date;
     end_time: Date;
     service_price: number;
+    note?: string;
 }
 
 export interface UpdateAppointmentRequest {
@@ -32,6 +34,7 @@ export interface UpdateAppointmentRequest {
     end_time?: Date;
     status?: AppointmentStatus;
     cancellation_reason?: string;
+    note?: string;
     service_price?: number;
 }
 

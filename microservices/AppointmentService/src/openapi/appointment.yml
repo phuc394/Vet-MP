@@ -239,6 +239,9 @@ components:
         cancellation_reason:
           type: string
           nullable: true
+        note:
+          type: string
+          nullable: true
         service_price:
           type: number
           format: float
@@ -268,6 +271,8 @@ components:
         end_time:
           type: string
           format: date-time
+        note:
+          type: string
         service_price:
           type: number
           format: float
@@ -293,6 +298,8 @@ components:
         status:
           $ref: "#/components/schemas/AppointmentStatus"
         cancellation_reason:
+          type: string
+        note:
           type: string
         service_price:
           type: number
