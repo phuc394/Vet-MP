@@ -1,76 +1,65 @@
 import React, { useState } from "react";
-
 import { useNavigation } from "@react-navigation/native";
-
-import {
-  View,
-  Text,
-  TouchableOpacity,
-} from "react-native";
-
-import {
-  useDispatch,
-  useSelector,
-} from "react-redux";
+import { View, Text, TouchableOpacity } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 
 import AuthCard from "../../components/auth/AuthCard";
 import AuthInput from "../../components/auth/AuthInput";
 import AuthButton from "../../components/auth/AuthButton";
 
-import {
-  AppDispatch,
-  RootState,
-} from "../../redux/store";
-
-import {
-  loginThunk,
-} from "../../redux/slices/login.slice";
-
+import { AppDispatch, RootState } from "../../redux/store";
+import { loginThunk } from "../../redux/slices/login.slice";
 import styles from "./login.style";
 
 const LoginScreen = () => {
-  const dispatch =
-    useDispatch<AppDispatch>();
+  const dispatch = useDispatch<AppDispatch>();
+  const navigation = useNavigation<any>();
 
-  const {
-    loading,
-    error,
-  } = useSelector(
+  // 1. Lấy trạng thái từ Redux store
+  const { loading, error } = useSelector(
     (state: RootState) => state.login
   );
 
-  const [identifier, setIdentifier] =
-    useState("");
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
 
-  const [password, setPassword] =
-    useState("");
-
+  // 2. Hàm xử lý logic Đăng nhập kèm điều hướng thành công
   const handleLogin = async () => {
-    dispatch(
-      loginThunk({
-        identifier,
-        password,
-      })
-    );
-  };
+    if (!identifier || !password) return;
 
-  const navigation = useNavigation<any>();
+    // dispatch(loginThunk) trả về một promise. .unwrap() giúp bóc tách kết quả trực tiếp
+    try {
+      const result = await dispatch(
+        loginThunk({
+          identifier,
+          password,
+        })
+      ).unwrap();
+
+      // Nếu đăng nhập thành công (không nhảy vào catch), điều hướng đến MainTabs
+      if (result) {
+        // Sử dụng reset để xóa lịch sử các màn hình trước đó, tránh việc bấm nút Back quay lại màn Login
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "MainTabs" }],
+        });
+      }
+    } catch (err) {
+      // Lỗi đã được slice xử lý và đẩy vào biến `error` ở trên selector, không cần ghi đè ở đây
+      console.log("Login failed:", err);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.topBackground} />
-
       <View style={styles.middleBackground} />
-
       <View style={styles.bottomBackground} />
 
       <View style={styles.content}>
         <View style={styles.topSection}>
           <View style={styles.avatar} />
-
-          <Text style={styles.clinicName}>
-            Dr.Phucs PetShelt
-          </Text>
+          <Text style={styles.clinicName}>Dr.Phucs PetShelt</Text>
         </View>
 
         <View style={styles.formContainer}>
@@ -90,19 +79,12 @@ const LoginScreen = () => {
               secureTextEntry
             />
 
+            {/* Điều hướng sang màn hình Quên Mật Khẩu đã gộp */}
             <TouchableOpacity
               style={styles.forgotPassword}
-              onPress={() =>
-                navigation.navigate("ForgotPassword")
-              }
+              onPress={() => navigation.navigate("ForgetPassword")}
             >
-              <Text
-                style={
-                  styles.forgotPasswordText
-                }
-              >
-                Forgot Password?
-              </Text>
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 
             <View style={styles.divider} />
@@ -127,17 +109,11 @@ const LoginScreen = () => {
           </AuthCard>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>
-              Don't have an account?
-            </Text>
+            <Text style={styles.footerText}>Don't have an account?</Text>
 
-            <TouchableOpacity
-            onPress={() =>
-            navigation.navigate("Register")
-            }>
-              <Text style={styles.footerLink}>
-                Sign Up
-              </Text>
+            {/* Điều hướng sang màn hình Đăng ký */}
+            <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+              <Text style={styles.footerLink}>Sign Up</Text>
             </TouchableOpacity>
           </View>
         </View>

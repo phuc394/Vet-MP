@@ -15,3 +15,13 @@ export interface AuthResponse {
   message: string;
   data?: any;
 }
+
+export interface ResetpasswordPayload{
+  token: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+}
