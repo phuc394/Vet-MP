@@ -1,0 +1,331 @@
+openapi: 3.0.3
+info:
+  title: Appointment Service API
+  version: 1.0.0
+  description: API quan ly lich hen kham thu y.
+servers:
+  - url: /
+    description: Current Appointment Service host
+tags:
+  - name: Appointments
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: Service is healthy
+  /appointments:
+    get:
+      tags: [Appointments]
+      summary: Lay danh sach lich hen
+      parameters:
+        - $ref: "#/components/parameters/SortBy"
+        - $ref: "#/components/parameters/Order"
+      responses:
+        "200":
+          $ref: "#/components/responses/AppointmentList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      tags: [Appointments]
+      summary: Tao lich hen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAppointmentRequest"
+      responses:
+        "201":
+          $ref: "#/components/responses/AppointmentList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /appointments/search:
+    get:
+      tags: [Appointments]
+      summary: Tim kiem lich hen
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/AppointmentStatus"
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: petId
+          in: query
+          schema:
+            type: integer
+        - name: staffId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          $ref: "#/components/responses/AppointmentList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /appointments/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Appointments]
+      summary: Lay lich hen theo id
+      responses:
+        "200":
+          $ref: "#/components/responses/AppointmentList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags: [Appointments]
+      summary: Cap nhat lich hen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAppointmentRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/AppointmentList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Appointments]
+      summary: Xoa lich hen da huy
+      responses:
+        "200":
+          $ref: "#/components/responses/EmptyList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    SortBy:
+      name: sortBy
+      in: query
+      schema:
+        type: string
+    Order:
+      name: order
+      in: query
+      schema:
+        type: string
+        enum: [asc, desc]
+  responses:
+    AppointmentList:
+      description: Appointment response
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/SuccessResponse"
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Appointment"
+    EmptyList:
+      description: Empty successful response
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/SuccessResponse"
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items: {}
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Missing or invalid token
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: Permission denied
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    AppointmentStatus:
+      type: string
+      enum: [pending, confirmed, cancelled, completed]
+    Appointment:
+      type: object
+      required: [pet_id, service_id, appointment_date, start_time, end_time, status, service_price]
+      properties:
+        appointment_id:
+          type: integer
+        pet_id:
+          type: integer
+        service_id:
+          type: integer
+        staff_id:
+          type: integer
+          nullable: true
+        appointment_date:
+          type: string
+          format: date-time
+        start_time:
+          type: string
+          format: time
+          example: "09:30:00"
+        end_time:
+          type: string
+          format: time
+          example: "10:30:00"
+        status:
+          $ref: "#/components/schemas/AppointmentStatus"
+        cancellation_reason:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        service_price:
+          type: number
+          format: float
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    CreateAppointmentRequest:
+      type: object
+      required: [pet_id, service_id, appointment_date, start_time, end_time, service_price]
+      additionalProperties: false
+      properties:
+        pet_id:
+          type: integer
+        service_id:
+          type: integer
+        staff_id:
+          type: integer
+        appointment_date:
+          type: string
+          format: date-time
+        start_time:
+          type: string
+          format: time
+          example: "09:30:00"
+        end_time:
+          type: string
+          format: time
+          example: "10:30:00"
+        note:
+          type: string
+        service_price:
+          type: number
+          format: float
+    UpdateAppointmentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        pet_id:
+          type: integer
+        service_id:
+          type: integer
+        staff_id:
+          type: integer
+        appointment_date:
+          type: string
+          format: date-time
+        start_time:
+          type: string
+          format: time
+          example: "09:30:00"
+        end_time:
+          type: string
+          format: time
+          example: "10:30:00"
+        status:
+          $ref: "#/components/schemas/AppointmentStatus"
+        cancellation_reason:
+          type: string
+        note:
+          type: string
+        service_price:
+          type: number
+          format: float
+    SuccessResponse:
+      type: object
+      required: [status, message, data]
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        data:
+          type: array
+          items: {}
+    ErrorResponse:
+      type: object
+      required: [status, message]
+      properties:
+        status:
+          type: integer
+        message:
+          type: string

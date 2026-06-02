@@ -2,6 +2,8 @@ import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import dotenv from "dotenv";
 import cors, { CorsOptions } from "cors";
+import path from "path";
+import swaggerUi from "swagger-ui-express";
 import {
   GatewayAuthRequest,
   gatewayAuthMiddleware,
@@ -12,6 +14,8 @@ dotenv.config();
 export const app = express();
 const port = Number(process.env.PORT) || 3000;
 const isProduction = process.env.NODE_ENV === "production";
+const openApiPath = path.resolve(__dirname, "openapi", "gateway.yml");
+let bundledOpenApiSpec: unknown;
 
 function getServiceUrl(envName: string, fallback: string) {
   const value = process.env[envName];
@@ -71,6 +75,36 @@ app.get("/health", (_request, response) => {
     port,
   });
 });
+
+async function getBundledOpenApiSpec() {
+  if (!isProduction || !bundledOpenApiSpec) {
+    const { default: $RefParser } = await import("@apidevtools/json-schema-ref-parser");
+    bundledOpenApiSpec = await $RefParser.bundle(openApiPath);
+  }
+
+  return bundledOpenApiSpec;
+}
+
+app.get("/openapi.json", async (_request, response, next) => {
+  try {
+    response.json(await getBundledOpenApiSpec());
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.use(
+  "/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(undefined, {
+    customSiteTitle: "Vet Microservices API Docs",
+    swaggerOptions: {
+      url: "/openapi.json",
+      docExpansion: "none",
+      persistAuthorization: true,
+    },
+  }),
+);
 
 app.use(gatewayAuthMiddleware);
 

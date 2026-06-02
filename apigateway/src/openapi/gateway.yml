@@ -27,107 +27,107 @@ paths:
         "200":
           description: Gateway is healthy
   /api/v1/auth/register:
-    $ref: "../../../microservices/AuthService/openapi/auth.yml#/paths/~1api~1v1~1auth~1register"
+    $ref: "./services/auth.yml#/paths/~1api~1v1~1auth~1register"
   /api/v1/auth/login:
-    $ref: "../../../microservices/AuthService/openapi/auth.yml#/paths/~1api~1v1~1auth~1login"
+    $ref: "./services/auth.yml#/paths/~1api~1v1~1auth~1login"
   /api/v1/auth/refresh-token:
-    $ref: "../../../microservices/AuthService/openapi/auth.yml#/paths/~1api~1v1~1auth~1refresh-token"
+    $ref: "./services/auth.yml#/paths/~1api~1v1~1auth~1refresh-token"
   /api/v1/auth/logout:
-    $ref: "../../../microservices/AuthService/openapi/auth.yml#/paths/~1api~1v1~1auth~1logout"
+    $ref: "./services/auth.yml#/paths/~1api~1v1~1auth~1logout"
   /api/v1/auth/forgot-password:
-    $ref: "../../../microservices/AuthService/openapi/auth.yml#/paths/~1api~1v1~1auth~1forgot-password"
+    $ref: "./services/auth.yml#/paths/~1api~1v1~1auth~1forgot-password"
   /api/v1/auth/reset-password:
-    $ref: "../../../microservices/AuthService/openapi/auth.yml#/paths/~1api~1v1~1auth~1reset-password"
+    $ref: "./services/auth.yml#/paths/~1api~1v1~1auth~1reset-password"
   /api/v1/auth/change-password:
-    $ref: "../../../microservices/AuthService/openapi/auth.yml#/paths/~1api~1v1~1auth~1change-password"
+    $ref: "./services/auth.yml#/paths/~1api~1v1~1auth~1change-password"
   /api/v1/profile/me:
-    $ref: "../../../microservices/AuthService/openapi/auth.yml#/paths/~1api~1v1~1profile~1me"
+    $ref: "./services/auth.yml#/paths/~1api~1v1~1profile~1me"
   /api/v1/staff:
-    $ref: "../../../microservices/AuthService/openapi/auth.yml#/paths/~1api~1v1~1staff"
+    $ref: "./services/auth.yml#/paths/~1api~1v1~1staff"
   /api/v1/staff/{id}:
-    $ref: "../../../microservices/AuthService/openapi/auth.yml#/paths/~1api~1v1~1staff~1{id}"
+    $ref: "./services/auth.yml#/paths/~1api~1v1~1staff~1{id}"
   /api/v1/staff/{id}/deactivate:
-    $ref: "../../../microservices/AuthService/openapi/auth.yml#/paths/~1api~1v1~1staff~1{id}~1deactivate"
+    $ref: "./services/auth.yml#/paths/~1api~1v1~1staff~1{id}~1deactivate"
   /api/v1/pets:
-    $ref: "../../../microservices/PetService/src/openapi/pet.yml#/paths/~1api~1v1~1pets"
+    $ref: "./services/pet.yml#/paths/~1api~1v1~1pets"
   /api/v1/pets/search:
-    $ref: "../../../microservices/PetService/src/openapi/pet.yml#/paths/~1api~1v1~1pets~1search"
+    $ref: "./services/pet.yml#/paths/~1api~1v1~1pets~1search"
   /api/v1/pets/{id}:
-    $ref: "../../../microservices/PetService/src/openapi/pet.yml#/paths/~1api~1v1~1pets~1{id}"
+    $ref: "./services/pet.yml#/paths/~1api~1v1~1pets~1{id}"
   /api/v1/catalog/medicines:
-    $ref: "../../../microservices/CatalogService/src/openapi/catalog.yml#/paths/~1catalog~1medicines"
+    $ref: "./services/catalog.yml#/paths/~1catalog~1medicines"
   /api/v1/catalog/medicines/search:
-    $ref: "../../../microservices/CatalogService/src/openapi/catalog.yml#/paths/~1catalog~1medicines~1search"
+    $ref: "./services/catalog.yml#/paths/~1catalog~1medicines~1search"
   /api/v1/catalog/medicines/{id}:
-    $ref: "../../../microservices/CatalogService/src/openapi/catalog.yml#/paths/~1catalog~1medicines~1{id}"
+    $ref: "./services/catalog.yml#/paths/~1catalog~1medicines~1{id}"
   /api/v1/catalog/services:
-    $ref: "../../../microservices/CatalogService/src/openapi/catalog.yml#/paths/~1catalog~1services"
+    $ref: "./services/catalog.yml#/paths/~1catalog~1services"
   /api/v1/catalog/services/search:
-    $ref: "../../../microservices/CatalogService/src/openapi/catalog.yml#/paths/~1catalog~1services~1search"
+    $ref: "./services/catalog.yml#/paths/~1catalog~1services~1search"
   /api/v1/catalog/services/{id}:
-    $ref: "../../../microservices/CatalogService/src/openapi/catalog.yml#/paths/~1catalog~1services~1{id}"
+    $ref: "./services/catalog.yml#/paths/~1catalog~1services~1{id}"
   /api/v1/suppliers:
-    $ref: "../../../microservices/InventoryService/src/openapi/inventory.yml#/paths/~1suppliers"
+    $ref: "./services/inventory.yml#/paths/~1suppliers"
   /api/v1/suppliers/search:
-    $ref: "../../../microservices/InventoryService/src/openapi/inventory.yml#/paths/~1suppliers~1search"
+    $ref: "./services/inventory.yml#/paths/~1suppliers~1search"
   /api/v1/suppliers/{id}:
-    $ref: "../../../microservices/InventoryService/src/openapi/inventory.yml#/paths/~1suppliers~1{id}"
+    $ref: "./services/inventory.yml#/paths/~1suppliers~1{id}"
   /api/v1/medicine-inventory:
-    $ref: "../../../microservices/InventoryService/src/openapi/inventory.yml#/paths/~1medicine-inventory"
+    $ref: "./services/inventory.yml#/paths/~1medicine-inventory"
   /api/v1/medicine-inventory/search:
-    $ref: "../../../microservices/InventoryService/src/openapi/inventory.yml#/paths/~1medicine-inventory~1search"
+    $ref: "./services/inventory.yml#/paths/~1medicine-inventory~1search"
   /api/v1/medicine-inventory/{id}:
-    $ref: "../../../microservices/InventoryService/src/openapi/inventory.yml#/paths/~1medicine-inventory~1{id}"
+    $ref: "./services/inventory.yml#/paths/~1medicine-inventory~1{id}"
   /api/v1/inventory-transactions:
-    $ref: "../../../microservices/InventoryService/src/openapi/inventory.yml#/paths/~1inventory-transactions"
+    $ref: "./services/inventory.yml#/paths/~1inventory-transactions"
   /api/v1/inventory-transactions/search:
-    $ref: "../../../microservices/InventoryService/src/openapi/inventory.yml#/paths/~1inventory-transactions~1search"
+    $ref: "./services/inventory.yml#/paths/~1inventory-transactions~1search"
   /api/v1/inventory-transactions/{id}:
-    $ref: "../../../microservices/InventoryService/src/openapi/inventory.yml#/paths/~1inventory-transactions~1{id}"
+    $ref: "./services/inventory.yml#/paths/~1inventory-transactions~1{id}"
   /api/v1/appointments:
-    $ref: "../../../microservices/AppointmentService/src/openapi/appointment.yml#/paths/~1appointments"
+    $ref: "./services/appointment.yml#/paths/~1appointments"
   /api/v1/appointments/search:
-    $ref: "../../../microservices/AppointmentService/src/openapi/appointment.yml#/paths/~1appointments~1search"
+    $ref: "./services/appointment.yml#/paths/~1appointments~1search"
   /api/v1/appointments/{id}:
-    $ref: "../../../microservices/AppointmentService/src/openapi/appointment.yml#/paths/~1appointments~1{id}"
+    $ref: "./services/appointment.yml#/paths/~1appointments~1{id}"
   /api/v1/medical-records:
-    $ref: "../../../microservices/MedicalRecordService/src/openapi/medicalrecord.yml#/paths/~1medical-records"
+    $ref: "./services/medicalrecord.yml#/paths/~1medical-records"
   /api/v1/medical-records/search:
-    $ref: "../../../microservices/MedicalRecordService/src/openapi/medicalrecord.yml#/paths/~1medical-records~1search"
+    $ref: "./services/medicalrecord.yml#/paths/~1medical-records~1search"
   /api/v1/medical-records/{id}:
-    $ref: "../../../microservices/MedicalRecordService/src/openapi/medicalrecord.yml#/paths/~1medical-records~1{id}"
+    $ref: "./services/medicalrecord.yml#/paths/~1medical-records~1{id}"
   /api/v1/prescriptions:
-    $ref: "../../../microservices/MedicalRecordService/src/openapi/medicalrecord.yml#/paths/~1prescriptions"
+    $ref: "./services/medicalrecord.yml#/paths/~1prescriptions"
   /api/v1/prescriptions/search:
-    $ref: "../../../microservices/MedicalRecordService/src/openapi/medicalrecord.yml#/paths/~1prescriptions~1search"
+    $ref: "./services/medicalrecord.yml#/paths/~1prescriptions~1search"
   /api/v1/prescriptions/{id}:
-    $ref: "../../../microservices/MedicalRecordService/src/openapi/medicalrecord.yml#/paths/~1prescriptions~1{id}"
+    $ref: "./services/medicalrecord.yml#/paths/~1prescriptions~1{id}"
   /api/v1/re-examinations:
-    $ref: "../../../microservices/MedicalRecordService/src/openapi/medicalrecord.yml#/paths/~1re-examinations"
+    $ref: "./services/medicalrecord.yml#/paths/~1re-examinations"
   /api/v1/re-examinations/search:
-    $ref: "../../../microservices/MedicalRecordService/src/openapi/medicalrecord.yml#/paths/~1re-examinations~1search"
+    $ref: "./services/medicalrecord.yml#/paths/~1re-examinations~1search"
   /api/v1/re-examinations/{id}:
-    $ref: "../../../microservices/MedicalRecordService/src/openapi/medicalrecord.yml#/paths/~1re-examinations~1{id}"
+    $ref: "./services/medicalrecord.yml#/paths/~1re-examinations~1{id}"
   /api/v1/reports/pie/auth/role:
-    $ref: "../../../microservices/ReportService/src/openapi/report.yml#/paths/~1reports~1pie~1auth~1role"
+    $ref: "./services/report.yml#/paths/~1reports~1pie~1auth~1role"
   /api/v1/reports/pie/pet/species:
-    $ref: "../../../microservices/ReportService/src/openapi/report.yml#/paths/~1reports~1pie~1pet~1species"
+    $ref: "./services/report.yml#/paths/~1reports~1pie~1pet~1species"
   /api/v1/reports/pie/appointment/status:
-    $ref: "../../../microservices/ReportService/src/openapi/report.yml#/paths/~1reports~1pie~1appointment~1status"
+    $ref: "./services/report.yml#/paths/~1reports~1pie~1appointment~1status"
   /api/v1/reports/bar/inventory/stock:
-    $ref: "../../../microservices/ReportService/src/openapi/report.yml#/paths/~1reports~1bar~1inventory~1stock"
+    $ref: "./services/report.yml#/paths/~1reports~1bar~1inventory~1stock"
   /api/v1/reports/bar/top-services:
-    $ref: "../../../microservices/ReportService/src/openapi/report.yml#/paths/~1reports~1bar~1top-services"
+    $ref: "./services/report.yml#/paths/~1reports~1bar~1top-services"
   /api/v1/reports/line/revenue-trend:
-    $ref: "../../../microservices/ReportService/src/openapi/report.yml#/paths/~1reports~1line~1revenue-trend"
+    $ref: "./services/report.yml#/paths/~1reports~1line~1revenue-trend"
   /api/v1/reports/revenue:
-    $ref: "../../../microservices/ReportService/src/openapi/report.yml#/paths/~1reports~1revenue"
+    $ref: "./services/report.yml#/paths/~1reports~1revenue"
   /api/v1/reports/revenue/calculate:
-    $ref: "../../../microservices/ReportService/src/openapi/report.yml#/paths/~1reports~1revenue~1calculate"
+    $ref: "./services/report.yml#/paths/~1reports~1revenue~1calculate"
   /api/v1/reports/table/low-stock:
-    $ref: "../../../microservices/ReportService/src/openapi/report.yml#/paths/~1reports~1table~1low-stock"
+    $ref: "./services/report.yml#/paths/~1reports~1table~1low-stock"
   /api/v1/reports/table/appointment/cancelled:
-    $ref: "../../../microservices/ReportService/src/openapi/report.yml#/paths/~1reports~1table~1appointment~1cancelled"
+    $ref: "./services/report.yml#/paths/~1reports~1table~1appointment~1cancelled"
 components:
   securitySchemes:
     bearerAuth:

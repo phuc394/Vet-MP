@@ -10,7 +10,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.json",
+    "build": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.json && node -e \"require('fs').cpSync('src/openapi', 'dist/openapi', { recursive: true })\"",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "jest",
     "test:unit": "jest src/test/unit",
@@ -19,18 +19,21 @@
     "dev": "nodemon --watch src --ext ts --exec ts-node src/gateway.ts"
   },
   "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "^15.3.5",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-openapi-validator": "^5.6.2",
     "http-proxy-middleware": "^3.0.5",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.6.0",
+    "@types/swagger-ui-express": "^4.1.8",
     "jest": "^30.4.2",
     "nodemon": "^3.1.14",
     "supertest": "^7.2.2",
