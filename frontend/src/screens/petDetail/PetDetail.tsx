@@ -5,6 +5,19 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './PetDetailStyle';
 import { usePetDetail } from './PetDetailUtils';
 
+function formatWeight(weight: number | string | null | undefined) {
+  if (weight === null || weight === undefined || weight === '') {
+    return 'N/A';
+  }
+
+  const numericWeight = Number(weight);
+  if (Number.isNaN(numericWeight)) {
+    return 'N/A';
+  }
+
+  return `${numericWeight.toFixed(2)} kg`;
+}
+
 export default function PetDetail() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
@@ -52,7 +65,7 @@ export default function PetDetail() {
               <Text style={styles.detailText}>Species: {pet.species}</Text>
               <Text style={styles.detailText}>Breed: {pet.breed}</Text>
               <Text style={styles.detailText}>Age: {calculateAge(pet.birth_date)}</Text>
-              <Text style={styles.detailText}>Weight: {pet.weight}kg</Text>
+              <Text style={styles.detailText}>Weight: {formatWeight(pet.weight)}</Text>
             </View>
           </View>
 

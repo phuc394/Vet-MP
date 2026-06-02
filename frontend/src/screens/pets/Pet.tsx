@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { 
   View, 
   Text, 
@@ -6,24 +6,58 @@ import {
   FlatList, 
   Image, 
   TouchableOpacity, 
-  SafeAreaView 
+  SafeAreaView,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './PetStyle';
-import { MOCK_PETS, PetType } from './PetUtils';
+import { useDispatch, useSelector } from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native';
+
+import { AppDispatch, RootState } from '../../redux/store';
+import { fetchPetsThunk } from '../../redux/slices/pet.slice';
+import { Pet } from '../../types/pet.type';
 
 const PetScreen = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const navigation = useNavigation<any>();
 
-  // Xử lý logic tìm kiếm thú cưng theo tên
-  const filteredPets = MOCK_PETS.filter((pet) =>
-    pet.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const { pets, loading, error } = useSelector((state: RootState) => state.pet);
+  const { accessToken } = useSelector((state: RootState) => state.login);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (accessToken) {
+        dispatch(fetchPetsThunk());
+      }
+    }, [accessToken, dispatch])
   );
 
+  const filteredPets = useMemo(
+    () =>
+      pets.filter((pet) =>
+        pet.name.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    [pets, searchQuery]
+  );
+
+  const formatWeight = (weight: Pet['weight']) => {
+    if (weight === null || weight === undefined || weight === '') {
+      return 'N/A';
+    }
+
+    const numericWeight = Number(weight);
+    if (Number.isNaN(numericWeight)) {
+      return 'N/A';
+    }
+
+    return `${numericWeight.toFixed(2)} kg`;
+  };
+
   // Render từng card thú cưng
-  const renderPetCard = ({ item }: { item: PetType }) => (
+  const renderPetCard = ({ item }: { item: Pet }) => (
     <TouchableOpacity
       style={styles.card}
       activeOpacity={0.85}
@@ -40,11 +74,21 @@ const PetScreen = () => {
           {[item.species, item.breed].filter(Boolean).join(' • ') || 'Unknown'}
         </Text>
         <Text style={styles.petDetail}>
-          Weight: {item.weight != null ? `${item.weight.toFixed(2)} kg` : 'N/A'}
+          Weight: {formatWeight(item.weight)}
         </Text>
       </View>
     </TouchableOpacity>
   );
+
+  if (loading && pets.length === 0) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+          <ActivityIndicator size="large" color="#465F4D" />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -54,6 +98,18 @@ const PetScreen = () => {
         <View style={styles.headerContainer}>
           <Text style={styles.title}>My Pets</Text>
         </View>
+
+        {error && (
+          <View style={{ paddingHorizontal: 20, marginBottom: 12 }}>
+            <Text style={{ color: 'red', textAlign: 'center', marginBottom: 8 }}>{error}</Text>
+            <TouchableOpacity
+              style={{ alignSelf: 'center', paddingHorizontal: 18, paddingVertical: 10, borderRadius: 16, backgroundColor: '#F4B35A' }}
+              onPress={() => dispatch(fetchPetsThunk())}
+            >
+              <Text style={{ color: '#fff', fontWeight: '700' }}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Search Bar */}
         <View style={styles.searchContainer}>
@@ -74,6 +130,13 @@ const PetScreen = () => {
           renderItem={renderPetCard}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={{ paddingVertical: 40, alignItems: 'center' }}>
+              <Text style={{ color: '#7A6B56', fontWeight: '600' }}>
+                {searchQuery ? 'No pets match your search.' : 'No pets found.'}
+              </Text>
+            </View>
+          }
         />
         
       </View>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   Alert,
+  ActivityIndicator,
   Image,
   SafeAreaView,
   ScrollView,
@@ -11,16 +12,21 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
 import { styles } from './AddPetStyle';
+import { AppDispatch, RootState } from '../../redux/store';
+import { createPetThunk } from '../../redux/slices/pet.slice';
 
 const sexOptions = [
   { label: 'Male', value: 'male' },
   { label: 'Female', value: 'female' },
-  { label: 'Unknown', value: 'unknown' },
 ];
 
 export default function AddPet() {
+  const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation<any>();
+  const { creating, createError } = useSelector((state: RootState) => state.pet);
+  const accessToken = useSelector((state: RootState) => state.login.accessToken);
   const [name, setName] = useState('');
   const [species, setSpecies] = useState('');
   const [breed, setBreed] = useState('');
@@ -29,12 +35,104 @@ export default function AddPet() {
   const [weight, setWeight] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [notes, setNotes] = useState('');
+  const [localError, setLocalError] = useState<string | null>(null);
 
-  const handleSave = () => {
-    Alert.alert(
-      'Pet saved',
-      'This screen is now ready to be connected to your API or store.'
-    );
+  const handleSave = async () => {
+    setLocalError(null);
+
+    // Debugging: print current token
+    // eslint-disable-next-line no-console
+    console.log('AddPet: accessToken=', accessToken);
+    // Ensure user is logged in
+    if (!accessToken) {
+      setLocalError('Please login before creating a pet');
+      Alert.alert('Not logged in', 'Please login to create a pet.', [
+        { text: 'OK', onPress: () => navigation.navigate('Login') },
+      ]);
+      return;
+    }
+
+    if (!name.trim()) {
+      setLocalError('Pet name is required');
+      return;
+    }
+
+    // sex is controlled via UI, but validate defensively
+    if (sex !== 'male' && sex !== 'female') {
+      setLocalError('Select pet sex');
+      return;
+    }
+
+    // birth date optional, if provided must match YYYY-MM-DD
+    if (birthDate.trim()) {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(birthDate.trim())) {
+        setLocalError('Birth date must be YYYY-MM-DD');
+        return;
+      }
+      const d = new Date(birthDate.trim());
+      if (Number.isNaN(d.getTime())) {
+        setLocalError('Birth date is invalid');
+        return;
+      }
+    }
+
+    const parsedWeight = weight.trim() ? Number(weight) : undefined;
+
+    if (parsedWeight !== undefined) {
+      if (Number.isNaN(parsedWeight)) {
+        setLocalError('Weight must be a number');
+        return;
+      }
+      if (parsedWeight <= 0) {
+        setLocalError('Weight must be greater than zero');
+        return;
+      }
+    }
+
+    // basic avatar URL sanity check
+    if (avatarUrl.trim()) {
+      try {
+        // eslint-disable-next-line no-new
+        new URL(avatarUrl.trim());
+      } catch (_e) {
+        setLocalError('Avatar must be a valid URL or left empty');
+        return;
+      }
+    }
+
+    try {
+      const createdPet = await dispatch(
+        createPetThunk({
+          name: name.trim(),
+          sex: sex as 'male' | 'female',
+          species: species.trim() || undefined,
+          breed: breed.trim() || undefined,
+          birth_date: birthDate.trim() || undefined,
+          weight: parsedWeight,
+          avatar: avatarUrl.trim() || undefined,
+          notes: notes.trim() || undefined,
+        })
+      ).unwrap();
+      Alert.alert('Pet saved', `${createdPet.name} has been created successfully.`, [
+        {
+          text: 'OK',
+          onPress: () => navigation.goBack(),
+        },
+      ]);
+    } catch (error) {
+      // Log full error/response for debugging
+      // eslint-disable-next-line no-console
+      console.error('Create pet failed (error):', error);
+      // Axios errors often have `response` with details
+      // eslint-disable-next-line no-console
+      console.error('Create pet failed (response):', (error as any)?.response);
+
+      const msg = (error as any)?.response?.data?.message ?? (error as any)?.message ?? 'Create pet failed';
+      setLocalError(String(msg));
+      // Also show a short alert so user notices
+      Alert.alert('Create pet failed', String(msg));
+    }
   };
 
   return (
@@ -158,8 +256,25 @@ export default function AddPet() {
             />
           </View>
 
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave} activeOpacity={0.9}>
-            <Text style={styles.saveButtonText}>Save Pet</Text>
+          {createError && (
+            <Text style={{ color: 'red', textAlign: 'center', marginTop: 12 }}>{createError}</Text>
+          )}
+
+          {localError && (
+            <Text style={{ color: 'red', textAlign: 'center', marginTop: 12 }}>{localError}</Text>
+          )}
+
+          <TouchableOpacity
+            style={[styles.saveButton, creating && { opacity: 0.7 }]}
+            onPress={handleSave}
+            activeOpacity={0.9}
+            disabled={creating}
+          >
+            {creating ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.saveButtonText}>Save Pet</Text>
+            )}
           </TouchableOpacity>
         </ScrollView>
       </View>

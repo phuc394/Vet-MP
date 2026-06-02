@@ -9,6 +9,8 @@ import resetPasswordReducer from "./slices/resetPassword.slice";
 import logoutReducer from "./slices/logout.slice";
 import profileReducer from "./slices/profile.slice";
 import changePasswordReducer from "./slices/changePassword.slice"
+import petReducer from "./slices/pet.slice";
+import { injectStore } from "../config/api";
 const store = configureStore({
   reducer: {
     login: loginReducer,
@@ -17,11 +19,13 @@ const store = configureStore({
     resetPassword: resetPasswordReducer,
     logout: logoutReducer,
     profile: profileReducer,
-    changePassword: changePasswordReducer
+    changePassword: changePasswordReducer,
+    pet: petReducer,
     
 
   },
 });
+
 
 export type RootState = ReturnType<
   typeof store.getState
@@ -29,5 +33,8 @@ export type RootState = ReturnType<
 
 export type AppDispatch =
   typeof store.dispatch;
+
+  
+injectStore(store);
 
 export default store;

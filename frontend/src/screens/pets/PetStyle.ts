@@ -36,11 +36,6 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333333',
     paddingVertical: 0,
-    outlineStyle: 'none',
-    outlineWidth: 0,
-    outlineColor: 'transparent',
-    borderWidth: 0,
-    borderColor: 'transparent',
   },
   listContainer: {
     paddingBottom: 90, // Để tránh card cuối bị FAB che lấp
