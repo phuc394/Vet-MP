@@ -101,6 +101,7 @@ export default function Calendar() {
         serviceName.includes(normalizedQuery) ||
         staff.includes(normalizedQuery) ||
         status.includes(normalizedQuery) ||
+        (appointment.note?.toLowerCase() ?? '').includes(normalizedQuery) ||
         appointment.appointment_date.toLowerCase().includes(normalizedQuery)
       );
     });

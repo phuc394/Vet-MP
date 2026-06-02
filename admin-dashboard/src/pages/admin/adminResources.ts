@@ -108,12 +108,6 @@ const labelOf = (row: AdminRecord, keys: string[], fallback: string) => {
     return String(found ?? fallback);
 };
 
-const formatAppointmentLabel = (appointment: AdminRecord) => {
-    const pet = appointment.pet_name ? `Pet: ${appointment.pet_name}` : `Pet #${appointment.pet_id}`;
-    const service = appointment.service_name ? `Service: ${appointment.service_name}` : `Service #${appointment.service_id}`;
-    return `#${appointment.appointment_id} - ${pet} - ${service} - ${formatDate(appointment.appointment_date)}`;
-};
-
 const getRelationshipLookups = async () => {
     const [pets, services, staff, medicines, suppliers] = await Promise.all([
         getAll("/api/v1/pets"),
@@ -249,6 +243,7 @@ export const adminResources: AdminResource[] = [
             column("appointment_date", "Date"),
             column("start_time", "Start"),
             column("status", "Status"),
+            column("note", "Note"),
         ],
         formFields: [
             { name: "pet_id", label: "Pet", type: "select", required: true },
@@ -258,11 +253,13 @@ export const adminResources: AdminResource[] = [
             { name: "start_time", label: "Start Time", type: "time", required: true },
             { name: "end_time", label: "End Time", type: "time", required: true },
             { name: "status", label: "Status", type: "select", options: ["pending", "confirmed", "cancelled", "completed"] },
+            { name: "note", label: "Note", type: "textarea" },
+            { name: "cancellation_reason", label: "Cancellation Reason", type: "textarea" },
             { name: "service_price", label: "Service Price", type: "number" },
         ],
         filterField: "status",
         filterOptions: ["All", "pending", "confirmed", "cancelled", "completed"],
-        searchKeys: ["appointment_id", "pet_name", "service_name", "staff_name", "status"],
+        searchKeys: ["appointment_id", "pet_name", "service_name", "staff_name", "status", "note"],
         extraActionLabel: "Re-Examination",
         loadRows: loadAppointmentsWithNames,
         loadDetails: async (row) => {

@@ -50,7 +50,7 @@ export default function AppointmentDetail() {
   const routePet = route.params?.pet as Pet | undefined;
   const serviceName = route.params?.serviceName as string | undefined;
   const source = route.params?.source;
-  const [noteVisible, setNoteVisible] = useState(false);
+  const [modalContent, setModalContent] = useState<{ title: string; text: string } | null>(null);
   const { selectedAppointment, detailLoading, detailError, updating, updateError } = useSelector(
     (state: RootState) => state.appointment
   );
@@ -218,19 +218,49 @@ export default function AppointmentDetail() {
             <Text style={styles.rowValue}>{appointment.staff_id ? `#${appointment.staff_id}` : 'Unassigned'}</Text>
           </View>
 
-          <TouchableOpacity style={styles.rowItem} activeOpacity={0.8} onPress={() => setNoteVisible(true)}>
+          <TouchableOpacity
+            style={styles.rowItem}
+            activeOpacity={0.8}
+            onPress={() => setModalContent({
+              title: 'Note',
+              text: appointment.note ?? 'No appointment note.',
+            })}
+          >
             <View style={styles.rowLeft}>
               <View style={styles.iconBox}>
                 <MaterialCommunityIcons name="note-outline" size={20} color="#835300" />
               </View>
-              <Text style={styles.rowLabel}>Cancellation</Text>
+              <Text style={styles.rowLabel}>Note</Text>
             </View>
             <View style={styles.notePreviewWrapper}>
               <Text style={styles.rowValueNote} numberOfLines={2} ellipsizeMode="tail">
-                {appointment.cancellation_reason ?? 'No cancellation reason.'}
+                {appointment.note ?? 'No appointment note.'}
               </Text>
             </View>
           </TouchableOpacity>
+
+          {appointment.cancellation_reason && (
+            <TouchableOpacity
+              style={styles.rowItem}
+              activeOpacity={0.8}
+              onPress={() => setModalContent({
+                title: 'Cancellation reason',
+                text: appointment.cancellation_reason ?? 'No cancellation reason.',
+              })}
+            >
+              <View style={styles.rowLeft}>
+                <View style={styles.iconBox}>
+                  <MaterialCommunityIcons name="cancel" size={20} color="#835300" />
+                </View>
+                <Text style={styles.rowLabel}>Cancellation</Text>
+              </View>
+              <View style={styles.notePreviewWrapper}>
+                <Text style={styles.rowValueNote} numberOfLines={2} ellipsizeMode="tail">
+                  {appointment.cancellation_reason}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
         </View>
 
         {canCancel && (
@@ -269,12 +299,12 @@ export default function AppointmentDetail() {
         </View>
       </ScrollView>
 
-      <Modal visible={noteVisible} transparent animationType="fade" onRequestClose={() => setNoteVisible(false)}>
+      <Modal visible={!!modalContent} transparent animationType="fade" onRequestClose={() => setModalContent(null)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Cancellation reason</Text>
-            <Text style={styles.modalText}>{appointment.cancellation_reason ?? 'No cancellation reason.'}</Text>
-            <TouchableOpacity style={styles.modalCloseButton} onPress={() => setNoteVisible(false)} activeOpacity={0.8}>
+            <Text style={styles.modalTitle}>{modalContent?.title}</Text>
+            <Text style={styles.modalText}>{modalContent?.text}</Text>
+            <TouchableOpacity style={styles.modalCloseButton} onPress={() => setModalContent(null)} activeOpacity={0.8}>
               <Text style={styles.modalCloseText}>Close</Text>
             </TouchableOpacity>
           </View>

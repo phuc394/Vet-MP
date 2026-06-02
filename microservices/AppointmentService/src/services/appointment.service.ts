@@ -21,6 +21,7 @@ const SORT_FIELDS = [
     'start_time',
     'end_time',
     'status',
+    'note',
     'created_at',
     'updated_at'
 ];
@@ -131,6 +132,9 @@ async function createAppointment(appointmentData: CreateAppointmentRequest): Pro
 
     if (appointmentData.staff_id !== undefined) {
         appointment.staff_id = appointmentData.staff_id;
+    }
+    if (appointmentData.note !== undefined) {
+        appointment.note = appointmentData.note;
     }
 
     const [result] = await connection.query('INSERT INTO Appointment SET ?', [appointment]);

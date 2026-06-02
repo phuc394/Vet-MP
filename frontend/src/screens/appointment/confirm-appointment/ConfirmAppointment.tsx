@@ -56,6 +56,7 @@ export default function ConfirmAppointment() {
           start_time: appointment.startTime,
           end_time: appointment.endTime,
           service_price: Number(service.price),
+          note: appointment.note?.trim() || undefined,
         })
       ).unwrap();
 

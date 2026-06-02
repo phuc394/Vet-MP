@@ -173,7 +173,7 @@ ON DUPLICATE KEY UPDATE
 
 INSERT INTO appointment_db_vet.Appointment (
     appointment_id, pet_id, service_id, staff_id, appointment_date, start_time, end_time,
-    status, cancellation_reason, service_price, created_at
+    status, cancellation_reason, note, service_price, created_at
 )
 SELECT
     n,
@@ -193,6 +193,14 @@ SELECT
         WHEN n IN (6, 13, 20, 27) THEN ELT(((n - 1) % 4) + 1, 'Owner unavailable', 'Pet recovered', 'Schedule conflict', 'Changed clinic')
         ELSE NULL
     END,
+    ELT(((n - 1) % 6) + 1,
+        'Owner requested a routine wellness check.',
+        'Pet has been eating less than usual.',
+        'Please check vaccination status during the visit.',
+        'Pet may be nervous around other animals.',
+        'Follow-up requested after recent treatment.',
+        'Owner prefers a morning appointment.'
+    ),
     120000 + (n * 35000),
     DATE_ADD('2026-04-20', INTERVAL (n - 1) DAY)
 FROM seed_numbers
@@ -206,6 +214,7 @@ ON DUPLICATE KEY UPDATE
     end_time = VALUES(end_time),
     status = VALUES(status),
     cancellation_reason = VALUES(cancellation_reason),
+    note = VALUES(note),
     service_price = VALUES(service_price);
 
 INSERT INTO medical_record_db_vet.Medical_Record (
