@@ -1,5 +1,6 @@
 -- Seed data for dashboard/report visualization.
 -- RefreshTokens is intentionally excluded.
+USE auth_db_vet;
 DROP TEMPORARY TABLE IF EXISTS seed_numbers;
 CREATE TEMPORARY TABLE seed_numbers (n INT PRIMARY KEY);
 
