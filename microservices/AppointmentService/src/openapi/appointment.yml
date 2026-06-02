@@ -230,10 +230,12 @@ components:
           format: date-time
         start_time:
           type: string
-          format: date-time
+          format: time
+          example: "09:30:00"
         end_time:
           type: string
-          format: date-time
+          format: time
+          example: "10:30:00"
         status:
           $ref: "#/components/schemas/AppointmentStatus"
         cancellation_reason:
@@ -267,10 +269,12 @@ components:
           format: date-time
         start_time:
           type: string
-          format: date-time
+          format: time
+          example: "09:30:00"
         end_time:
           type: string
-          format: date-time
+          format: time
+          example: "10:30:00"
         note:
           type: string
         service_price:
@@ -291,10 +295,12 @@ components:
           format: date-time
         start_time:
           type: string
-          format: date-time
+          format: time
+          example: "09:30:00"
         end_time:
           type: string
-          format: date-time
+          format: time
+          example: "10:30:00"
         status:
           $ref: "#/components/schemas/AppointmentStatus"
         cancellation_reason:

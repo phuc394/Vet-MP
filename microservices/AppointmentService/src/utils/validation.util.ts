@@ -76,6 +76,61 @@ export const parseOptionalDate = (value: unknown, field: string): Date | undefin
     return parseDate(value, field);
 };
 
+export const parseTime = (value: unknown, field: string): string => {
+    if (value instanceof Date) {
+        if (Number.isNaN(value.getTime())) {
+            throw new HttpError(400, `${field} must be a valid time`);
+        }
+        return value.toTimeString().slice(0, 8);
+    }
+
+    if (typeof value !== 'string') {
+        throw new HttpError(400, `${field} must be a valid time`);
+    }
+
+    const trimmed = value.trim();
+    const timeOnlyMatch = trimmed.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+    if (timeOnlyMatch) {
+        const hours = Number(timeOnlyMatch[1]);
+        const minutes = Number(timeOnlyMatch[2]);
+        const seconds = timeOnlyMatch[3] === undefined ? 0 : Number(timeOnlyMatch[3]);
+
+        if (hours <= 23 && minutes <= 59 && seconds <= 59) {
+            return [
+                String(hours).padStart(2, '0'),
+                String(minutes).padStart(2, '0'),
+                String(seconds).padStart(2, '0')
+            ].join(':');
+        }
+    }
+
+    const dateTimeMatch = trimmed.match(/[T\s](\d{2}):(\d{2})(?::(\d{2}))?/);
+    if (dateTimeMatch) {
+        return parseTime(
+            [
+                dateTimeMatch[1],
+                dateTimeMatch[2],
+                dateTimeMatch[3] ?? '00'
+            ].join(':'),
+            field
+        );
+    }
+
+    const date = new Date(trimmed);
+    if (!Number.isNaN(date.getTime())) {
+        return date.toTimeString().slice(0, 8);
+    }
+
+    throw new HttpError(400, `${field} must be a valid time`);
+};
+
+export const parseOptionalTime = (value: unknown, field: string): string | undefined => {
+    if (value === undefined || value === null || value === '') {
+        return undefined;
+    }
+    return parseTime(value, field);
+};
+
 export const parseBoolean = (value: unknown, field: string): boolean => {
     if (typeof value === 'boolean') {
         return value;

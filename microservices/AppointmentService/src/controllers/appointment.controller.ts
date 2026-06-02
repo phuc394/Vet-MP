@@ -18,7 +18,9 @@ import {
     parseOptionalDate,
     parseOptionalNumber,
     parseOptionalString,
-    parseString
+    parseOptionalTime,
+    parseString,
+    parseTime
 } from '../utils/validation.util';
 
 const getAllAppointments = asyncHandler(
@@ -52,8 +54,8 @@ const createAppointment = asyncHandler(async (req: Request<{}, unknown, CreateAp
         pet_id: parseId(req.body.pet_id, 'pet_id'),
         service_id: parseId(req.body.service_id, 'service_id'),
         appointment_date: parseDate(req.body.appointment_date, 'appointment_date'),
-        start_time: parseDate(req.body.start_time, 'start_time'),
-        end_time: parseDate(req.body.end_time, 'end_time'),
+        start_time: parseTime(req.body.start_time, 'start_time'),
+        end_time: parseTime(req.body.end_time, 'end_time'),
         service_price: parseNumber(req.body.service_price, 'service_price')
     };
     const staffId = parseOptionalId(req.body.staff_id, 'staff_id');
@@ -92,9 +94,9 @@ const updateAppointment = asyncHandler(async (req: Request<{ id: string }, unkno
     if (staffId !== undefined) payload.staff_id = staffId;
     const appointmentDate = parseOptionalDate(req.body.appointment_date, 'appointment_date');
     if (appointmentDate !== undefined) payload.appointment_date = appointmentDate;
-    const startTime = parseOptionalDate(req.body.start_time, 'start_time');
+    const startTime = parseOptionalTime(req.body.start_time, 'start_time');
     if (startTime !== undefined) payload.start_time = startTime;
-    const endTime = parseOptionalDate(req.body.end_time, 'end_time');
+    const endTime = parseOptionalTime(req.body.end_time, 'end_time');
     if (endTime !== undefined) payload.end_time = endTime;
     const status = parseOptionalString(req.body.status, 'status');
     if (status !== undefined) payload.status = AppointmentService.resolveAppointmentStatus(status);

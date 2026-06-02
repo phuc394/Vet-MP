@@ -4,8 +4,8 @@ export interface Appointment {
     service_id: number;
     staff_id?: number;
     appointment_date: Date;
-    start_time: Date;
-    end_time: Date;
+    start_time: string;
+    end_time: string;
     status: AppointmentStatus;
     cancellation_reason?: string;
     note?: string;
@@ -19,8 +19,8 @@ export interface CreateAppointmentRequest {
     service_id: number;
     staff_id?: number;
     appointment_date: Date;
-    start_time: Date;
-    end_time: Date;
+    start_time: string;
+    end_time: string;
     service_price: number;
     note?: string;
 }
@@ -30,8 +30,8 @@ export interface UpdateAppointmentRequest {
     service_id?: number;
     staff_id?: number;
     appointment_date?: Date;
-    start_time?: Date;
-    end_time?: Date;
+    start_time?: string;
+    end_time?: string;
     status?: AppointmentStatus;
     cancellation_reason?: string;
     note?: string;
