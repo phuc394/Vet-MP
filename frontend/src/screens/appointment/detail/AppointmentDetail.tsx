@@ -7,6 +7,19 @@ import { MOCK_PETS } from '../../home/HomeUtils';
 import { formatDateTime } from '../../calendar/CalenderUtils';
 import { formatAppointmentId, getAppointmentStatusBackground, formatAppointmentDatetime } from '../AppointmentUtils';
 
+function formatWeight(weight: number | string | null | undefined) {
+  if (weight === null || weight === undefined || weight === '') {
+    return 'weight';
+  }
+
+  const numericWeight = Number(weight);
+  if (Number.isNaN(numericWeight)) {
+    return 'weight';
+  }
+
+  return `${numericWeight.toFixed(2)}kg`;
+}
+
 export default function AppointmentDetail() {
   const navigation: any = useNavigation();
   const route: any = useRoute();
@@ -58,7 +71,7 @@ export default function AppointmentDetail() {
             <Image source={{ uri: pet.avatar }} style={styles.petAvatarPlaceholder} />
             <View style={styles.topInfo}>
               <Text style={styles.petNameLarge}>{pet.name}</Text>
-              <Text style={styles.petMeta}>{pet.species ?? 'species'}   breed   {pet.weight ? pet.weight + 'kg' : 'weight'}</Text>
+              <Text style={styles.petMeta}>{pet.species ?? 'species'}   breed   {formatWeight(pet.weight)}</Text>
             </View>
           </View>
         </View>

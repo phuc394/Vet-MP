@@ -43,7 +43,7 @@ router.get(
 router.post(
   "/",
   identityMiddleware,
-  authorizeRoles("customer"),
+  authorizeRoles("admin", "customer"),
   petController.createPet
 );
 
@@ -53,7 +53,7 @@ router.post(
 router.put(
   "/:id",
   identityMiddleware,
-  authorizeRoles("customer"),
+  authorizeRoles("admin", "customer"),
   checkPetOwnership,
   petController.updatePet
 );
@@ -64,7 +64,7 @@ router.put(
 router.delete(
   "/:id",
   identityMiddleware,
-  authorizeRoles("customer"),
+  authorizeRoles("admin", "customer"),
   checkPetOwnership,
   petController.deletePet
 );
