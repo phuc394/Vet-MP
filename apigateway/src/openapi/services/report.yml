@@ -1,0 +1,152 @@
+openapi: 3.0.3
+info:
+  title: Report Service API
+  version: 1.0.0
+  description: API bao cao thong ke cho admin.
+servers:
+  - url: /
+    description: Current Report Service host
+tags:
+  - name: Reports
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: Service is healthy
+  /reports/pie/auth/role:
+    get:
+      tags: [Reports]
+      summary: Thong ke ti le role nguoi dung
+      responses:
+        "200":
+          $ref: "#/components/responses/ChartResponse"
+  /reports/pie/pet/species:
+    get:
+      tags: [Reports]
+      summary: Thong ke ti le loai thu cung
+      responses:
+        "200":
+          $ref: "#/components/responses/ChartResponse"
+  /reports/pie/appointment/status:
+    get:
+      tags: [Reports]
+      summary: Thong ke ti le trang thai lich hen
+      responses:
+        "200":
+          $ref: "#/components/responses/ChartResponse"
+  /reports/bar/inventory/stock:
+    get:
+      tags: [Reports]
+      summary: Bao cao muc ton kho thuoc
+      responses:
+        "200":
+          $ref: "#/components/responses/ChartResponse"
+  /reports/bar/top-services:
+    get:
+      tags: [Reports]
+      summary: Bao cao dich vu doanh thu cao
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 5
+      responses:
+        "200":
+          $ref: "#/components/responses/ChartResponse"
+  /reports/line/revenue-trend:
+    get:
+      tags: [Reports]
+      summary: Bao cao xu huong doanh thu
+      parameters:
+        - $ref: "#/components/parameters/StartDate"
+        - $ref: "#/components/parameters/EndDate"
+        - name: groupBy
+          in: query
+          schema:
+            type: string
+            enum: [day, month, year]
+      responses:
+        "200":
+          $ref: "#/components/responses/ChartResponse"
+  /reports/revenue:
+    get:
+      tags: [Reports]
+      summary: Lay bao cao doanh thu
+      parameters:
+        - $ref: "#/components/parameters/StartDate"
+        - $ref: "#/components/parameters/EndDate"
+      responses:
+        "200":
+          $ref: "#/components/responses/ChartResponse"
+  /reports/revenue/calculate:
+    get:
+      tags: [Reports]
+      summary: Tinh doanh thu theo khoang ngay
+      parameters:
+        - $ref: "#/components/parameters/StartDate"
+        - $ref: "#/components/parameters/EndDate"
+      responses:
+        "200":
+          $ref: "#/components/responses/ChartResponse"
+  /reports/table/low-stock:
+    get:
+      tags: [Reports]
+      summary: Bang thuoc sap het hang
+      responses:
+        "200":
+          $ref: "#/components/responses/ChartResponse"
+  /reports/table/appointment/cancelled:
+    get:
+      tags: [Reports]
+      summary: Bang lich hen bi huy
+      responses:
+        "200":
+          $ref: "#/components/responses/ChartResponse"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    StartDate:
+      name: startDate
+      in: query
+      schema:
+        type: string
+        format: date
+    EndDate:
+      name: endDate
+      in: query
+      schema:
+        type: string
+        format: date
+  responses:
+    ChartResponse:
+      description: Report response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ReportSuccess"
+  schemas:
+    ReportSuccess:
+      type: object
+      required: [status, message, data]
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            additionalProperties: true

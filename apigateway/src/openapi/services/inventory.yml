@@ -1,0 +1,522 @@
+openapi: 3.0.3
+info:
+  title: Inventory Service API
+  version: 1.0.0
+  description: API quan ly nha cung cap, ton kho thuoc va giao dich kho.
+servers:
+  - url: /
+    description: Current Inventory Service host
+tags:
+  - name: Suppliers
+  - name: MedicineInventory
+  - name: InventoryTransactions
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: Service is healthy
+  /suppliers:
+    get:
+      tags: [Suppliers]
+      summary: Lay danh sach nha cung cap
+      parameters:
+        - $ref: "#/components/parameters/SortBy"
+        - $ref: "#/components/parameters/Order"
+      responses:
+        "200":
+          $ref: "#/components/responses/SupplierList"
+    post:
+      tags: [Suppliers]
+      summary: Tao nha cung cap
+      requestBody:
+        $ref: "#/components/requestBodies/CreateSupplier"
+      responses:
+        "201":
+          $ref: "#/components/responses/SupplierList"
+  /suppliers/search:
+    get:
+      tags: [Suppliers]
+      summary: Tim kiem nha cung cap
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: contactInfo
+          in: query
+          schema:
+            type: string
+        - name: address
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/SupplierList"
+  /suppliers/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Suppliers]
+      summary: Lay nha cung cap theo id
+      responses:
+        "200":
+          $ref: "#/components/responses/SupplierList"
+        "404":
+          $ref: "#/components/responses/Error"
+    put:
+      tags: [Suppliers]
+      summary: Cap nhat nha cung cap
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateSupplier"
+      responses:
+        "200":
+          $ref: "#/components/responses/SupplierList"
+    delete:
+      tags: [Suppliers]
+      summary: Xoa nha cung cap
+      responses:
+        "200":
+          $ref: "#/components/responses/EmptyList"
+  /medicine-inventory:
+    get:
+      tags: [MedicineInventory]
+      summary: Lay danh sach ton kho thuoc
+      parameters:
+        - $ref: "#/components/parameters/SortBy"
+        - $ref: "#/components/parameters/Order"
+      responses:
+        "200":
+          $ref: "#/components/responses/MedicineInventoryList"
+    post:
+      tags: [MedicineInventory]
+      summary: Tao ban ghi ton kho thuoc
+      requestBody:
+        $ref: "#/components/requestBodies/CreateMedicineInventory"
+      responses:
+        "201":
+          $ref: "#/components/responses/MedicineInventoryList"
+  /medicine-inventory/search:
+    get:
+      tags: [MedicineInventory]
+      summary: Tim kiem ton kho thuoc
+      parameters:
+        - name: medicineId
+          in: query
+          schema:
+            type: integer
+        - name: minStock
+          in: query
+          schema:
+            type: integer
+        - name: maxStock
+          in: query
+          schema:
+            type: integer
+        - name: belowThreshold
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          $ref: "#/components/responses/MedicineInventoryList"
+  /medicine-inventory/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [MedicineInventory]
+      summary: Lay ton kho theo id
+      responses:
+        "200":
+          $ref: "#/components/responses/MedicineInventoryList"
+    put:
+      tags: [MedicineInventory]
+      summary: Cap nhat ton kho
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateMedicineInventory"
+      responses:
+        "200":
+          $ref: "#/components/responses/MedicineInventoryList"
+    delete:
+      tags: [MedicineInventory]
+      summary: Xoa ton kho
+      responses:
+        "200":
+          $ref: "#/components/responses/EmptyList"
+  /inventory-transactions:
+    get:
+      tags: [InventoryTransactions]
+      summary: Lay danh sach giao dich kho
+      parameters:
+        - $ref: "#/components/parameters/SortBy"
+        - $ref: "#/components/parameters/Order"
+      responses:
+        "200":
+          $ref: "#/components/responses/InventoryTransactionList"
+    post:
+      tags: [InventoryTransactions]
+      summary: Tao giao dich kho
+      requestBody:
+        $ref: "#/components/requestBodies/CreateInventoryTransaction"
+      responses:
+        "201":
+          $ref: "#/components/responses/InventoryTransactionList"
+  /inventory-transactions/search:
+    get:
+      tags: [InventoryTransactions]
+      summary: Tim kiem giao dich kho
+      parameters:
+        - name: medicineId
+          in: query
+          schema:
+            type: integer
+        - name: supplierId
+          in: query
+          schema:
+            type: integer
+        - name: transactionType
+          in: query
+          schema:
+            $ref: "#/components/schemas/TransactionType"
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: createdBy
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          $ref: "#/components/responses/InventoryTransactionList"
+  /inventory-transactions/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [InventoryTransactions]
+      summary: Lay giao dich kho theo id
+      responses:
+        "200":
+          $ref: "#/components/responses/InventoryTransactionList"
+    put:
+      tags: [InventoryTransactions]
+      summary: Cap nhat giao dich kho
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateInventoryTransaction"
+      responses:
+        "200":
+          $ref: "#/components/responses/InventoryTransactionList"
+    delete:
+      tags: [InventoryTransactions]
+      summary: Xoa giao dich kho
+      responses:
+        "200":
+          $ref: "#/components/responses/EmptyList"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    SortBy:
+      name: sortBy
+      in: query
+      schema:
+        type: string
+    Order:
+      name: order
+      in: query
+      schema:
+        type: string
+        enum: [asc, desc]
+  requestBodies:
+    CreateSupplier:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateSupplierRequest"
+    UpdateSupplier:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UpdateSupplierRequest"
+    CreateMedicineInventory:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateMedicineInventoryRequest"
+    UpdateMedicineInventory:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UpdateMedicineInventoryRequest"
+    CreateInventoryTransaction:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateInventoryTransactionRequest"
+    UpdateInventoryTransaction:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UpdateInventoryTransactionRequest"
+  responses:
+    SupplierList:
+      description: Supplier response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SupplierSuccess"
+    MedicineInventoryList:
+      description: Medicine inventory response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/MedicineInventorySuccess"
+    InventoryTransactionList:
+      description: Inventory transaction response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/InventoryTransactionSuccess"
+    EmptyList:
+      description: Empty successful response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SuccessResponse"
+    Error:
+      description: Error response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    Supplier:
+      type: object
+      properties:
+        supplier_id:
+          type: integer
+        name:
+          type: string
+        contact_info:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    CreateSupplierRequest:
+      type: object
+      required: [name]
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        contact_info:
+          type: string
+        address:
+          type: string
+    UpdateSupplierRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        contact_info:
+          type: string
+        address:
+          type: string
+    MedicineInventory:
+      type: object
+      properties:
+        inventory_id:
+          type: integer
+        medicine_id:
+          type: integer
+        import_price:
+          type: number
+          nullable: true
+        available_stock:
+          type: integer
+        min_threshold:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    CreateMedicineInventoryRequest:
+      type: object
+      required: [medicine_id]
+      additionalProperties: false
+      properties:
+        medicine_id:
+          type: integer
+        import_price:
+          type: number
+        available_stock:
+          type: integer
+        min_threshold:
+          type: integer
+    UpdateMedicineInventoryRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        import_price:
+          type: number
+        available_stock:
+          type: integer
+        min_threshold:
+          type: integer
+    TransactionType:
+      type: string
+      enum: [import, export_prescription, adjustment]
+    InventoryTransaction:
+      type: object
+      properties:
+        transaction_id:
+          type: integer
+        medicine_id:
+          type: integer
+        transaction_type:
+          $ref: "#/components/schemas/TransactionType"
+        quantity:
+          type: integer
+        transaction_date:
+          type: string
+          format: date-time
+        supplier_id:
+          type: integer
+          nullable: true
+        reference_id:
+          type: integer
+          nullable: true
+        created_by:
+          type: integer
+        notes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+    CreateInventoryTransactionRequest:
+      type: object
+      required: [medicine_id, transaction_type, quantity, transaction_date, created_by]
+      additionalProperties: false
+      properties:
+        medicine_id:
+          type: integer
+        transaction_type:
+          $ref: "#/components/schemas/TransactionType"
+        quantity:
+          type: integer
+        transaction_date:
+          type: string
+          format: date-time
+        supplier_id:
+          type: integer
+        reference_id:
+          type: integer
+        created_by:
+          type: integer
+        notes:
+          type: string
+    UpdateInventoryTransactionRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        medicine_id:
+          type: integer
+        transaction_type:
+          $ref: "#/components/schemas/TransactionType"
+        quantity:
+          type: integer
+        transaction_date:
+          type: string
+          format: date-time
+        supplier_id:
+          type: integer
+        reference_id:
+          type: integer
+        created_by:
+          type: integer
+        notes:
+          type: string
+    SuccessResponse:
+      type: object
+      required: [status, message, data]
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        data:
+          type: array
+          items: {}
+    SupplierSuccess:
+      allOf:
+        - $ref: "#/components/schemas/SuccessResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/Supplier"
+    MedicineInventorySuccess:
+      allOf:
+        - $ref: "#/components/schemas/SuccessResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/MedicineInventory"
+    InventoryTransactionSuccess:
+      allOf:
+        - $ref: "#/components/schemas/SuccessResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/InventoryTransaction"
+    ErrorResponse:
+      type: object
+      required: [status, message]
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
