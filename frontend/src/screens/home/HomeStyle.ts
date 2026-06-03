@@ -95,6 +95,15 @@ export const styles = StyleSheet.create({
     marginRight: 15,
     width: 140,
   },
+  petAvatarFallback: {
+    width: 110,
+    height: 110,
+    borderRadius: 40,
+    marginBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F2E5CF',
+  },
   petImage: {
     width: 110,
     height: 110,
@@ -131,6 +140,18 @@ export const styles = StyleSheet.create({
   },
   servicesList: {
     paddingBottom: 8,
+  },
+  stateCard: {
+    backgroundColor: '#FFF6E8',
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: '#E8DDCF',
+    padding: 16,
+    marginBottom: 20,
+  },
+  stateText: {
+    color: '#5A4D3B',
+    lineHeight: 20,
   },
   serviceCard: {
     flexDirection: 'row',

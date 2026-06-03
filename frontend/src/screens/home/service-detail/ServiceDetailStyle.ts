@@ -10,6 +10,12 @@ export const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'android' ? 36 : 20,
     paddingBottom: 36,
   },
+  centerState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
