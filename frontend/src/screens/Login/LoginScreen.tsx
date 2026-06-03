@@ -58,8 +58,7 @@ const LoginScreen = () => {
 
       <View style={styles.content}>
         <View style={styles.topSection}>
-          <View style={styles.avatar} />
-          <Text style={styles.clinicName}>Dr.Phucs PetShelt</Text>
+          <Text style={styles.clinicName}>VetCare</Text>
         </View>
 
         <View style={styles.formContainer}>
@@ -109,11 +108,11 @@ const LoginScreen = () => {
           </AuthCard>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account?</Text>
+            <Text style={styles.footerText}>Don't have an Account ? </Text>
 
             {/* Điều hướng sang màn hình Đăng ký */}
             <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-              <Text style={styles.footerLink}>Sign Up</Text>
+              <Text style={styles.footerLink}>Sign up</Text>
             </TouchableOpacity>
           </View>
         </View>

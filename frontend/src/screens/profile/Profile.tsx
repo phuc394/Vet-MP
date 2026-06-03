@@ -163,7 +163,8 @@ const Profile = () => {
         onClose={() => setEditModalVisible(false)} 
         currentData={{ 
           full_name: user.full_name, 
-          address: user.address
+          address: user.address,
+          avatar: user.avatar,
         }}
       />
 

@@ -4,13 +4,13 @@ import {
   Alert,
   Image,
   RefreshControl,
-  SafeAreaView,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -195,15 +195,16 @@ export default function Calendar() {
         </View>
         <View style={styles.divider} />
 
-        {tab === 'upcoming' && (
-          <View style={styles.cardFooter}>
-            <TouchableOpacity
-              style={styles.viewButton}
-              activeOpacity={0.8}
-              onPress={() => navigation.navigate('AppointmentDetail', { appointment, pet, serviceName, source: 'upcoming' })}
-            >
-              <Text style={styles.viewButtonText}>View Details</Text>
-            </TouchableOpacity>
+        <View style={styles.cardFooter}>
+          <TouchableOpacity
+            style={styles.viewButton}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('AppointmentDetail', { appointment, pet, serviceName, source: tab })}
+          >
+            <Text style={styles.viewButtonText}>View Details</Text>
+          </TouchableOpacity>
+
+          {tab === 'upcoming' && (
             <TouchableOpacity
               style={[styles.cancelButton, updating && styles.disabledButton]}
               activeOpacity={0.8}
@@ -212,23 +213,10 @@ export default function Calendar() {
             >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
-          </View>
-        )}
+          )}
+        </View>
       </>
     );
-
-    if (tab === 'history') {
-      return (
-        <TouchableOpacity
-          key={appointment.appointment_id}
-          style={styles.appointmentCard}
-          activeOpacity={0.9}
-          onPress={() => navigation.navigate('AppointmentDetail', { appointment, pet, serviceName, source: 'history' })}
-        >
-          {cardContent}
-        </TouchableOpacity>
-      );
-    }
 
     return (
       <View key={appointment.appointment_id} style={styles.appointmentCard}>
@@ -258,7 +246,7 @@ export default function Calendar() {
           <View style={styles.tabInner}>
             <TouchableOpacity
               onPress={() => setTab('upcoming')}
-              style={[styles.tabPill, styles.tabPillWide, styles.tabPillSpacing, tab === 'upcoming' ? styles.tabPillActive : styles.tabPillInactive]}
+              style={[styles.tabPill, tab === 'upcoming' ? styles.tabPillActive : styles.tabPillInactive]}
             >
               <Text style={[styles.tabPillText, tab === 'upcoming' ? styles.tabPillActiveText : styles.tabPillInactiveText]}>UPCOMING</Text>
             </TouchableOpacity>

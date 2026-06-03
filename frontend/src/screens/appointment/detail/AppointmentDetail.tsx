@@ -4,12 +4,12 @@ import {
   Alert,
   Image,
   Modal,
-  SafeAreaView,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';

@@ -1,5 +1,8 @@
 -- Seed data for dashboard/report visualization.
 -- RefreshTokens is intentionally excluded.
+ALTER TABLE auth_db_vet.Users MODIFY avatar MEDIUMTEXT NULL;
+ALTER TABLE pet_db_vet.Pet MODIFY avatar MEDIUMTEXT NULL;
+
 USE auth_db_vet;
 DROP TEMPORARY TABLE IF EXISTS seed_numbers;
 CREATE TEMPORARY TABLE seed_numbers (n INT PRIMARY KEY);
