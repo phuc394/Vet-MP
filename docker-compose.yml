@@ -213,7 +213,7 @@ services:
       APPOINTMENT_SERVICE_URL: http://appointment-service:3005
       MEDICAL_RECORD_SERVICE_URL: http://medical-record-service:3006
       REPORT_SERVICE_URL: http://report-service:3007
-      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://localhost:19006,http://localhost:8081,https://vetcare-admin-dashboard.vercel.app,https://reset-password-web-livid.vercel.app
+      CORS_ALLOWED_ORIGINS: "*"
     ports:
       - "3000:3000"
     depends_on:
