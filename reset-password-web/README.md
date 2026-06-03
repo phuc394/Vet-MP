@@ -26,7 +26,7 @@ POST /api/v1/auth/reset-password
 AuthService must also have `CLIENT_URL` set to this Vercel app URL so email links point here:
 
 ```env
-CLIENT_URL=https://your-reset-password-web.vercel.app
+CLIENT_URL=https://reset-password-web-livid.vercel.app
 ```
 
 ## Local run
