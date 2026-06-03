@@ -307,7 +307,7 @@ const forgotPassword = async (email: string): Promise<ForgotPasswordResponse> =>
   await AuthModel.saveResetToken(user.user_id, hashedToken, expiredAt);
 
   // 6. Tạo đường dẫn gửi tới Client theo biến môi trường CLIENT_URL của Frontend
-  const clientUrl = process.env.CLIENT_URL;
+  const clientUrl = process.env.CLIENT_URL?.replace(/\/+$/, "");
   if (!clientUrl) {
     throw new Error("Missing CLIENT_URL");
   }
