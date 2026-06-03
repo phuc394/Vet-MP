@@ -3,6 +3,9 @@ import axios from "axios";
 
 import "./App.css";
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, "") || "";
+
 function App() {
 
   const [isSuccess, setIsSuccess] =
@@ -25,6 +28,26 @@ function App() {
 
   const handleResetPassword =
   async () => {
+    if (!API_BASE_URL) {
+      setMessage(
+        "API base URL is not configured"
+      );
+
+      setIsSuccess(false);
+
+      return;
+    }
+
+    if (!token) {
+      setMessage(
+        "Reset token is missing"
+      );
+
+      setIsSuccess(false);
+
+      return;
+    }
+
     if (
       newPassword !==
       confirmPassword
@@ -41,7 +64,7 @@ function App() {
     try {
       const response =
         await axios.post(
-          "http://localhost:3001/api/v1/auth/reset-password",
+          `${API_BASE_URL}/api/v1/auth/reset-password`,
           {
             token,
             newPassword,
