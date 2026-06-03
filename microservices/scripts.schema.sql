@@ -9,7 +9,7 @@ CREATE TABLE Users (
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('admin', 'staff', 'customer') NOT NULL,
     status ENUM('active', 'inactive') DEFAULT 'active',
-    avatar VARCHAR(255) NULL,
+    avatar MEDIUMTEXT NULL,
     address TEXT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -50,7 +50,7 @@ CREATE TABLE Pet (
     birth_date DATE NULL,
     weight DECIMAL(5,2) NULL,
     notes TEXT NULL,
-    avatar VARCHAR(255) NULL,
+    avatar MEDIUMTEXT NULL,
     is_deleted BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

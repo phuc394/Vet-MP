@@ -61,33 +61,19 @@ export const styles = StyleSheet.create({
 
   tabInner: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
     flexWrap: 'nowrap',
   },
   tabPill: {
+    flex: 1,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
-    flexGrow: 0,
-    flexShrink: 1,
     margin: 4,
-    flexBasis: '35%',
     minWidth: 0,
-  },
-  tabPillWide: {
-    paddingHorizontal: 24,
-    flexGrow: 0,
-    flexShrink: 1,
-    margin: 4,
-    flexBasis: '65%',
-    minWidth: 0,
-  },
-  tabPillSpacing: {
-    marginRight: 8,
   },
   tabPillActive: {
     backgroundColor: '#F0B15A',

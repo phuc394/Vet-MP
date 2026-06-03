@@ -3,18 +3,18 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  SafeAreaView,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { styles } from './ConfirmAppointmentStyle';
 import { AppDispatch, RootState } from '../../../redux/store';
-import { createAppointmentThunk } from '../../../redux/slices/appointment.slice';
+import { createAppointmentThunk, fetchAppointmentsThunk } from '../../../redux/slices/appointment.slice';
 import type { CatalogService } from '../../../types/catalog.type';
 import type { Pet } from '../../../types/pet.type';
 import { formatAppointmentDatetime } from '../AppointmentUtils';
@@ -59,11 +59,12 @@ export default function ConfirmAppointment() {
           note: appointment.note?.trim() || undefined,
         })
       ).unwrap();
+      dispatch(fetchAppointmentsThunk());
 
       Alert.alert('Appointment created', 'Your appointment has been booked successfully.', [
         {
           text: 'OK',
-          onPress: () => navigation.navigate('Calendar'),
+          onPress: () => navigation.navigate('MainTabs', { screen: 'Calendar' }),
         },
       ]);
     } catch (err) {

@@ -136,7 +136,6 @@ export const styles = StyleSheet.create({
     borderColor: '#E8DDCF',
     padding: 12,
     marginBottom: 30,
-    maxHeight: 320,
   },
   servicesList: {
     paddingBottom: 8,

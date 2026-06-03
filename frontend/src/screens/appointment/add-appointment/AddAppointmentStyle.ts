@@ -152,43 +152,20 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  dateText: {
-    marginLeft: 10,
-    color: '#5A4D3B',
-    fontWeight: '700',
-  },
-  dateTextInput: {
+  datePickerTextWrap: {
     flex: 1,
     marginLeft: 10,
-    color: '#5A4D3B',
-    fontWeight: '700',
-    paddingVertical: 0,
   },
-  timeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  timeChip: {
-    minWidth: 64,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E8DDCF',
-    alignItems: 'center',
-  },
-  timeChipActive: {
-    backgroundColor: '#F0B15A',
-    borderColor: '#F0B15A',
-  },
-  timeText: {
-    color: '#5A4D3B',
+  datePickerLabel: {
+    color: '#8A8A8A',
+    fontSize: 12,
+    marginBottom: 4,
     fontWeight: '700',
   },
-  timeTextActive: {
-    color: '#FFFFFF',
+  datePickerValue: {
+    color: '#5A4D3B',
+    fontWeight: '800',
+    fontSize: 15,
   },
   noteInput: {
     minHeight: 120,
@@ -230,6 +207,10 @@ export const styles = StyleSheet.create({
     padding: 18,
     borderWidth: 1,
     borderColor: '#E8DDCF',
+    maxHeight: '82%',
+  },
+  modalList: {
+    flexGrow: 0,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -306,6 +287,55 @@ export const styles = StyleSheet.create({
     marginTop: 2,
     fontSize: 12,
     color: '#8A8A8A',
+  },
+  pickerInputLabel: {
+    color: '#7A6B56',
+    fontSize: 12,
+    fontWeight: '800',
+    marginBottom: 6,
+    textTransform: 'uppercase',
+  },
+  pickerInput: {
+    minHeight: 48,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E8DDCF',
+    backgroundColor: '#FFF6E8',
+    paddingHorizontal: 14,
+    color: '#2F3B2E',
+    fontWeight: '800',
+    marginBottom: 14,
+  },
+  pickerActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 4,
+  },
+  pickerCancelButton: {
+    flex: 1,
+    minHeight: 46,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: '#E8DDCF',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pickerCancelText: {
+    color: '#465F4D',
+    fontWeight: '900',
+  },
+  pickerApplyButton: {
+    flex: 1,
+    minHeight: 46,
+    borderRadius: 22,
+    backgroundColor: '#F0B15A',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pickerApplyText: {
+    color: '#FFFFFF',
+    fontWeight: '900',
   },
   errorBox: {
     backgroundColor: '#FFF1EA',

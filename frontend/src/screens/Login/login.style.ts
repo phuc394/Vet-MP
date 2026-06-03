@@ -37,29 +37,21 @@ const styles = StyleSheet.create({
   },
 
   topSection: {
-    height: "40%",
+    height: "36%",
     alignItems: "center",
-    justifyContent: "flex-start",
-    paddingTop: 18,
-  },
-
-  avatar: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
-    backgroundColor: "#D9D9D9",
-    marginBottom: 18,
+    justifyContent: "center",
+    paddingTop: 28,
   },
 
   clinicName: {
-    fontSize: 26,
+    fontSize: 40,
     fontWeight: "800",
-    color: colors.text,
+    color: "#465F4D",
   },
 
   formContainer: {
     flex: 1,
-    marginTop: -56,
+    marginTop: -34,
     paddingHorizontal: 47,
   },
 
@@ -82,12 +74,12 @@ const styles = StyleSheet.create({
   },
 
   footer: {
-    marginTop: "auto",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     paddingBottom: 0,
-    marginBottom: 35,
+    marginTop: 24,
+    marginBottom: 54,
   },
 
   footerText: {

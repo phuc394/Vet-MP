@@ -4,15 +4,15 @@ import {
   Alert,
   Image,
   Modal,
-  SafeAreaView,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { styles } from './AddAppointmentStyle';
 import { AppDispatch, RootState } from '../../../redux/store';
@@ -20,25 +20,75 @@ import { fetchPetsThunk } from '../../../redux/slices/pet.slice';
 import catalogService from '../../../services/catalog.service';
 import type { CatalogService } from '../../../types/catalog.type';
 import type { Pet } from '../../../types/pet.type';
-import { toAppointmentDateTime } from '../AppointmentUtils';
 
-const timeSlots = ['08:30', '09:30', '10:30', '13:30', '15:00'];
-
-function getDefaultDate() {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  return tomorrow.toISOString().split('T')[0];
+function pad(value: number) {
+  return String(value).padStart(2, '0');
 }
 
-function addMinutes(dateTime: string, minutes: number) {
-  const date = new Date(dateTime);
-  date.setMinutes(date.getMinutes() + minutes);
-  return date.toISOString();
+function getDefaultAppointmentDate() {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(9, 30, 0, 0);
+  return tomorrow;
+}
+
+function addMinutes(date: Date, minutes: number) {
+  const nextDate = new Date(date);
+  nextDate.setMinutes(nextDate.getMinutes() + minutes);
+  return nextDate;
+}
+
+function toApiDate(date: Date) {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function toApiTime(date: Date) {
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
+}
+
+function toDisplayDateTime(date: Date) {
+  return date.toLocaleString([], {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function parseDateTime(dateValue: string, timeValue: string): Date | null {
+  const dateMatch = dateValue.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const timeMatch = timeValue.trim().match(/^(\d{1,2}):(\d{2})$/);
+
+  if (!dateMatch || !timeMatch) {
+    return null;
+  }
+
+  const year = Number(dateMatch[1]);
+  const month = Number(dateMatch[2]);
+  const day = Number(dateMatch[3]);
+  const hour = Number(timeMatch[1]);
+  const minute = Number(timeMatch[2]);
+
+  const parsed = new Date(year, month - 1, day, hour, minute, 0, 0);
+  if (
+    parsed.getFullYear() !== year ||
+    parsed.getMonth() !== month - 1 ||
+    parsed.getDate() !== day ||
+    parsed.getHours() !== hour ||
+    parsed.getMinutes() !== minute
+  ) {
+    return null;
+  }
+
+  return parsed;
 }
 
 export default function AddAppointment() {
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation<any>();
+  const route = useRoute<any>();
+  const routePet = route.params?.pet as Pet | undefined;
   const { pets, loading: petsLoading, error: petsError } = useSelector((state: RootState) => state.pet);
   const [selectedPetId, setSelectedPetId] = useState<number>(0);
   const [petModalVisible, setPetModalVisible] = useState(false);
@@ -47,8 +97,10 @@ export default function AddAppointment() {
   const [serviceError, setServiceError] = useState<string | null>(null);
   const [selectedServiceId, setSelectedServiceId] = useState<number>(0);
   const [serviceModalVisible, setServiceModalVisible] = useState(false);
-  const [appointmentDate, setAppointmentDate] = useState(getDefaultDate());
-  const [selectedTime, setSelectedTime] = useState(timeSlots[1]);
+  const [appointmentDateTime, setAppointmentDateTime] = useState(getDefaultAppointmentDate());
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [draftDate, setDraftDate] = useState(toApiDate(appointmentDateTime));
+  const [draftTime, setDraftTime] = useState(toApiTime(appointmentDateTime).slice(0, 5));
   const [note, setNote] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -73,10 +125,15 @@ export default function AddAppointment() {
   );
 
   useEffect(() => {
+    if (routePet?.pet_id && selectedPetId !== routePet.pet_id) {
+      setSelectedPetId(routePet.pet_id);
+      return;
+    }
+
     if (!selectedPetId && pets.length > 0) {
       setSelectedPetId(pets[0].pet_id);
     }
-  }, [pets, selectedPetId]);
+  }, [pets, routePet, selectedPetId]);
 
   useEffect(() => {
     if (!selectedServiceId && services.length > 0) {
@@ -85,8 +142,8 @@ export default function AddAppointment() {
   }, [selectedServiceId, services]);
 
   const selectedPet = useMemo<Pet | undefined>(
-    () => pets.find((pet) => pet.pet_id === selectedPetId) ?? pets[0],
-    [pets, selectedPetId]
+    () => pets.find((pet) => pet.pet_id === selectedPetId) ?? routePet ?? pets[0],
+    [pets, routePet, selectedPetId]
   );
 
   const selectedService = useMemo<CatalogService | undefined>(
@@ -107,33 +164,46 @@ export default function AddAppointment() {
       return;
     }
 
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(appointmentDate.trim())) {
-      setLocalError('Appointment date must be YYYY-MM-DD');
-      return;
-    }
-
-    const startTime = toAppointmentDateTime(appointmentDate.trim(), selectedTime);
-    const startDate = new Date(startTime);
-    if (Number.isNaN(startDate.getTime())) {
+    if (Number.isNaN(appointmentDateTime.getTime())) {
       setLocalError('Appointment date or time is invalid');
       return;
     }
 
-    if (startDate <= new Date()) {
+    if (appointmentDateTime <= new Date()) {
       setLocalError('Appointment must be in the future');
       return;
     }
 
+    const endDateTime = addMinutes(appointmentDateTime, 60);
+
     navigation.navigate('ConfirmAppointment', {
       pet: selectedPet,
       service: selectedService,
-      appointmentDate: appointmentDate.trim(),
-      startTime,
-      endTime: addMinutes(startTime, 60),
-      time: selectedTime,
+      appointmentDate: toApiDate(appointmentDateTime),
+      startTime: toApiTime(appointmentDateTime),
+      endTime: toApiTime(endDateTime),
+      time: toApiTime(appointmentDateTime).slice(0, 5),
       note,
     });
+  };
+
+  const openDateTimePicker = () => {
+    setDraftDate(toApiDate(appointmentDateTime));
+    setDraftTime(toApiTime(appointmentDateTime).slice(0, 5));
+    setDatePickerVisible(true);
+  };
+
+  const confirmDateTimePicker = () => {
+    const parsedDate = parseDateTime(draftDate, draftTime);
+
+    if (!parsedDate) {
+      setLocalError('Appointment date and time must be valid');
+      return;
+    }
+
+    setLocalError(null);
+    setAppointmentDateTime(parsedDate);
+    setDatePickerVisible(false);
   };
 
   const isLoading = petsLoading || servicesLoading;
@@ -203,31 +273,14 @@ export default function AddAppointment() {
 
             <View style={styles.sectionCard}>
               <Text style={styles.sectionTitle}>3. Picking date and time</Text>
-              <View style={styles.dateInput}>
+              <TouchableOpacity style={styles.dateInput} activeOpacity={0.85} onPress={openDateTimePicker}>
                 <MaterialCommunityIcons name="calendar-month" size={20} color="#835300" />
-                <TextInput
-                  style={styles.dateTextInput}
-                  value={appointmentDate}
-                  onChangeText={setAppointmentDate}
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor="#9A8C73"
-                />
-              </View>
-              <View style={styles.timeGrid}>
-                {timeSlots.map((time) => {
-                  const isActive = selectedTime === time;
-                  return (
-                    <TouchableOpacity
-                      key={time}
-                      style={[styles.timeChip, isActive && styles.timeChipActive]}
-                      onPress={() => setSelectedTime(time)}
-                      activeOpacity={0.85}
-                    >
-                      <Text style={[styles.timeText, isActive && styles.timeTextActive]}>{time}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+                <View style={styles.datePickerTextWrap}>
+                  <Text style={styles.datePickerLabel}>Appointment date and time</Text>
+                  <Text style={styles.datePickerValue}>{toDisplayDateTime(appointmentDateTime)}</Text>
+                </View>
+                <MaterialCommunityIcons name="chevron-down" size={22} color="#835300" />
+              </TouchableOpacity>
             </View>
 
             <View style={styles.sectionCard}>
@@ -260,24 +313,26 @@ export default function AddAppointment() {
               </TouchableOpacity>
             </View>
 
-            {services.map((service) => {
-              const isActive = selectedServiceId === service.service_id;
-              return (
-                <TouchableOpacity
-                  key={service.service_id}
-                  style={[styles.modalServiceItem, isActive && styles.modalServiceItemActive]}
-                  onPress={() => {
-                    setSelectedServiceId(service.service_id);
-                    setServiceModalVisible(false);
-                  }}
-                  activeOpacity={0.85}
-                >
-                  <Text style={[styles.modalServiceText, isActive && styles.modalServiceTextActive]}>
-                    {service.name} - {Number(service.price).toFixed(0)}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+            <ScrollView style={styles.modalList} showsVerticalScrollIndicator={false}>
+              {services.map((service) => {
+                const isActive = selectedServiceId === service.service_id;
+                return (
+                  <TouchableOpacity
+                    key={service.service_id}
+                    style={[styles.modalServiceItem, isActive && styles.modalServiceItemActive]}
+                    onPress={() => {
+                      setSelectedServiceId(service.service_id);
+                      setServiceModalVisible(false);
+                    }}
+                    activeOpacity={0.85}
+                  >
+                    <Text style={[styles.modalServiceText, isActive && styles.modalServiceTextActive]}>
+                      {service.name} - {Number(service.price).toFixed(0)}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -292,33 +347,76 @@ export default function AddAppointment() {
               </TouchableOpacity>
             </View>
 
-            {pets.map((pet) => {
-              const isActive = pet.pet_id === selectedPetId;
-              return (
-                <TouchableOpacity
-                  key={pet.pet_id}
-                  style={[styles.modalPetItem, isActive && styles.modalPetItemActive]}
-                  onPress={() => {
-                    setSelectedPetId(pet.pet_id);
-                    setPetModalVisible(false);
-                  }}
-                  activeOpacity={0.85}
-                >
-                  {pet.avatar ? (
-                    <Image source={{ uri: pet.avatar }} style={styles.modalPetAvatar} />
-                  ) : (
-                    <View style={styles.modalPetAvatarPlaceholder}>
-                      <MaterialCommunityIcons name="paw" size={18} color="#835300" />
+            <ScrollView style={styles.modalList} showsVerticalScrollIndicator={false}>
+              {pets.map((pet) => {
+                const isActive = pet.pet_id === selectedPetId;
+                return (
+                  <TouchableOpacity
+                    key={pet.pet_id}
+                    style={[styles.modalPetItem, isActive && styles.modalPetItemActive]}
+                    onPress={() => {
+                      setSelectedPetId(pet.pet_id);
+                      setPetModalVisible(false);
+                    }}
+                    activeOpacity={0.85}
+                  >
+                    {pet.avatar ? (
+                      <Image source={{ uri: pet.avatar }} style={styles.modalPetAvatar} />
+                    ) : (
+                      <View style={styles.modalPetAvatarPlaceholder}>
+                        <MaterialCommunityIcons name="paw" size={18} color="#835300" />
+                      </View>
+                    )}
+                    <View style={styles.modalPetTextWrap}>
+                      <Text style={styles.modalPetName}>{pet.name}</Text>
+                      <Text style={styles.modalPetMeta}>{[pet.species, pet.breed].filter(Boolean).join(' / ') || 'Unknown'}</Text>
                     </View>
-                  )}
-                  <View style={styles.modalPetTextWrap}>
-                    <Text style={styles.modalPetName}>{pet.name}</Text>
-                    <Text style={styles.modalPetMeta}>{[pet.species, pet.breed].filter(Boolean).join(' / ') || 'Unknown'}</Text>
-                  </View>
-                  <View style={[styles.selectionDot, isActive && styles.selectionDotActive]} />
-                </TouchableOpacity>
-              );
-            })}
+                    <View style={[styles.selectionDot, isActive && styles.selectionDotActive]} />
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal transparent visible={datePickerVisible} animationType="fade" onRequestClose={() => setDatePickerVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Pick date and time</Text>
+              <TouchableOpacity onPress={() => setDatePickerVisible(false)} hitSlop={10}>
+                <MaterialCommunityIcons name="close" size={22} color="#465F4D" />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.pickerInputLabel}>Date</Text>
+            <TextInput
+              style={styles.pickerInput}
+              value={draftDate}
+              onChangeText={setDraftDate}
+              placeholder="YYYY-MM-DD"
+              placeholderTextColor="#9A8C73"
+            />
+
+            <Text style={styles.pickerInputLabel}>Time</Text>
+            <TextInput
+              style={styles.pickerInput}
+              value={draftTime}
+              onChangeText={setDraftTime}
+              placeholder="HH:mm"
+              placeholderTextColor="#9A8C73"
+              keyboardType="numbers-and-punctuation"
+            />
+
+            <View style={styles.pickerActions}>
+              <TouchableOpacity style={styles.pickerCancelButton} activeOpacity={0.85} onPress={() => setDatePickerVisible(false)}>
+                <Text style={styles.pickerCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.pickerApplyButton} activeOpacity={0.9} onPress={confirmDateTimePicker}>
+                <Text style={styles.pickerApplyText}>Apply</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>

@@ -16,20 +16,61 @@ type ResourceFormProps = {
     onCancel: () => void;
 };
 
-const formatInitialValue = (value: unknown) => {
+const formatDateInputValue = (value: unknown) => {
+    if (value === null || value === undefined || value === "") {
+        return "";
+    }
+
+    const raw = String(value);
+    const dateMatch = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (dateMatch) {
+        return dateMatch[1];
+    }
+
+    const date = new Date(raw);
+    if (Number.isNaN(date.getTime())) {
+        return "";
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+};
+
+const formatTimeInputValue = (value: unknown) => {
+    if (value === null || value === undefined || value === "") {
+        return "";
+    }
+
+    const raw = String(value);
+    const timeMatch = raw.match(/(?:T|\s)?(\d{2}:\d{2})/);
+    return timeMatch ? timeMatch[1] : "";
+};
+
+const formatInitialValue = (value: unknown, type?: FormField["type"]) => {
     if (typeof value === "boolean") {
         return value;
     }
     if (value === null || value === undefined) {
         return "";
     }
+
+    if (type === "date") {
+        return formatDateInputValue(value);
+    }
+
+    if (type === "time") {
+        return formatTimeInputValue(value);
+    }
+
     return String(value).slice(0, 16);
 };
 
 const ResourceForm = ({ fields, initialValues = {}, submitLabel, onSubmit, onCancel }: ResourceFormProps) => {
     const defaultValues = useMemo(() => {
         return fields.reduce<Record<string, unknown>>((values, field) => {
-            values[field.name] = formatInitialValue(initialValues[field.name]);
+            values[field.name] = formatInitialValue(initialValues[field.name], field.type);
             return values;
         }, {});
     }, [fields, initialValues]);

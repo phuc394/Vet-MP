@@ -1,0 +1,110 @@
+import { Platform, StyleSheet } from 'react-native';
+
+export const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FFF9EC',
+  },
+  container: {
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'android' ? 36 : 20,
+    paddingBottom: 36,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 18,
+  },
+  backButton: {
+    marginRight: 12,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E8DDCF',
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#465F4D',
+  },
+  centerState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+  },
+  stateCard: {
+    backgroundColor: '#FFF6E8',
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: '#E8DDCF',
+    padding: 16,
+  },
+  stateText: {
+    color: '#5A4D3B',
+    lineHeight: 20,
+    marginTop: 8,
+  },
+  servicesList: {
+    paddingBottom: 8,
+  },
+  serviceCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 14,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#E8DDCF',
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  serviceIconWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: 18,
+    backgroundColor: '#FFF3E6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#F0D7B0',
+    marginRight: 12,
+  },
+  serviceCardBody: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  serviceName: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#2F3B2E',
+    marginBottom: 4,
+  },
+  serviceDescription: {
+    fontSize: 13,
+    color: '#6E6E6E',
+    lineHeight: 18,
+    marginBottom: 10,
+  },
+  serviceMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  servicePrice: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#465F4D',
+  },
+  serviceDuration: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#8A8A8A',
+  },
+});

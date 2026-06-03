@@ -1,14 +1,6 @@
 import type { Pet } from '../../types/pet.type';
 
-export interface Vaccination {
-  id: number;
-  pet_id: number;
-  name: string;
-  date_given: string;
-  expiration_date: string;
-}
-
-export type TabState = 'Information' | 'Vaccinations';
+export type TabState = 'Information' | 'Appointment';
 
 export const emptyPet: Pet = {
   pet_id: 0,
@@ -57,15 +49,4 @@ export function formatDisplayDate(dateString: string | null | undefined): string
     month: 'short',
     day: '2-digit',
   });
-}
-
-export function checkVaccineStatus(expirationDateStr: string): 'Valid' | 'Expired' {
-  const expirationDate = new Date(expirationDateStr);
-  if (Number.isNaN(expirationDate.getTime())) return 'Expired';
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  expirationDate.setHours(0, 0, 0, 0);
-
-  return expirationDate >= today ? 'Valid' : 'Expired';
 }

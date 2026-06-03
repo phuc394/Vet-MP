@@ -16,6 +16,7 @@ import Profile from "../screens/profile/Profile";
 import Calendar from "../screens/calendar/Calendar";
 import AppointmentDetail from "../screens/appointment/detail/AppointmentDetail";
 import ServiceDetail from "../screens/home/service-detail/ServiceDetail";
+import ServiceList from "../screens/home/service-list/ServiceList";
 const BottomTabs = createBottomTabNavigator({
   screenOptions: {
     headerShown: false,
@@ -50,6 +51,7 @@ const RootStack = createNativeStackNavigator({
     AddPet,
     AddAppointment,
     ConfirmAppointment,
+    ServiceList,
     ServiceDetail,
   },
 });

@@ -25,6 +25,22 @@ services:
       retries: 10
       start_period: 20s
 
+  seed-data:
+    image: mysql:8.4
+    container_name: vet-mp-seed-data
+    restart: "no"
+    environment:
+      MYSQL_ROOT_PASSWORD: *mysql_root_password
+    volumes:
+      - ./microservices/scripts.seed.sql:/seed/scripts.seed.sql:ro
+    command:
+      - sh
+      - -c
+      - mysql -hmysql -uroot -p"$$MYSQL_ROOT_PASSWORD" < /seed/scripts.seed.sql
+    depends_on:
+      mysql:
+        condition: service_healthy
+
   auth-service:
     build:
       context: ./microservices/AuthService
@@ -46,6 +62,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      seed-data:
+        condition: service_completed_successfully
 
   pet-service:
     build:
@@ -66,6 +84,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      seed-data:
+        condition: service_completed_successfully
 
   catalog-service:
     build:
@@ -85,6 +105,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      seed-data:
+        condition: service_completed_successfully
 
   inventory-service:
     build:
@@ -104,6 +126,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      seed-data:
+        condition: service_completed_successfully
 
   appointment-service:
     build:
@@ -123,6 +147,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      seed-data:
+        condition: service_completed_successfully
 
   medical-record-service:
     build:
@@ -142,6 +168,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      seed-data:
+        condition: service_completed_successfully
 
   report-service:
     build:
@@ -166,6 +194,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      seed-data:
+        condition: service_completed_successfully
 
   api-gateway:
     build:

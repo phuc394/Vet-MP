@@ -6,10 +6,10 @@ import {
   FlatList, 
   Image, 
   TouchableOpacity, 
-  SafeAreaView,
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './PetStyle';
@@ -36,14 +36,6 @@ const PetScreen = () => {
     }, [accessToken, dispatch])
   );
 
-  const filteredPets = useMemo(
-    () =>
-      pets.filter((pet) =>
-        pet.name.toLowerCase().includes(searchQuery.toLowerCase())
-      ),
-    [pets, searchQuery]
-  );
-
   const formatWeight = (weight: Pet['weight']) => {
     if (weight === null || weight === undefined || weight === '') {
       return 'N/A';
@@ -56,6 +48,27 @@ const PetScreen = () => {
 
     return `${numericWeight.toFixed(2)} kg`;
   };
+
+  const filteredPets = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+
+    if (!normalizedQuery) {
+      return pets;
+    }
+
+    return pets.filter((pet) => {
+      const searchableFields = [
+        pet.name,
+        pet.species,
+        String(pet.weight ?? ''),
+        formatWeight(pet.weight),
+      ];
+
+      return searchableFields.some((field) =>
+        field?.toLowerCase().includes(normalizedQuery)
+      );
+    });
+  }, [pets, searchQuery]);
 
   // Render từng card thú cưng
   const renderPetCard = ({ item }: { item: Pet }) => (
@@ -117,7 +130,7 @@ const PetScreen = () => {
           <Ionicons name="search-outline" size={20} color="#333" />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search By Name"
+            placeholder="Search by name, species, or weight"
             placeholderTextColor="#777"
             value={searchQuery}
             onChangeText={setSearchQuery}

@@ -24,6 +24,26 @@ const SORT_FIELDS = [
 const DATE_FIELDS = ['created_at', 'updated_at'];
 const DEFAULT_SORT_BY = 'created_at';
 
+type ServiceRow = Omit<Service, 'is_active'> & {
+    is_active: boolean | number | string | Buffer;
+};
+
+function normalizeService(row: ServiceRow): Service {
+    const rawIsActive = row.is_active;
+    const isActive = Buffer.isBuffer(rawIsActive)
+        ? rawIsActive[0] === 1
+        : rawIsActive === true || rawIsActive === 1 || rawIsActive === '1';
+
+    return {
+        ...row,
+        is_active: isActive
+    };
+}
+
+function normalizeServices(rows: unknown): Service[] {
+    return (rows as ServiceRow[]).map(normalizeService);
+}
+
 function resolveSort(query?: ServiceSortQuery): { sortBy: string; order: SortOrder; mode: SortMode } {
     const sortByRaw = typeof query?.sortBy === 'string' ? query.sortBy.trim() : '';
     const sortBy = sortByRaw.length > 0 ? sortByRaw : DEFAULT_SORT_BY;
@@ -54,12 +74,12 @@ function resolveSort(query?: ServiceSortQuery): { sortBy: string; order: SortOrd
 async function getAllServices(sortQuery?: ServiceSortQuery): Promise<Service[]> {
     const { sortBy, order } = resolveSort(sortQuery);
     const [rows] = await connection.query(`SELECT * FROM Service ORDER BY ${sortBy} ${order}`);
-    return rows as Service[];
+    return normalizeServices(rows);
 }
 
 async function getServiceById(id: number): Promise<Service | null> {
     const [rows] = await connection.query('SELECT * FROM Service WHERE service_id = ?', [id]);
-    const services = rows as Service[];
+    const services = normalizeServices(rows);
     return services.length > 0 ? services[0] ?? null : null;
 }
 
@@ -122,7 +142,7 @@ async function searchServices(filters: ServiceSearchFilters): Promise<Service[]>
 
     sql += ' LIMIT 10';
     const [rows] = await connection.query(sql, params);
-    return rows as Service[];
+    return normalizeServices(rows);
 }
 
 export {

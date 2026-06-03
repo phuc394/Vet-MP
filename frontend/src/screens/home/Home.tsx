@@ -3,22 +3,18 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
-  SafeAreaView,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import {
-  Modal,
-} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import { fetchPetsThunk } from '../../redux/slices/pet.slice';
 import catalogService from '../../services/catalog.service';
-import api from '../../config/api';
 import type { CatalogService } from '../../types/catalog.type';
 import type { Pet } from '../../types/pet.type';
 import { styles } from './HomeStyle';
@@ -28,7 +24,6 @@ import {
   getServiceIconName,
   getServiceLabel,
 } from './HomeUtils';
-import SupportCard from '../../components/SupportCard';
 
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
@@ -39,22 +34,14 @@ export default function Home() {
   const [services, setServices] = useState<CatalogService[]>([]);
   const [servicesLoading, setServicesLoading] = useState(false);
   const [servicesError, setServicesError] = useState<string | null>(null);
-  const [rawResponse, setRawResponse] = useState<string | null>(null);
-  const [serviceModalVisible, setServiceModalVisible] = useState(false);
 
   const loadServices = useCallback(async () => {
     try {
       setServicesLoading(true);
       setServicesError(null);
-      // Call via api directly to capture raw response for debugging
-      const resp = await api.get('/catalog/services');
-      setRawResponse(JSON.stringify(resp.data, null, 2));
-      const result = resp.data?.data ?? [];
-      setServices(result.filter((service: any) => service.is_active));
+      const result = await catalogService.getServices();
+      setServices(result.filter((service) => service.is_active));
     } catch (error: any) {
-      setRawResponse(
-        error.response ? JSON.stringify(error.response.data, null, 2) : String(error)
-      );
       setServicesError(error.response?.data?.message || 'Get services failed');
     } finally {
       setServicesLoading(false);
@@ -90,6 +77,7 @@ export default function Home() {
 
   const showPetsLoading = petLoading && pets.length === 0;
   const showServicesLoading = servicesLoading && services.length === 0;
+  const previewServices = services.slice(0, 3);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -157,15 +145,15 @@ export default function Home() {
         {/* Khu vực Services */}
         <View style={styles.servicesHeader}>
           <Text style={styles.servicesTitle}>Services</Text>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => setServiceModalVisible(true)}>
+          <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('ServiceList')}>
             <Text style={styles.seeAllText}>see all</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.servicesFrame}>
-          {services.length > 0 ? (
+          {previewServices.length > 0 ? (
             <View style={styles.servicesList}>
-              {services.map(renderServiceCard)}
+              {previewServices.map(renderServiceCard)}
             </View>
           ) : (
             !showServicesLoading && (
@@ -175,42 +163,6 @@ export default function Home() {
             )
           )}
         </View>
-
-        <Modal visible={serviceModalVisible} animationType="fade" transparent>
-          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center' }}>
-            <View style={{ margin: 20, backgroundColor: '#fff', borderRadius: 12, maxHeight: '80%' }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 12, borderBottomWidth: 1, borderColor: '#eee' }}>
-                <Text style={{ fontSize: 18, fontWeight: '800' }}>All services</Text>
-                <TouchableOpacity onPress={() => setServiceModalVisible(false)} hitSlop={10}>
-                  <Text style={{ color: '#7D4600', fontWeight: '700' }}>Close</Text>
-                </TouchableOpacity>
-              </View>
-
-              <ScrollView contentContainerStyle={{ padding: 12 }}>
-                {services.length === 0 ? (
-                  <View style={styles.stateCard}>
-                    <Text style={styles.stateText}>No services available</Text>
-                  </View>
-                ) : (
-                  services.map((s) => (
-                    <TouchableOpacity key={s.service_id} style={[styles.serviceCard, { marginBottom: 10 }]} onPress={() => { setServiceModalVisible(false); navigation.navigate('ServiceDetail', { serviceId: s.service_id, service: s }); }}>
-                      <View style={styles.serviceIconWrap}>
-                        <MaterialCommunityIcons name={getServiceIconName(s) as any} size={22} color="#835300" />
-                      </View>
-                      <View style={styles.serviceCardBody}>
-                        <Text style={styles.serviceName}>{s.name}</Text>
-                        <Text style={styles.serviceDescription} numberOfLines={2}>{getServiceLabel(s)}</Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))
-                )}
-              </ScrollView>
-            </View>
-          </View>
-        </Modal>
-
-        {/* Bảng Hỗ trợ / Reschedule */}
-        <SupportCard />
 
       </ScrollView>
     </SafeAreaView>
