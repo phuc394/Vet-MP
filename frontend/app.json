@@ -1,17 +1,17 @@
 {
   "expo": {
-    "name": "frontend",
+    "name": "VetCare",
     "slug": "frontend",
     "scheme": "petclinic",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/vet-care-icon.png",
     "userInterfaceStyle": "light",
     "plugins": [
       [
         "expo-splash-screen",
         {
-          "image": "./assets/vetcare-splash-logo.png",
+          "image": "./assets/vet-care-splash-screen.png",
           "imageWidth": 240,
           "resizeMode": "contain",
           "backgroundColor": "#FFF9EC"
@@ -22,14 +22,20 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.vetcare.app",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFF9EC"
+        "foregroundImage": "./assets/vet-care-icon.png",
+        "backgroundColor": "#FFFFFF"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "3b69be8d-93f8-42af-95d2-a7afbb3fc166"
+      }
     }
   }
 }
