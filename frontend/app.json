@@ -12,8 +12,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/vet-care-splash-screen.png",
-          "imageWidth": 240,
-          "resizeMode": "contain",
+          "resizeMode": "cover",
           "backgroundColor": "#FFF9EC"
         }
       ]
