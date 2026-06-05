@@ -324,6 +324,13 @@ const forgotPassword = async (email: string): Promise<ForgotPasswordResponse> =>
       to: user.email, // Dùng email chuẩn lấy trực tiếp từ DB ra
       subject: "Reset Password",
       text: `Click this link to reset password:\n\n${resetLink}\n\nThis link expires in 5 minutes.`,
+      templateParams: {
+        to_email: user.email,
+        user_name: user.full_name,
+        reset_link: resetLink,
+        app_name: "PetClinic",
+        expires_in: "5 phut",
+      },
       html: `<p>Bạn đã yêu cầu đặt lại mật khẩu tại PetClinic.</p>
              <p>Vui lòng click vào liên kết sau để thực hiện:</p>
              <p><a href="${resetLink}">Đặt lại mật khẩu</a></p>
