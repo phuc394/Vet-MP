@@ -325,6 +325,7 @@ const forgotPassword = async (email: string): Promise<ForgotPasswordResponse> =>
       subject: "Reset Password",
       text: `Click this link to reset password:\n\n${resetLink}\n\nThis link expires in 5 minutes.`,
       templateParams: {
+        email: user.email,
         to_email: user.email,
         user_name: user.full_name,
         reset_link: resetLink,
