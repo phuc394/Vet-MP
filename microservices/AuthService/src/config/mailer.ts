@@ -1,5 +1,8 @@
 import nodemailer from "nodemailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
+import dns from "dns";
+
+dns.setDefaultResultOrder("ipv4first");
 
 function cleanEnvValue(value: string | undefined) {
   return value?.trim().replace(/^["']|["']$/g, "");
