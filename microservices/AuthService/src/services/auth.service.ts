@@ -307,7 +307,9 @@ const forgotPassword = async (email: string): Promise<ForgotPasswordResponse> =>
   await AuthModel.saveResetToken(user.user_id, hashedToken, expiredAt);
 
   // 6. Tạo đường dẫn gửi tới Client theo biến môi trường CLIENT_URL của Frontend
-  const clientUrl = process.env.CLIENT_URL?.replace(/\/+$/, "");
+  const clientUrl =
+    process.env.CLIENT_URL?.trim().replace(/^["']|["']$/g, "").replace(/\/+$/, "") ||
+    "http://localhost:5173";
   if (!clientUrl) {
     throw new Error("Missing CLIENT_URL");
   }
@@ -318,7 +320,7 @@ const forgotPassword = async (email: string): Promise<ForgotPasswordResponse> =>
   // Bọc vào try-catch để nếu lỗi cấu hình SMTP Gmail không làm sập (crash) toàn bộ API Auth
   try {
     await transporter.sendMail({
-      from: `"PetClinic Security" <${process.env.SMTP_EMAIL}>`,
+      from: `"PetClinic Security" <${process.env.SMTP_EMAIL?.trim().replace(/^["']|["']$/g, "")}>`,
       to: user.email, // Dùng email chuẩn lấy trực tiếp từ DB ra
       subject: "Reset Password",
       text: `Click this link to reset password:\n\n${resetLink}\n\nThis link expires in 5 minutes.`,

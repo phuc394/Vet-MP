@@ -17,6 +17,14 @@ const isProduction = process.env.NODE_ENV === "production";
 const openApiPath = path.resolve(__dirname, "openapi", "gateway.yml");
 let bundledOpenApiSpec: unknown;
 
+function cleanEnvValue(value: string) {
+  return value.trim().replace(/^["']|["']$/g, "");
+}
+
+function cleanUrl(value: string) {
+  return cleanEnvValue(value).replace(/\/+$/, "");
+}
+
 function getServiceUrl(envName: string, fallback: string) {
   const value = process.env[envName];
 
@@ -24,7 +32,7 @@ function getServiceUrl(envName: string, fallback: string) {
     throw new Error(`Missing ${envName}. Set the Railway service URL before deploying.`);
   }
 
-  return (value ?? fallback).replace(/\/+$/, "");
+  return cleanUrl(value ?? fallback);
 }
 
 const serviceUrls = {
@@ -52,7 +60,7 @@ if (isProduction && !process.env.CORS_ALLOWED_ORIGINS) {
 
 const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS ?? defaultAllowedOrigins.join(","))
   .split(",")
-  .map((origin) => origin.trim())
+  .map((origin) => cleanUrl(origin))
   .filter(Boolean);
 
 const allowAllOrigins = allowedOrigins.includes("*");

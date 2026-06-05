@@ -11,6 +11,14 @@ dotenv.config();
 
 const app = express();
 
+function cleanEnvValue(value: string) {
+  return value.trim().replace(/^["']|["']$/g, "");
+}
+
+function cleanOrigin(value: string) {
+  return cleanEnvValue(value).replace(/\/+$/, "");
+}
+
 const defaultAllowedOrigins = [
   "http://localhost:3000",
   "http://127.0.0.1:3000",
@@ -22,7 +30,7 @@ const defaultAllowedOrigins = [
 
 const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS ?? defaultAllowedOrigins.join(","))
   .split(",")
-  .map((origin) => origin.trim())
+  .map((origin) => cleanOrigin(origin))
   .filter(Boolean);
 
 const allowAllOrigins = allowedOrigins.includes("*");

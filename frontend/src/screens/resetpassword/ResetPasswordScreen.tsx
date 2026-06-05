@@ -56,8 +56,9 @@ useEffect(() => {
 const route = useRoute<any>();
 
 const token =
-  route.params?.token ??
-  "";
+  typeof route.params?.token === "string"
+    ? route.params.token
+    : "";
 
 const handleResetPassword =
   async () => {
@@ -80,9 +81,16 @@ const handleResetPassword =
       return;
     }
 
+    if (!token) {
+      setError(
+        "Reset link is invalid or missing token"
+      );
+      return;
+    }
+
     dispatch(
       resetPasswordThunk({
-        token :"13dd30dea0ab59551541693ab94817722261b6a78d1ae9f5db6ca9af7fd90d1b",
+        token,
         newPassword,
       })
     );

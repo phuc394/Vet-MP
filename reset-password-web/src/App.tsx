@@ -4,7 +4,8 @@ import axios from "axios";
 import "./App.css";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, "") || "";
+  import.meta.env.VITE_API_BASE_URL?.trim().replace(/^["']|["']$/g, "").replace(/\/+$/, "") ||
+  "http://localhost:3000";
 
 function App() {
 
