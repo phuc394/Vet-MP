@@ -37,9 +37,9 @@ const menuItems = [
         label: "Inventory",
         icon: Inventory2Icon,
         children: [
-            { label: "Medicine_Inventory", path: "/inventory/medicine" },
+            { label: "Medicine Inventory", path: "/inventory/medicine" },
             { label: "Suppliers", path: "/inventory/suppliers" },
-            { label: "Inventory_Transaction", path: "/inventory/transactions" },
+            { label: "Inventory Transactions", path: "/inventory/transactions" },
         ],
     },
     { label: "Staff", icon: LocalHospitalIcon, path: "/staff" },

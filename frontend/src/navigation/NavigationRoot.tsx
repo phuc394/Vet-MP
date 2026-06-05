@@ -42,7 +42,10 @@ const RootStack = createNativeStackNavigator({
     Login: LoginScreen,
     Register: RegisterScreen,
     ForgetPassword: ForgetPasswordScreen, 
-    ResetPassword: ResetPasswordScreen,   
+    ResetPassword: {
+      screen: ResetPasswordScreen,
+      linking: "reset-password",
+    },
 
     // Luồng Main App 
     MainTabs: BottomTabs,
