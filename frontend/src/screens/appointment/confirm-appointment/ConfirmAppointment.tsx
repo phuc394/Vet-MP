@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Image,
   ScrollView,
   Text,
@@ -18,6 +17,7 @@ import { createAppointmentThunk, fetchAppointmentsThunk } from '../../../redux/s
 import type { CatalogService } from '../../../types/catalog.type';
 import type { Pet } from '../../../types/pet.type';
 import { formatAppointmentDatetime } from '../AppointmentUtils';
+import { showPlatformAlert } from '../../../utils/platformAlert';
 
 type ConfirmParams = {
   pet?: Pet;
@@ -61,7 +61,7 @@ export default function ConfirmAppointment() {
       ).unwrap();
       dispatch(fetchAppointmentsThunk());
 
-      Alert.alert('Appointment created', 'Your appointment has been booked successfully.', [
+      showPlatformAlert('Appointment created', 'Your appointment has been booked successfully.', [
         {
           text: 'OK',
           onPress: () => navigation.navigate('MainTabs', { screen: 'Calendar' }),
@@ -70,7 +70,7 @@ export default function ConfirmAppointment() {
     } catch (err) {
       const message = typeof err === 'string' ? err : 'Create appointment failed';
       setLocalError(message);
-      Alert.alert('Create appointment failed', message);
+      showPlatformAlert('Create appointment failed', message);
     }
   };
 

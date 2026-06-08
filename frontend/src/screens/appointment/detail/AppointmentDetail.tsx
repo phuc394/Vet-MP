@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Modal,
   ScrollView,
@@ -28,6 +27,44 @@ import {
 } from '../../../redux/slices/appointment.slice';
 import type { Appointment } from '../../../types/appointment.type';
 import type { Pet } from '../../../types/pet.type';
+import { showPlatformAlert } from '../../../utils/platformAlert';
+import api from '../../../config/api';
+
+type MedicalRecord = {
+  record_id: number;
+  appointment_id: number;
+  symptoms?: string | null;
+  diagnosis?: string | null;
+  notes?: string | null;
+  status?: string;
+};
+
+type Prescription = {
+  prescription_id: number;
+  record_id: number;
+  medicine_id: number;
+  quantity: number;
+  dosage?: string | null;
+  usage_instructions?: string | null;
+  notes?: string | null;
+};
+
+type ReExamination = {
+  re_exam_id: number;
+  record_id: number;
+  suggested_date: string;
+  reason: string;
+  is_booked: boolean;
+};
+
+type Medicine = {
+  medicine_id: number;
+  name: string;
+};
+
+type ApiListResponse<T> = {
+  data: T[];
+};
 
 function formatWeight(weight: number | string | null | undefined) {
   if (weight === null || weight === undefined || weight === '') {
@@ -42,6 +79,21 @@ function formatWeight(weight: number | string | null | undefined) {
   return `${numericWeight.toFixed(2)} kg`;
 }
 
+function formatDate(value: string | Date | null | undefined) {
+  if (!value) return 'N/A';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleDateString([], {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  });
+}
+
 export default function AppointmentDetail() {
   const dispatch = useDispatch<AppDispatch>();
   const navigation: any = useNavigation();
@@ -51,6 +103,11 @@ export default function AppointmentDetail() {
   const serviceName = route.params?.serviceName as string | undefined;
   const source = route.params?.source;
   const [modalContent, setModalContent] = useState<{ title: string; text: string } | null>(null);
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [reExaminations, setReExaminations] = useState<ReExamination[]>([]);
+  const [medicineNames, setMedicineNames] = useState<Record<number, string>>({});
+  const [medicalInfoLoading, setMedicalInfoLoading] = useState(false);
+  const [medicalInfoError, setMedicalInfoError] = useState<string | null>(null);
   const { selectedAppointment, detailLoading, detailError, updating, updateError } = useSelector(
     (state: RootState) => state.appointment
   );
@@ -78,10 +135,77 @@ export default function AppointmentDetail() {
     [appointment?.pet_id, pets, routePet]
   );
 
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const loadMedicalInfo = async () => {
+        if (!appointment?.appointment_id) {
+          return;
+        }
+
+        setMedicalInfoLoading(true);
+        setMedicalInfoError(null);
+
+        try {
+          const recordsResponse = await api.get<ApiListResponse<MedicalRecord>>('/medical-records/search', {
+            params: { appointmentId: appointment.appointment_id },
+          });
+          const record = recordsResponse.data.data[0] ?? null;
+
+          if (!isActive) return;
+
+          if (!record?.record_id) {
+            setPrescriptions([]);
+            setReExaminations([]);
+            setMedicineNames({});
+            return;
+          }
+
+          const [prescriptionsResponse, reExaminationsResponse, medicinesResponse] = await Promise.all([
+            api.get<ApiListResponse<Prescription>>('/prescriptions/search', {
+              params: { recordId: record.record_id },
+            }),
+            api.get<ApiListResponse<ReExamination>>('/re-examinations/search', {
+              params: { recordId: record.record_id },
+            }),
+            api.get<ApiListResponse<Medicine>>('/catalog/medicines'),
+          ]);
+
+          if (!isActive) return;
+
+          const medicinesById = Object.fromEntries(
+            medicinesResponse.data.data.map((medicine) => [medicine.medicine_id, medicine.name])
+          );
+
+          setPrescriptions(prescriptionsResponse.data.data ?? []);
+          setReExaminations(reExaminationsResponse.data.data ?? []);
+          setMedicineNames(medicinesById);
+        } catch (error: any) {
+          if (!isActive) return;
+          setPrescriptions([]);
+          setReExaminations([]);
+          setMedicineNames({});
+          setMedicalInfoError(error.response?.data?.message || 'Could not load medical details.');
+        } finally {
+          if (isActive) {
+            setMedicalInfoLoading(false);
+          }
+        }
+      };
+
+      loadMedicalInfo();
+
+      return () => {
+        isActive = false;
+      };
+    }, [appointment?.appointment_id])
+  );
+
   const handleCancel = () => {
     if (!appointment || updating) return;
 
-    Alert.alert('Cancel appointment', 'Do you want to cancel this appointment?', [
+    showPlatformAlert('Cancel appointment', 'Do you want to cancel this appointment?', [
       { text: 'No', style: 'cancel' },
       {
         text: 'Cancel appointment',
@@ -99,7 +223,7 @@ export default function AppointmentDetail() {
             ).unwrap();
           } catch (err) {
             const message = typeof err === 'string' ? err : 'Cancel appointment failed';
-            Alert.alert('Cancel failed', message);
+            showPlatformAlert('Cancel failed', message);
           }
         },
       },
@@ -143,6 +267,12 @@ export default function AppointmentDetail() {
         {(detailError || updateError) && (
           <View style={styles.errorBox}>
             <Text style={styles.errorText}>{detailError || updateError}</Text>
+          </View>
+        )}
+
+        {medicalInfoError && (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{medicalInfoError}</Text>
           </View>
         )}
 
@@ -260,6 +390,68 @@ export default function AppointmentDetail() {
                 </Text>
               </View>
             </TouchableOpacity>
+          )}
+        </View>
+
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.iconBox}>
+              <MaterialCommunityIcons name="pill" size={20} color="#835300" />
+            </View>
+            <Text style={styles.sectionTitle}>Prescription</Text>
+          </View>
+
+          {medicalInfoLoading ? (
+            <View style={styles.inlineState}>
+              <ActivityIndicator size="small" color="#465F4D" />
+              <Text style={styles.inlineStateText}>Loading prescription...</Text>
+            </View>
+          ) : prescriptions.length === 0 ? (
+            <Text style={styles.emptySectionText}>No prescription recorded for this appointment.</Text>
+          ) : (
+            prescriptions.map((prescription) => (
+              <View key={prescription.prescription_id} style={styles.prescriptionItem}>
+                <Text style={styles.prescriptionTitle}>
+                  {medicineNames[prescription.medicine_id] ?? `Medicine #${prescription.medicine_id}`}
+                </Text>
+                <Text style={styles.prescriptionMeta}>Quantity: {prescription.quantity}</Text>
+                {!!prescription.dosage && <Text style={styles.prescriptionMeta}>Dosage: {prescription.dosage}</Text>}
+                {!!prescription.usage_instructions && (
+                  <Text style={styles.prescriptionMeta}>Usage: {prescription.usage_instructions}</Text>
+                )}
+                {!!prescription.notes && <Text style={styles.prescriptionMeta}>Notes: {prescription.notes}</Text>}
+              </View>
+            ))
+          )}
+        </View>
+
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.iconBox}>
+              <MaterialCommunityIcons name="calendar-refresh" size={20} color="#835300" />
+            </View>
+            <Text style={styles.sectionTitle}>Re-examinations</Text>
+          </View>
+
+          {medicalInfoLoading ? (
+            <View style={styles.inlineState}>
+              <ActivityIndicator size="small" color="#465F4D" />
+              <Text style={styles.inlineStateText}>Loading follow-up...</Text>
+            </View>
+          ) : reExaminations.length === 0 ? (
+            <Text style={styles.emptySectionText}>This pet do not need any follow-up right now</Text>
+          ) : (
+            reExaminations.map((reExamination) => (
+              <View key={reExamination.re_exam_id} style={styles.followUpItem}>
+                <View style={styles.followUpHeader}>
+                  <Text style={styles.followUpDate}>{formatDate(reExamination.suggested_date)}</Text>
+                  <View style={[styles.followUpBadge, reExamination.is_booked && styles.followUpBadgeBooked]}>
+                    <Text style={styles.followUpBadgeText}>{reExamination.is_booked ? 'Booked' : 'Pending'}</Text>
+                  </View>
+                </View>
+                <Text style={styles.prescriptionMeta}>{reExamination.reason}</Text>
+              </View>
+            ))
           )}
         </View>
 

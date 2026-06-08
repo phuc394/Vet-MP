@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Image,
   RefreshControl,
   ScrollView,
@@ -29,6 +28,7 @@ import { fetchPetsThunk } from '../../redux/slices/pet.slice';
 import catalogService from '../../services/catalog.service';
 import type { CatalogService } from '../../types/catalog.type';
 import type { Appointment } from '../../types/appointment.type';
+import { showPlatformAlert } from '../../utils/platformAlert';
 
 function getServiceName(services: CatalogService[], serviceId: number) {
   return services.find((service) => service.service_id === serviceId)?.name ?? `Service #${serviceId}`;
@@ -110,7 +110,7 @@ export default function Calendar() {
   const handleCancel = (appointment: Appointment) => {
     if (updating) return;
 
-    Alert.alert('Cancel appointment', 'Do you want to cancel this appointment?', [
+    showPlatformAlert('Cancel appointment', 'Do you want to cancel this appointment?', [
       { text: 'No', style: 'cancel' },
       {
         text: 'Cancel appointment',
@@ -128,7 +128,7 @@ export default function Calendar() {
             ).unwrap();
           } catch (err) {
             const message = typeof err === 'string' ? err : 'Cancel appointment failed';
-            Alert.alert('Cancel failed', message);
+            showPlatformAlert('Cancel failed', message);
           }
         },
       },
