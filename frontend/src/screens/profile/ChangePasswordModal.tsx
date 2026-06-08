@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { changePasswordThunk, resetChangePasswordState } from "../../redux/slices/changePassword.slice";
 import { AppDispatch, RootState } from "../../redux/store";
+import { showPlatformAlert } from "../../utils/platformAlert";
 
 interface ChangePasswordModalProps {
   visible: boolean;
@@ -18,19 +19,19 @@ const ChangePasswordModal = ({ visible, onClose }: ChangePasswordModalProps) => 
 
   const handleUpdatePassword = async () => {
     if (!currentPassword || !newPassword) {
-      Alert.alert("Error", "Please fill in all fields");
+      showPlatformAlert("Error", "Please fill in all fields");
       return;
     }
 
     try {
       await dispatch(changePasswordThunk({ currentPassword, newPassword })).unwrap();
-      Alert.alert("Success", "Password changed successfully!");
+      showPlatformAlert("Success", "Password changed successfully!");
       dispatch(resetChangePasswordState());
       setCurrentPassword("");
       setNewPassword("");
       onClose();
     } catch (err: any) {
-      Alert.alert("Failed", err || "Change password failed");
+      showPlatformAlert("Failed", err || "Change password failed");
     }
   };
 

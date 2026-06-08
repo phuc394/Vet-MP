@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Alert,
   ActivityIndicator,
   Image,
   ScrollView,
@@ -10,17 +9,16 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { styles } from './AddPetStyle';
 import { AppDispatch, RootState } from '../../redux/store';
 import { createPetThunk } from '../../redux/slices/pet.slice';
+import { showPlatformAlert } from '../../utils/platformAlert';
 
-const sexOptions = [
-  { label: 'Male', value: 'male' },
-  { label: 'Female', value: 'female' },
-];
+const sexOptions = ['male', 'female'] as const;
 
 export default function AddPet() {
   const dispatch = useDispatch<AppDispatch>();
@@ -33,16 +31,42 @@ export default function AddPet() {
   const [sex, setSex] = useState('male');
   const [birthDate, setBirthDate] = useState('');
   const [weight, setWeight] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
+  const [avatar, setAvatar] = useState('');
   const [notes, setNotes] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
+
+  const pickAvatar = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permission.granted) {
+      showPlatformAlert('Permission needed', 'Please allow photo library access to choose a pet avatar.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.35,
+      base64: true,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      const asset = result.assets[0];
+      const selectedAvatar = asset.base64
+        ? `data:${asset.mimeType ?? 'image/jpeg'};base64,${asset.base64}`
+        : asset.uri;
+
+      setAvatar(selectedAvatar);
+    }
+  };
 
   const handleSave = async () => {
     setLocalError(null);
 
     if (!accessToken) {
       setLocalError('Please login before creating a pet');
-      Alert.alert('Not logged in', 'Please login to create a pet.', [
+      showPlatformAlert('Not logged in', 'Please login to create a pet.', [
         { text: 'OK', onPress: () => navigation.navigate('Login') },
       ]);
       return;
@@ -84,16 +108,6 @@ export default function AddPet() {
       }
     }
 
-    if (avatarUrl.trim()) {
-      try {
-        // eslint-disable-next-line no-new
-        new URL(avatarUrl.trim());
-      } catch (_e) {
-        setLocalError('Avatar must be a valid URL or left empty');
-        return;
-      }
-    }
-
     try {
       const createdPet = await dispatch(
         createPetThunk({
@@ -103,11 +117,11 @@ export default function AddPet() {
           breed: breed.trim() || undefined,
           birth_date: birthDate.trim() || undefined,
           weight: parsedWeight,
-          avatar: avatarUrl.trim() || undefined,
+          avatar: avatar || undefined,
           notes: notes.trim() || undefined,
         })
       ).unwrap();
-      Alert.alert('Pet saved', `${createdPet.name} has been created successfully.`, [
+      showPlatformAlert('Pet saved', `${createdPet.name} has been created successfully.`, [
         {
           text: 'OK',
           onPress: () => navigation.goBack(),
@@ -116,7 +130,7 @@ export default function AddPet() {
     } catch (error) {
       const msg = (error as any)?.response?.data?.message ?? (error as any)?.message ?? 'Create pet failed';
       setLocalError(String(msg));
-      Alert.alert('Create pet failed', String(msg));
+      showPlatformAlert('Create pet failed', String(msg));
     }
   };
 
@@ -135,13 +149,18 @@ export default function AddPet() {
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           <View style={styles.previewCard}>
-            {avatarUrl ? (
-              <Image source={{ uri: avatarUrl }} style={styles.previewImage} />
-            ) : (
-              <View style={styles.previewPlaceholder}>
-                <Ionicons name="paw-outline" size={34} color="#8CA694" />
+            <TouchableOpacity style={styles.avatarPicker} activeOpacity={0.85} onPress={pickAvatar}>
+              {avatar ? (
+                <Image source={{ uri: avatar }} style={styles.previewImage} />
+              ) : (
+                <View style={styles.previewPlaceholder}>
+                  <Ionicons name="paw-outline" size={34} color="#8CA694" />
+                </View>
+              )}
+              <View style={styles.avatarEditBadge}>
+                <Ionicons name="camera-outline" size={18} color="#FFFFFF" />
               </View>
-            )}
+            </TouchableOpacity>
             <Text style={styles.previewName}>{name.trim() || 'Pet name preview'}</Text>
             <Text style={styles.previewDetail}>
               {[species, breed].filter(Boolean).join(' / ') || 'Species / Breed'}
@@ -151,91 +170,76 @@ export default function AddPet() {
           <View style={styles.formCard}>
             <Text style={styles.sectionTitle}>Basic Information</Text>
 
-            <Text style={styles.label}>Pet Name</Text>
+            <Text style={styles.inputLabel}>Name</Text>
             <TextInput
               style={styles.input}
               value={name}
               onChangeText={setName}
-              placeholder="Enter pet name"
-              placeholderTextColor="#8A8A8A"
+              placeholder="Pet name"
+              placeholderTextColor="#9A8C73"
             />
 
-            <Text style={styles.label}>Species</Text>
-            <TextInput
-              style={styles.input}
-              value={species}
-              onChangeText={setSpecies}
-              placeholder="Dog, Cat..."
-              placeholderTextColor="#8A8A8A"
-            />
-
-            <Text style={styles.label}>Breed</Text>
-            <TextInput
-              style={styles.input}
-              value={breed}
-              onChangeText={setBreed}
-              placeholder="Enter breed"
-              placeholderTextColor="#8A8A8A"
-            />
-
-            <Text style={styles.label}>Sex</Text>
-            <View style={styles.segmentRow}>
+            <Text style={styles.inputLabel}>Sex</Text>
+            <View style={styles.sexToggle}>
               {sexOptions.map((option) => {
-                const isActive = sex === option.value;
+                const isActive = sex === option;
                 return (
                   <TouchableOpacity
-                    key={option.value}
-                    style={[styles.segmentButton, isActive && styles.segmentButtonActive]}
-                    onPress={() => setSex(option.value)}
+                    key={option}
+                    style={[styles.sexToggleButton, isActive && styles.sexToggleButtonActive]}
+                    onPress={() => setSex(option)}
                     activeOpacity={0.85}
                   >
-                    <Text style={[styles.segmentText, isActive && styles.segmentTextActive]}>{option.label}</Text>
+                    <Text style={[styles.sexToggleText, isActive && styles.sexToggleTextActive]}>{option}</Text>
                   </TouchableOpacity>
                 );
               })}
             </View>
 
-            <View style={styles.row}>
-              <View style={styles.halfField}>
-                <Text style={styles.label}>Birth Date</Text>
-                <TextInput
-                  style={styles.input}
-                  value={birthDate}
-                  onChangeText={setBirthDate}
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor="#8A8A8A"
-                />
-              </View>
-
-              <View style={styles.halfField}>
-                <Text style={styles.label}>Weight</Text>
-                <TextInput
-                  style={styles.input}
-                  value={weight}
-                  onChangeText={setWeight}
-                  placeholder="kg"
-                  placeholderTextColor="#8A8A8A"
-                  keyboardType="decimal-pad"
-                />
-              </View>
-            </View>
-
-            <Text style={styles.label}>Avatar URL</Text>
+            <Text style={styles.inputLabel}>Species</Text>
             <TextInput
               style={styles.input}
-              value={avatarUrl}
-              onChangeText={setAvatarUrl}
-              placeholder="Paste image link"
-              placeholderTextColor="#8A8A8A"
+              value={species}
+              onChangeText={setSpecies}
+              placeholder="Dog, cat..."
+              placeholderTextColor="#9A8C73"
             />
 
-            <Text style={styles.label}>Notes</Text>
+            <Text style={styles.inputLabel}>Breed</Text>
             <TextInput
-              style={[styles.input, styles.textArea]}
+              style={styles.input}
+              value={breed}
+              onChangeText={setBreed}
+              placeholder="Breed"
+              placeholderTextColor="#9A8C73"
+            />
+
+            <Text style={styles.inputLabel}>Birth date</Text>
+            <TextInput
+              style={styles.input}
+              value={birthDate}
+              onChangeText={setBirthDate}
+              placeholder="YYYY-MM-DD"
+              placeholderTextColor="#9A8C73"
+            />
+
+            <Text style={styles.inputLabel}>Weight</Text>
+            <TextInput
+              style={styles.input}
+              value={weight}
+              onChangeText={setWeight}
+              placeholder="Weight in kg"
+              placeholderTextColor="#9A8C73"
+              keyboardType="decimal-pad"
+            />
+
+            <Text style={styles.inputLabel}>Notes</Text>
+            <TextInput
+              style={[styles.input, styles.notesInput]}
               value={notes}
               onChangeText={setNotes}
-              placeholder="Health notes, habits, diet..."
-              placeholderTextColor="#8A8A8A"
+              placeholder="Medical notes"
+              placeholderTextColor="#9A8C73"
               multiline
               textAlignVertical="top"
             />

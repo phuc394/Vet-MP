@@ -30,6 +30,87 @@ export const styles = StyleSheet.create({
   notePreviewWrapper: { flex: 1, maxWidth: '50%' },
   rowValueNote: { color: '#2F3B2E', fontWeight: '700', textAlign: 'left', flexShrink: 1 },
 
+  sectionCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EDE6DB',
+    marginBottom: 18,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    color: '#2F3B2E',
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  inlineState: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  inlineStateText: {
+    color: '#6E8A76',
+    fontWeight: '700',
+    marginLeft: 8,
+  },
+  emptySectionText: {
+    color: '#7A6B56',
+    fontWeight: '700',
+    lineHeight: 20,
+  },
+  prescriptionItem: {
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F3EEE9',
+  },
+  prescriptionTitle: {
+    color: '#465F4D',
+    fontSize: 15,
+    fontWeight: '900',
+    marginBottom: 6,
+  },
+  prescriptionMeta: {
+    color: '#5A4D3B',
+    fontSize: 13,
+    fontWeight: '600',
+    lineHeight: 19,
+  },
+  followUpItem: {
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F3EEE9',
+  },
+  followUpHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  followUpDate: {
+    color: '#465F4D',
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  followUpBadge: {
+    backgroundColor: '#FFF3E6',
+    borderRadius: 14,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+  },
+  followUpBadgeBooked: {
+    backgroundColor: '#E7F2EA',
+  },
+  followUpBadgeText: {
+    color: '#465F4D',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+
   actionRow: { marginTop: 6, alignItems: 'center' },
   cancelCard: { backgroundColor: '#FFFFFF', borderRadius: 18, padding: 12, borderWidth: 1, borderColor: '#F3E9E6', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cancelInfo: { flex: 1, paddingRight: 12 },

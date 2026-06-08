@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Modal,
   StyleSheet,
@@ -15,6 +14,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useDispatch, useSelector } from "react-redux";
 import { getMyProfileThunk, updateMyProfileThunk } from "../../redux/slices/profile.slice";
 import { AppDispatch, RootState } from "../../redux/store";
+import { showPlatformAlert } from "../../utils/platformAlert";
 
 interface EditProfileModalProps {
   visible: boolean;
@@ -46,7 +46,7 @@ const EditProfileModal = ({ visible, onClose, currentData }: EditProfileModalPro
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permission.granted) {
-      Alert.alert("Permission needed", "Please allow photo library access to choose your avatar.");
+      showPlatformAlert("Permission needed", "Please allow photo library access to choose your avatar.");
       return;
     }
 

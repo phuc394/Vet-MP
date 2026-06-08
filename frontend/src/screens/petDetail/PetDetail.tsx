@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Modal,
   ScrollView,
@@ -40,6 +39,7 @@ import {
   getStatusColor,
   normalizeAppointmentStatus,
 } from '../calendar/CalenderUtils';
+import { showPlatformAlert } from '../../utils/platformAlert';
 
 type EditForm = {
   name: string;
@@ -168,20 +168,22 @@ export default function PetDetail() {
   const handleDelete = () => {
     if (!pet.pet_id || deleting) return;
 
-    Alert.alert('Delete pet', `Delete ${pet.name}? This pet will be removed from your list.`, [
+    const deleteSelectedPet = async () => {
+      try {
+        await dispatch(deletePetThunk(pet.pet_id)).unwrap();
+        navigation.goBack();
+      } catch (error) {
+        const message = typeof error === 'string' ? error : 'Delete pet failed';
+        showPlatformAlert('Delete pet failed', message);
+      }
+    };
+
+    showPlatformAlert('Delete pet', `Delete ${pet.name}? This pet will be removed from your list.`, [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete',
         style: 'destructive',
-        onPress: async () => {
-          try {
-            await dispatch(deletePetThunk(pet.pet_id)).unwrap();
-            navigation.goBack();
-          } catch (error) {
-            const message = typeof error === 'string' ? error : 'Delete pet failed';
-            Alert.alert('Delete pet failed', message);
-          }
-        },
+        onPress: deleteSelectedPet,
       },
     ]);
   };
@@ -190,7 +192,7 @@ export default function PetDetail() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permission.granted) {
-      Alert.alert('Permission needed', 'Please allow photo library access to choose a pet avatar.');
+      showPlatformAlert('Permission needed', 'Please allow photo library access to choose a pet avatar.');
       return;
     }
 
@@ -215,13 +217,13 @@ export default function PetDetail() {
   const applyEdit = async () => {
     const trimmedName = editForm.name.trim();
     if (!trimmedName) {
-      Alert.alert('Missing name', 'Please enter a pet name.');
+      showPlatformAlert('Missing name', 'Please enter a pet name.');
       return;
     }
 
     const parsedWeight = editForm.weight.trim() ? Number(editForm.weight) : undefined;
     if (parsedWeight !== undefined && Number.isNaN(parsedWeight)) {
-      Alert.alert('Invalid weight', 'Weight must be a number.');
+      showPlatformAlert('Invalid weight', 'Weight must be a number.');
       return;
     }
 
@@ -249,7 +251,7 @@ export default function PetDetail() {
       setEditVisible(false);
     } catch (error) {
       const message = typeof error === 'string' ? error : 'Update pet failed';
-      Alert.alert('Update pet failed', message);
+      showPlatformAlert('Update pet failed', message);
     }
   };
 
