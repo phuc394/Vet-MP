@@ -22,6 +22,7 @@ export type AdminResource = {
     deleteEndpoint?: string;
     deleteMethod?: "delete" | "patch";
     deletePath?: (row: AdminRecord) => string;
+    createRecord?: (values: AdminRecord) => Promise<void>;
     createPayload?: (values: AdminRecord) => AdminRecord;
     updatePayload?: (values: AdminRecord) => AdminRecord;
     loadRows?: () => Promise<AdminRecord[]>;
@@ -78,6 +79,9 @@ const unwrapRecord = (response: unknown): AdminRecord => {
     const payload = response as { data?: unknown };
     const body = payload.data as { data?: unknown } | AdminRecord;
     const data = (body as { data?: unknown })?.data ?? body;
+    if (Array.isArray(data)) {
+        return (data[0] ?? {}) as AdminRecord;
+    }
     return (data ?? {}) as AdminRecord;
 };
 
@@ -228,6 +232,32 @@ const enrichReExaminations = (reExaminations: AdminRecord[], records: AdminRecor
     }));
 };
 
+const createMedicalRecordWithPrescription = async (values: AdminRecord) => {
+    const medicalRecordPayload = cleanPayload({
+        appointment_id: values.appointment_id,
+        symptoms: values.symptoms,
+        diagnosis: values.diagnosis,
+        notes: values.notes,
+        status: values.status,
+    });
+
+    const record = unwrapRecord(await privateAxios.post("/api/v1/medical-records", medicalRecordPayload));
+    const recordId = record.record_id;
+
+    if (!recordId || !values.medicine_id) {
+        return;
+    }
+
+    await privateAxios.post("/api/v1/prescriptions", cleanPayload({
+        record_id: recordId,
+        medicine_id: values.medicine_id,
+        quantity: values.quantity,
+        dosage: values.dosage,
+        usage_instructions: values.usage_instructions,
+        notes: values.prescription_notes,
+    }));
+};
+
 export const adminResources: AdminResource[] = [
     {
         key: "appointments",
@@ -299,11 +329,16 @@ export const adminResources: AdminResource[] = [
             column("created_at", "Created"),
         ],
         formFields: [
-            { name: "appointment_id", label: "Appointment", type: "select", required: true },
+            { name: "appointment_id", label: "Appointment", type: "select", required: true, hideOnEdit: true },
             { name: "symptoms", label: "Symptoms", type: "textarea" },
             { name: "diagnosis", label: "Diagnosis", type: "textarea" },
             { name: "notes", label: "Notes", type: "textarea" },
             { name: "status", label: "Status", type: "select", options: ["in_progress", "completed"] },
+            { name: "medicine_id", label: "Medicine", type: "select", required: true, hideOnEdit: true },
+            { name: "quantity", label: "Quantity", type: "number", required: true, hideOnEdit: true },
+            { name: "dosage", label: "Dosage", hideOnEdit: true },
+            { name: "usage_instructions", label: "Usage Instructions", type: "textarea", hideOnEdit: true },
+            { name: "prescription_notes", label: "Prescription Notes", type: "textarea", hideOnEdit: true },
         ],
         filterField: "status",
         filterOptions: ["All", "in_progress", "completed"],
@@ -315,8 +350,13 @@ export const adminResources: AdminResource[] = [
             const formattedPrescriptions = await enrichPrescriptions(prescriptions, record);
             return { data: record, sections: [{ title: "Prescriptions", rows: formattedPrescriptions }] };
         },
-        createPayload: cleanPayload,
-        updatePayload: cleanPayload,
+        createRecord: createMedicalRecordWithPrescription,
+        updatePayload: (values) => cleanPayload({
+            symptoms: values.symptoms,
+            diagnosis: values.diagnosis,
+            notes: values.notes,
+            status: values.status,
+        }),
     },
     {
         key: "pets-customers",

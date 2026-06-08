@@ -27,7 +27,7 @@ type ModalState =
     | { type: "create" }
     | { type: "edit"; row: AdminRecord }
     | { type: "reexamination"; row: AdminRecord; initialRecordId?: unknown }
-    | { type: "details"; row: AdminRecord; details?: AdminRecord; sections?: DetailSection[] }
+    | { type: "details"; row: AdminRecord; details: AdminRecord; sections?: DetailSection[] }
     | null;
 
 const matchesSearch = (row: AdminRecord, searchKeys: string[], searchValue: string) => {
@@ -62,11 +62,20 @@ const AdminResourcePage = ({ resource }: AdminResourcePageProps) => {
     }, [resource.key]);
 
     const formFields = useMemo<FormField[]>(() => {
-        return resource.formFields.map((field) => {
+        const isEdit = modal?.type === "edit";
+        return resource.formFields.filter((field) => {
+            if (isEdit && field.hideOnEdit) {
+                return false;
+            }
+            if (!isEdit && field.hideOnCreate) {
+                return false;
+            }
+            return true;
+        }).map((field) => {
             const options = referenceOptions[field.name];
             return options ? { ...field, type: "select", options } : field;
         });
-    }, [referenceOptions, resource.formFields]);
+    }, [modal?.type, referenceOptions, resource.formFields]);
 
     const filterOptions = useMemo(() => {
         if (resource.filterOptions) {
@@ -97,9 +106,12 @@ const AdminResourcePage = ({ resource }: AdminResourcePageProps) => {
     };
 
     const handleDetails = async (row: AdminRecord) => {
-        setModal({ type: "details", row });
-        const detailResult = await dispatch(fetchAdminDetails({ resourceKey: resource.key, row })).unwrap();
-        setModal({ type: "details", row, details: detailResult.data, sections: detailResult.sections });
+        try {
+            const detailResult = await dispatch(fetchAdminDetails({ resourceKey: resource.key, row })).unwrap();
+            setModal({ type: "details", row, details: detailResult.data, sections: detailResult.sections });
+        } catch {
+            setModal({ type: "details", row, details: row });
+        }
     };
 
     const handleDelete = async (row: AdminRecord) => {

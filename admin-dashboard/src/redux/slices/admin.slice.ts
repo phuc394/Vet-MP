@@ -153,11 +153,20 @@ export const fetchReferenceOptions = createAsyncThunk<
                     return null;
                 }
                 const rows = unwrapRows(await privateAxios.get(config.endpoint));
-                const options = rows
+                let optionRows = rows;
+                if (resource.key === "medical-records" && fieldName === "appointment_id") {
+                    const records = unwrapRows(await privateAxios.get("/api/v1/medical-records"));
+                    const usedAppointmentIds = new Set(records.map((record) => String(record.appointment_id)));
+                    optionRows = rows.filter((row) => !usedAppointmentIds.has(String(row.appointment_id)));
+                }
+
+                const options = optionRows
                     .filter((row) => config.filter?.(row) ?? true)
                     .map((row) => ({
                         value: row[config.idField] as string | number,
-                        label: `${labelOf(row, config.labelKeys, `${config.fallback} #${row[config.idField]}`)} (#${row[config.idField]})`,
+                        label: fieldName === "medicine_id"
+                            ? labelOf(row, config.labelKeys, `${config.fallback} #${row[config.idField]}`)
+                            : `${labelOf(row, config.labelKeys, `${config.fallback} #${row[config.idField]}`)} (#${row[config.idField]})`,
                     }));
                 return [fieldName, options] as const;
             }),
@@ -183,10 +192,13 @@ export const saveAdminRecord = createAsyncThunk<
     try {
         if (editRow) {
             await privateAxios.put(`${resource.updateEndpoint ?? resource.endpoint}/${editRow[resource.idField]}`, payload);
+        } else if (resource.createRecord) {
+            await resource.createRecord(values);
         } else {
             await privateAxios.post(resource.createEndpoint ?? resource.endpoint, payload);
         }
         await dispatch(fetchAdminRows(resourceKey)).unwrap();
+        dispatch(fetchReferenceOptions(resourceKey));
     } catch (error) {
         const message = axios.isAxiosError(error) ? error.response?.data?.message : undefined;
         return rejectWithValue(message ?? `Could not save ${resource.title.toLowerCase()}.`);

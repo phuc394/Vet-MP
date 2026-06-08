@@ -6,6 +6,8 @@ export type FormField = {
     type?: "text" | "number" | "date" | "time" | "email" | "password" | "select" | "textarea" | "checkbox";
     options?: Array<string | { label: string; value: string | number }>;
     required?: boolean;
+    hideOnCreate?: boolean;
+    hideOnEdit?: boolean;
 };
 
 type ResourceFormProps = {
