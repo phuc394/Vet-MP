@@ -34,7 +34,7 @@ const AdminResourceDetailsModal = ({ title, row, details, sections, onClose }: A
                 <div className="details-panel-group" key={section.title}>
                     <h3>{section.title}</h3>
                     {section.rows.length === 0 ? (
-                        <p className="empty-text">No records found.</p>
+                        <p className="empty-text">no record</p>
                     ) : (
                         section.rows.map((sectionRow, index) => (
                             <DetailsPanel
