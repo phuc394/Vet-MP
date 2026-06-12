@@ -28,6 +28,7 @@ const AdminLayout = ({ title, kicker = "Admin management", description, children
     const handleLogout = useCallback(() => {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("adminEmail");
+        localStorage.removeItem("adminRole");
         navigate("/");
     }, [navigate]);
 

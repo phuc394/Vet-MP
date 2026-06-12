@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
 
 export const publicAxios = axios.create({
   baseURL: API_BASE_URL,
@@ -32,20 +32,20 @@ export const AuthService = {
 };
 
 export const ReportService = {
-  getRevenueSummary: () => {
-    return privateAxios.get("/api/v1/reports/revenue/calculate");
+  getRevenueSummary: (params?: Record<string, string | number>) => {
+    return privateAxios.get("/api/v1/reports/revenue/calculate", { params });
   },
-  getRevenueItems: () => {
-    return privateAxios.get("/api/v1/reports/revenue");
+  getRevenueItems: (params?: Record<string, string | number>) => {
+    return privateAxios.get("/api/v1/reports/revenue", { params });
   },
-  getRevenueTrend: () => {
+  getRevenueTrend: (params?: Record<string, string | number>) => {
     return privateAxios.get("/api/v1/reports/line/revenue-trend", {
-      params: { groupBy: "day" },
+      params: { groupBy: "day", ...params },
     });
   },
-  getTopRevenueServices: () => {
+  getTopRevenueServices: (params?: Record<string, string | number>) => {
     return privateAxios.get("/api/v1/reports/bar/top-services", {
-      params: { limit: 6 },
+      params: { limit: 6, ...params },
     });
   },
   getMedicineStock: () => {

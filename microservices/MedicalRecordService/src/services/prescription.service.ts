@@ -72,6 +72,20 @@ async function getPrescriptionsByOwnerId(ownerId: number, sortQuery?: Prescripti
     return rows as Prescription[];
 }
 
+async function getPrescriptionsByStaffId(staffId: number, sortQuery?: PrescriptionSortQuery): Promise<Prescription[]> {
+    const { sortBy, order } = resolveSort(sortQuery);
+    const [rows] = await connection.query(
+        `SELECT pr.*
+         FROM Prescription pr
+         INNER JOIN Medical_Record mr ON mr.record_id = pr.record_id
+         INNER JOIN appointment_db_vet.Appointment a ON a.appointment_id = mr.appointment_id
+         WHERE a.staff_id = ?
+         ORDER BY pr.${sortBy} ${order}`,
+        [staffId]
+    );
+    return rows as Prescription[];
+}
+
 async function getPrescriptionById(id: number): Promise<Prescription | null> {
     const [rows] = await connection.query('SELECT * FROM Prescription WHERE prescription_id = ?', [id]);
     const prescriptions = rows as Prescription[];
@@ -90,6 +104,31 @@ async function isPrescriptionOwnedByUser(id: number, ownerId: number): Promise<b
         [id, ownerId]
     );
     return (rows as Array<{ prescription_id: number }>).length > 0;
+}
+
+async function isPrescriptionAssignedToStaff(id: number, staffId: number): Promise<boolean> {
+    const [rows] = await connection.query(
+        `SELECT pr.prescription_id
+         FROM Prescription pr
+         INNER JOIN Medical_Record mr ON mr.record_id = pr.record_id
+         INNER JOIN appointment_db_vet.Appointment a ON a.appointment_id = mr.appointment_id
+         WHERE pr.prescription_id = ? AND a.staff_id = ?
+         LIMIT 1`,
+        [id, staffId]
+    );
+    return (rows as Array<{ prescription_id: number }>).length > 0;
+}
+
+async function isRecordAssignedToStaff(recordId: number, staffId: number): Promise<boolean> {
+    const [rows] = await connection.query(
+        `SELECT mr.record_id
+         FROM Medical_Record mr
+         INNER JOIN appointment_db_vet.Appointment a ON a.appointment_id = mr.appointment_id
+         WHERE mr.record_id = ? AND a.staff_id = ?
+         LIMIT 1`,
+        [recordId, staffId]
+    );
+    return (rows as Array<{ record_id: number }>).length > 0;
 }
 
 async function createPrescription(prescriptionData: CreatePrescriptionRequest): Promise<Prescription> {
@@ -204,14 +243,56 @@ async function searchPrescriptionsByOwnerId(
     return rows as Prescription[];
 }
 
+async function searchPrescriptionsByStaffId(
+    staffId: number,
+    filters: PrescriptionSearchFilters
+): Promise<Prescription[]> {
+    let sql = `
+        SELECT pr.*
+        FROM Prescription pr
+        INNER JOIN Medical_Record mr ON mr.record_id = pr.record_id
+        INNER JOIN appointment_db_vet.Appointment a ON a.appointment_id = mr.appointment_id
+        WHERE a.staff_id = ?
+    `;
+    const params: Array<string | number> = [staffId];
+
+    if (filters.recordId !== undefined) {
+        sql += ' AND pr.record_id = ?';
+        params.push(filters.recordId);
+    }
+
+    if (filters.medicineId !== undefined) {
+        sql += ' AND pr.medicine_id = ?';
+        params.push(filters.medicineId);
+    }
+
+    if (filters.dosage) {
+        sql += ' AND pr.dosage LIKE ?';
+        params.push(`%${filters.dosage}%`);
+    }
+
+    if (filters.usageInstructions) {
+        sql += ' AND pr.usage_instructions LIKE ?';
+        params.push(`%${filters.usageInstructions}%`);
+    }
+
+    sql += ' LIMIT 10';
+    const [rows] = await connection.query(sql, params);
+    return rows as Prescription[];
+}
+
 export {
     getAllPrescriptions,
     getPrescriptionsByOwnerId,
+    getPrescriptionsByStaffId,
     getPrescriptionById,
     isPrescriptionOwnedByUser,
+    isPrescriptionAssignedToStaff,
+    isRecordAssignedToStaff,
     createPrescription,
     updatePrescription,
     deletePrescription,
     searchPrescriptions,
-    searchPrescriptionsByOwnerId
+    searchPrescriptionsByOwnerId,
+    searchPrescriptionsByStaffId
 };

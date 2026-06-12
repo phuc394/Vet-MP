@@ -22,7 +22,7 @@ Project được tổ chức theo kiến trúc microservices. Backend gồm nhi�
 - npm.
 - Docker và Docker Compose.
 
-### Chạy backend bằng Docker Compose
+### Chạy hệ thống bằng Docker Compose
 
 Ở thư mục gốc của project, chạy:
 
@@ -30,11 +30,12 @@ Project được tổ chức theo kiến trúc microservices. Backend gồm nhi�
 docker compose up --build
 ```
 
-Docker Compose sẽ khởi động MySQL, seed dữ liệu mẫu, các microservice và API Gateway.
+Docker Compose sẽ khởi động MySQL, seed dữ liệu mẫu, các microservice, API Gateway và Admin dashboard.
 
 Các service mặc định:
 
 - API Gateway: `http://localhost:3000`
+- Admin dashboard: `http://localhost:8080`
 - Auth Service: `http://localhost:3001`
 - Pet Service: `http://localhost:3002`
 - Catalog Service: `http://localhost:3003`
@@ -50,7 +51,28 @@ API của hệ thống đi qua gateway với prefix:
 http://localhost:3000/api/v1
 ```
 
-Để dừng backend:
+Admin dashboard trong Docker được build với API Gateway mặc định:
+
+```text
+http://localhost:3000
+```
+
+Nếu cần đổi URL API cho dashboard, đặt biến môi trường `ADMIN_DASHBOARD_API_BASE_URL` trước khi build lại.
+
+PowerShell:
+
+```powershell
+$env:ADMIN_DASHBOARD_API_BASE_URL="https://your-gateway.example.com"
+docker compose up --build
+```
+
+Bash:
+
+```bash
+ADMIN_DASHBOARD_API_BASE_URL=https://your-gateway.example.com docker compose up --build
+```
+
+Để dừng hệ thống:
 
 ```bash
 docker compose down
@@ -144,4 +166,24 @@ Các lệnh thường dùng:
 npm run build
 npm run start
 npm run test
+```
+
+Chạy riêng Admin dashboard bằng Dockerfile:
+
+```bash
+cd admin-dashboard
+docker build -t vet-mp-admin-dashboard .
+docker run --rm -p 8080:80 vet-mp-admin-dashboard
+```
+
+Sau khi container chạy, mở:
+
+```text
+http://localhost:8080
+```
+
+Nếu API Gateway không chạy ở `http://localhost:3000`, truyền URL API khi build image:
+
+```bash
+docker build --build-arg VITE_API_BASE_URL=http://localhost:3000 -t vet-mp-admin-dashboard .
 ```

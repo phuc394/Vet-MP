@@ -1,6 +1,7 @@
 import { PermissionAction } from "./adminResources";
 
 type TokenPayload = {
+    user_id?: number;
     role?: string;
     permissions?: string[] | Record<string, string[]>;
 };
@@ -16,7 +17,7 @@ const parseJson = <T,>(value: string | null): T | null => {
     }
 };
 
-const getTokenPayload = (): TokenPayload => {
+export const getTokenPayload = (): TokenPayload => {
     const token = localStorage.getItem("accessToken");
     const payload = token?.split(".")[1];
     if (!payload) {
@@ -28,6 +29,10 @@ const getTokenPayload = (): TokenPayload => {
         return {};
     }
 };
+
+export const getCurrentRole = () => getTokenPayload().role ?? localStorage.getItem("adminRole") ?? "admin";
+
+export const getCurrentUserId = () => getTokenPayload().user_id;
 
 export const hasPermission = (resourceKey: string, action: PermissionAction) => {
     const stored = parseJson<string[] | Record<string, string[]>>(localStorage.getItem("adminPermissions"));
@@ -41,6 +46,25 @@ export const hasPermission = (resourceKey: string, action: PermissionAction) => 
         return permissions[resourceKey].includes(action);
     }
 
-    const role = getTokenPayload().role ?? localStorage.getItem("adminRole") ?? "admin";
-    return role === "admin";
+    const role = getCurrentRole();
+
+    if (role === "staff") {
+        const staffPermissions: Record<string, PermissionAction[]> = {
+            appointments: ["edit", "delete"],
+            "medical-records": ["create", "edit", "delete"],
+        };
+        return staffPermissions[resourceKey]?.includes(action) ?? false;
+    }
+
+    if (role === "admin") {
+        if (resourceKey === "appointments") {
+            return action === "create";
+        }
+        if (resourceKey === "medical-records") {
+            return false;
+        }
+        return true;
+    }
+
+    return false;
 };

@@ -18,6 +18,11 @@ function getQueryValue(value: unknown): string | undefined {
   return typeof value === "string" && value.trim().length > 0 ? value : undefined;
 }
 
+function getStaffScope(req: Request): number | undefined {
+  const user = (req as any).user;
+  return user?.role === "staff" ? Number(user.user_id) : undefined;
+}
+
 // ---------- PIE ----------
 export const userRoleDist: RequestHandler = asyncHandler(async (_req: Request, res: Response) => {
   const data = await getUserRoleDistribution();
@@ -42,14 +47,16 @@ export const medicineStock: RequestHandler = asyncHandler(async (_req: Request, 
 
 export const topServices: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
   const limit = Number(req.query.limit ?? 5);
-  const data = await getTopRevenueServices(limit);
+  const startDate = getQueryValue(req.query.startDate);
+  const endDate = getQueryValue(req.query.endDate);
+  const data = await getTopRevenueServices(limit, "revenue", startDate, endDate, getStaffScope(req));
   return sendSuccess(res, 200, "Top revenue services retrieved", data);
 });
 
 // ---------- LINE ----------
 export const revenueTrend: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
   const { startDate, endDate, groupBy } = req.query as any;
-  const data = await getRevenueTrend(startDate, endDate, groupBy);
+  const data = await getRevenueTrend(startDate, endDate, groupBy, getStaffScope(req));
   return sendSuccess(res, 200, "Revenue trend retrieved", data);
 });
 
@@ -67,13 +74,13 @@ export const cancelledAppointments: RequestHandler = asyncHandler(async (_req: R
 export const calculateRevenueReport: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
   const startDate = getQueryValue(req.query.startDate);
   const endDate = getQueryValue(req.query.endDate);
-  const data = await calculateRevenue(startDate, endDate);
+  const data = await calculateRevenue(startDate, endDate, getStaffScope(req));
   return sendSuccess(res, 200, "Revenue calculated", data);
 });
 
 export const getRevenueReport: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
   const startDate = getQueryValue(req.query.startDate);
   const endDate = getQueryValue(req.query.endDate);
-  const data = await getRevenue(startDate, endDate);
+  const data = await getRevenue(startDate, endDate, getStaffScope(req));
   return sendSuccess(res, 200, "Revenue retrieved", data);
 });

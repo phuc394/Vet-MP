@@ -11,6 +11,7 @@ import InventorySection from "./components/InventorySection";
 import MetricGrid from "./components/MetricGrid";
 import RevenueSection from "./components/RevenueSection";
 import UserSection from "./components/UserSection";
+import { getCurrentRole } from "../admin/permissions";
 
 const Home = () => {
     const navigate = useNavigate();
@@ -61,6 +62,7 @@ const Home = () => {
     }, [userRoles]);
 
     const cancelledCount = cancelledAppointments?.rows.length ?? 0;
+    const isStaff = getCurrentRole() === "staff";
 
     return (
         <div className={`dashboard${isDarkMode ? " is-dark" : ""}`}>
@@ -90,15 +92,19 @@ const Home = () => {
                         revenueItems={revenueItems}
                         cancelledAppointments={cancelledAppointments}
                     />
-                    <InventorySection medicineStock={medicineStock} lowStock={lowStock} />
-                    <UserSection
-                        userRoles={userRoles}
-                        petSpecies={petSpecies}
-                        appointmentStatus={appointmentStatus}
-                        totalUsers={totalUsers}
-                        staffCount={staffCount}
-                        customerCount={customerCount}
-                    />
+                    {!isStaff && (
+                        <>
+                            <InventorySection medicineStock={medicineStock} lowStock={lowStock} />
+                            <UserSection
+                                userRoles={userRoles}
+                                petSpecies={petSpecies}
+                                appointmentStatus={appointmentStatus}
+                                totalUsers={totalUsers}
+                                staffCount={staffCount}
+                                customerCount={customerCount}
+                            />
+                        </>
+                    )}
                 </>
             )}
             <Footer />

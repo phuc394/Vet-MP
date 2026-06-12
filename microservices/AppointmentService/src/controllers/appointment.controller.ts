@@ -28,7 +28,9 @@ const getAllAppointments = asyncHandler(
         const user = (req as any).user;
         const appointments = user.role === 'admin'
             ? await AppointmentService.getAllAppointments(req.query)
-            : await AppointmentService.getAppointmentsByOwnerId(user.user_id, req.query);
+            : user.role === 'staff'
+                ? await AppointmentService.getAppointmentsByStaffId(user.user_id, req.query)
+                : await AppointmentService.getAppointmentsByOwnerId(user.user_id, req.query);
         return sendSuccess(res, 200, 'Appointments retrieved', appointments);
     }
 );
@@ -42,7 +44,9 @@ const getAppointmentById = asyncHandler(async (req: Request<{ id: string }>, res
     const user = (req as any).user;
     if (
         user.role !== 'admin' &&
-        !await AppointmentService.isAppointmentOwnedByUser(id, user.user_id)
+        !(user.role === 'staff'
+            ? await AppointmentService.isAppointmentAssignedToStaff(id, user.user_id)
+            : await AppointmentService.isAppointmentOwnedByUser(id, user.user_id))
     ) {
         throw new HttpError(403, 'Forbidden');
     }
@@ -80,7 +84,9 @@ const updateAppointment = asyncHandler(async (req: Request<{ id: string }, unkno
     const user = (req as any).user;
     if (
         user.role !== 'admin' &&
-        !await AppointmentService.isAppointmentOwnedByUser(id, user.user_id)
+        !(user.role === 'staff'
+            ? await AppointmentService.isAppointmentAssignedToStaff(id, user.user_id)
+            : await AppointmentService.isAppointmentOwnedByUser(id, user.user_id))
     ) {
         throw new HttpError(403, 'Forbidden');
     }
@@ -112,7 +118,7 @@ const updateAppointment = asyncHandler(async (req: Request<{ id: string }, unkno
     }
 
     if (
-        user.role !== 'admin' &&
+        user.role === 'customer' &&
         payload.pet_id !== undefined &&
         !await AppointmentService.isPetOwnedByUser(payload.pet_id, user.user_id)
     ) {
@@ -134,6 +140,14 @@ const deleteAppointment = asyncHandler(async (req: Request<{ id: string }>, res:
     }
     if (appointment.status !== AppointmentService.resolveAppointmentStatus('cancelled')) {
         throw new HttpError(400, 'Chỉ có thể xóa lịch hẹn đã được hủy trước đó.');
+    }
+
+    const user = (req as any).user;
+    if (
+        user.role === 'staff' &&
+        !await AppointmentService.isAppointmentAssignedToStaff(id, user.user_id)
+    ) {
+        throw new HttpError(403, 'Forbidden');
     }
 
     const deleted = await AppointmentService.deleteAppointment(id);
@@ -167,7 +181,9 @@ const searchAppointments = asyncHandler(
         const user = (req as any).user;
         const appointments = user.role === 'admin'
             ? await AppointmentService.searchAppointments(filters)
-            : await AppointmentService.searchAppointmentsByOwnerId(user.user_id, filters);
+            : user.role === 'staff'
+                ? await AppointmentService.searchAppointmentsByStaffId(user.user_id, filters)
+                : await AppointmentService.searchAppointmentsByOwnerId(user.user_id, filters);
         return sendSuccess(res, 200, 'Appointments retrieved', appointments);
     }
 );

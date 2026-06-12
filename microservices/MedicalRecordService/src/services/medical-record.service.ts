@@ -76,6 +76,19 @@ async function getMedicalRecordsByOwnerId(ownerId: number, sortQuery?: MedicalRe
     return rows as MedicalRecord[];
 }
 
+async function getMedicalRecordsByStaffId(staffId: number, sortQuery?: MedicalRecordSortQuery): Promise<MedicalRecord[]> {
+    const { sortBy, order } = resolveSort(sortQuery);
+    const [rows] = await connection.query(
+        `SELECT mr.*
+         FROM Medical_Record mr
+         INNER JOIN appointment_db_vet.Appointment a ON a.appointment_id = mr.appointment_id
+         WHERE a.staff_id = ?
+         ORDER BY mr.${sortBy} ${order}`,
+        [staffId]
+    );
+    return rows as MedicalRecord[];
+}
+
 async function getMedicalRecordById(id: number): Promise<MedicalRecord | null> {
     const [rows] = await connection.query('SELECT * FROM Medical_Record WHERE record_id = ?', [id]);
     const records = rows as MedicalRecord[];
@@ -93,6 +106,29 @@ async function isMedicalRecordOwnedByUser(id: number, ownerId: number): Promise<
         [id, ownerId]
     );
     return (rows as Array<{ record_id: number }>).length > 0;
+}
+
+async function isMedicalRecordAssignedToStaff(id: number, staffId: number): Promise<boolean> {
+    const [rows] = await connection.query(
+        `SELECT mr.record_id
+         FROM Medical_Record mr
+         INNER JOIN appointment_db_vet.Appointment a ON a.appointment_id = mr.appointment_id
+         WHERE mr.record_id = ? AND a.staff_id = ?
+         LIMIT 1`,
+        [id, staffId]
+    );
+    return (rows as Array<{ record_id: number }>).length > 0;
+}
+
+async function isAppointmentAssignedToStaff(appointmentId: number, staffId: number): Promise<boolean> {
+    const [rows] = await connection.query(
+        `SELECT appointment_id
+         FROM appointment_db_vet.Appointment
+         WHERE appointment_id = ? AND staff_id = ?
+         LIMIT 1`,
+        [appointmentId, staffId]
+    );
+    return (rows as Array<{ appointment_id: number }>).length > 0;
 }
 
 async function createMedicalRecord(medicalRecordData: CreateMedicalRecordRequest): Promise<MedicalRecord> {
@@ -207,6 +243,43 @@ async function searchMedicalRecordsByOwnerId(
     return rows as MedicalRecord[];
 }
 
+async function searchMedicalRecordsByStaffId(
+    staffId: number,
+    filters: MedicalRecordSearchFilters
+): Promise<MedicalRecord[]> {
+    let sql = `
+        SELECT mr.*
+        FROM Medical_Record mr
+        INNER JOIN appointment_db_vet.Appointment a ON a.appointment_id = mr.appointment_id
+        WHERE a.staff_id = ?
+    `;
+    const params: Array<string | number> = [staffId];
+
+    if (filters.appointmentId !== undefined) {
+        sql += ' AND mr.appointment_id = ?';
+        params.push(filters.appointmentId);
+    }
+
+    if (filters.symptoms) {
+        sql += ' AND mr.symptoms LIKE ?';
+        params.push(`%${filters.symptoms}%`);
+    }
+
+    if (filters.diagnosis) {
+        sql += ' AND mr.diagnosis LIKE ?';
+        params.push(`%${filters.diagnosis}%`);
+    }
+
+    if (filters.status) {
+        sql += ' AND mr.status = ?';
+        params.push(filters.status);
+    }
+
+    sql += ' LIMIT 10';
+    const [rows] = await connection.query(sql, params);
+    return rows as MedicalRecord[];
+}
+
 function resolveMedicalRecordStatus(value: string): MedicalRecordStatus {
     if (!VALID_MEDICAL_RECORD_STATUSES.includes(value as MedicalRecordStatus)) {
         throw new HttpError(400, `status must be one of: ${VALID_MEDICAL_RECORD_STATUSES.join(', ')}`);
@@ -217,12 +290,16 @@ function resolveMedicalRecordStatus(value: string): MedicalRecordStatus {
 export {
     getAllMedicalRecords,
     getMedicalRecordsByOwnerId,
+    getMedicalRecordsByStaffId,
     getMedicalRecordById,
     isMedicalRecordOwnedByUser,
+    isMedicalRecordAssignedToStaff,
+    isAppointmentAssignedToStaff,
     createMedicalRecord,
     updateMedicalRecord,
     deleteMedicalRecord,
     searchMedicalRecords,
     searchMedicalRecordsByOwnerId,
+    searchMedicalRecordsByStaffId,
     resolveMedicalRecordStatus
 };

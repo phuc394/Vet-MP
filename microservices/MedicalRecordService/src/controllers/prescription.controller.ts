@@ -17,7 +17,9 @@ const getAllPrescriptions = asyncHandler(
         const user = (req as any).user;
         const prescriptions = user.role === 'admin'
             ? await PrescriptionService.getAllPrescriptions(req.query)
-            : await PrescriptionService.getPrescriptionsByOwnerId(user.user_id, req.query);
+            : user.role === 'staff'
+                ? await PrescriptionService.getPrescriptionsByStaffId(user.user_id, req.query)
+                : await PrescriptionService.getPrescriptionsByOwnerId(user.user_id, req.query);
         return sendSuccess(res, 200, 'Prescriptions retrieved', prescriptions);
     }
 );
@@ -31,7 +33,9 @@ const getPrescriptionById = asyncHandler(async (req: Request<{ id: string }>, re
     const user = (req as any).user;
     if (
         user.role !== 'admin' &&
-        !await PrescriptionService.isPrescriptionOwnedByUser(id, user.user_id)
+        !(user.role === 'staff'
+            ? await PrescriptionService.isPrescriptionAssignedToStaff(id, user.user_id)
+            : await PrescriptionService.isPrescriptionOwnedByUser(id, user.user_id))
     ) {
         throw new HttpError(403, 'Forbidden');
     }
@@ -52,6 +56,14 @@ const createPrescription = asyncHandler(
         const notes = parseOptionalString(req.body.notes, 'notes');
         if (notes !== undefined) payload.notes = notes;
 
+        const user = (req as any).user;
+        if (
+            user.role === 'staff' &&
+            !await PrescriptionService.isRecordAssignedToStaff(payload.record_id, user.user_id)
+        ) {
+            throw new HttpError(403, 'Forbidden');
+        }
+
         const prescription = await PrescriptionService.createPrescription(payload);
         return sendSuccess(res, 201, 'Prescription created', [prescription]);
     }
@@ -60,6 +72,13 @@ const createPrescription = asyncHandler(
 const updatePrescription = asyncHandler(
     async (req: Request<{ id: string }, unknown, UpdatePrescriptionRequest>, res: Response) => {
         const id = parseId(req.params.id, 'id');
+        const user = (req as any).user;
+        if (
+            user.role === 'staff' &&
+            !await PrescriptionService.isPrescriptionAssignedToStaff(id, user.user_id)
+        ) {
+            throw new HttpError(403, 'Forbidden');
+        }
 
         const payload: UpdatePrescriptionRequest = {};
         const medicineId = parseOptionalId(req.body.medicine_id, 'medicine_id');
@@ -87,6 +106,13 @@ const updatePrescription = asyncHandler(
 
 const deletePrescription = asyncHandler(async (req: Request<{ id: string }>, res: Response) => {
     const id = parseId(req.params.id, 'id');
+    const user = (req as any).user;
+    if (
+        user.role === 'staff' &&
+        !await PrescriptionService.isPrescriptionAssignedToStaff(id, user.user_id)
+    ) {
+        throw new HttpError(403, 'Forbidden');
+    }
     const deleted = await PrescriptionService.deletePrescription(id);
     if (!deleted) {
         throw new HttpError(404, 'Prescription not found');
@@ -107,7 +133,9 @@ const searchPrescriptions = asyncHandler(
         const user = (req as any).user;
         const prescriptions = user.role === 'admin'
             ? await PrescriptionService.searchPrescriptions(filters)
-            : await PrescriptionService.searchPrescriptionsByOwnerId(user.user_id, filters);
+            : user.role === 'staff'
+                ? await PrescriptionService.searchPrescriptionsByStaffId(user.user_id, filters)
+                : await PrescriptionService.searchPrescriptionsByOwnerId(user.user_id, filters);
         return sendSuccess(res, 200, 'Prescriptions retrieved', prescriptions);
     }
 );

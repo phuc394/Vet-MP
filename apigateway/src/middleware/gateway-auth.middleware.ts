@@ -24,26 +24,27 @@ type RouteRule = {
 
 const routeRules: RouteRule[] = [
   { prefix: "/api/v1/staff", roles: ["admin"] },
-  { prefix: "/api/v1/reports", roles: ["admin"] },
+  { prefix: "/api/v1/reports", roles: ["admin", "staff"] },
   { prefix: "/api/v1/suppliers", roles: ["admin"] },
   { prefix: "/api/v1/medicine-inventory", roles: ["admin"] },
   { prefix: "/api/v1/inventory-transactions", roles: ["admin"] },
 
-  { prefix: "/api/v1/catalog", methods: ["GET"], roles: ["admin", "customer"] },
+  { prefix: "/api/v1/catalog", methods: ["GET"], roles: ["admin", "staff", "customer"] },
   { prefix: "/api/v1/catalog", roles: ["admin"] },
 
   { prefix: "/api/v1/pets", methods: ["GET"], roles: ["admin", "customer"] },
   { prefix: "/api/v1/pets", methods: ["POST", "PUT", "PATCH", "DELETE"], roles: ["admin", "customer"] },
 
-  { prefix: "/api/v1/appointments", methods: ["GET"], roles: ["admin", "customer"] },
-  { prefix: "/api/v1/appointments", methods: ["POST", "PUT", "PATCH"], roles: ["admin", "customer"] },
-  { prefix: "/api/v1/appointments", methods: ["DELETE"], roles: ["admin"] },
+  { prefix: "/api/v1/appointments", methods: ["GET"], roles: ["admin", "staff", "customer"] },
+  { prefix: "/api/v1/appointments", methods: ["POST"], roles: ["admin", "customer"] },
+  { prefix: "/api/v1/appointments", methods: ["PUT", "PATCH"], roles: ["admin", "staff", "customer"] },
+  { prefix: "/api/v1/appointments", methods: ["DELETE"], roles: ["admin", "staff"] },
 
-  { prefix: "/api/v1/medical-records", methods: ["GET"], roles: ["admin", "customer"] },
-  { prefix: "/api/v1/prescriptions", methods: ["GET"], roles: ["admin", "customer"] },
+  { prefix: "/api/v1/medical-records", methods: ["GET"], roles: ["admin", "staff", "customer"] },
+  { prefix: "/api/v1/prescriptions", methods: ["GET"], roles: ["admin", "staff", "customer"] },
   { prefix: "/api/v1/re-examinations", methods: ["GET"], roles: ["admin", "customer"] },
-  { prefix: "/api/v1/medical-records", roles: ["admin"] },
-  { prefix: "/api/v1/prescriptions", roles: ["admin"] },
+  { prefix: "/api/v1/medical-records", roles: ["admin", "staff"] },
+  { prefix: "/api/v1/prescriptions", roles: ["admin", "staff"] },
   { prefix: "/api/v1/re-examinations", roles: ["admin"] },
 ];
 

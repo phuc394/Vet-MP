@@ -166,14 +166,6 @@ const login = async (data: {
     throw new Error("Account is inactive");
   }
 
-  if (
-    (user.role === "admin" || user.role === "staff") &&
-    user.email !== DEMO_ADMIN_EMAIL
-  ) {
-    throw new Error("Only the demo admin account can sign in as admin");
-  }
-  
-
   // Compare password
   const isMatch = await bcrypt.compare(
     password,

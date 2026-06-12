@@ -47,6 +47,12 @@ const referenceConfigs: Record<string, ReferenceConfig> = {
         labelKeys: ["full_name", "email"],
         fallback: "Staff",
     },
+    created_by: {
+        endpoint: "/api/v1/staff",
+        idField: "user_id",
+        labelKeys: ["full_name", "email"],
+        fallback: "Staff",
+    },
     appointment_id: {
         endpoint: "/api/v1/appointments",
         idField: "appointment_id",
@@ -143,7 +149,10 @@ export const fetchReferenceOptions = createAsyncThunk<
 
     try {
         const fields = new Set([
-            ...resource.formFields.map((field) => field.name),
+            ...resource.formFields.flatMap((field) => [
+                field.name,
+                ...(field.fields?.map((childField) => childField.name) ?? []),
+            ]),
             ...(resource.key === "appointments" ? ["record_id"] : []),
         ]);
         const entries = await Promise.all(
