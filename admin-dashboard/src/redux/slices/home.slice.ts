@@ -39,12 +39,53 @@ const initialState: HomeState = {
     adminEmail: localStorage.getItem("adminEmail") ?? "admin@gmail.com",
 };
 
+const getStoredRole = () => localStorage.getItem("adminRole");
+
+const currentMonthRange = () => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const format = (date: Date) => {
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${date.getFullYear()}-${month}-${day}`;
+    };
+    return { startDate: format(start), endDate: format(now) };
+};
+
 export const fetchDashboardReports = createAsyncThunk<
     Omit<HomeState, "isLoading" | "error" | "isMenuOpen" | "isDarkMode" | "adminEmail">,
     void,
     { rejectValue: string }
 >("home/fetchDashboardReports", async (_, { rejectWithValue }) => {
     try {
+        if (getStoredRole() === "staff") {
+            const params = currentMonthRange();
+            const [
+                revenueSummaryResponse,
+                revenueItemsResponse,
+                revenueTrendResponse,
+                topServicesResponse,
+            ] = await Promise.all([
+                ReportService.getRevenueSummary(params),
+                ReportService.getRevenueItems(params),
+                ReportService.getRevenueTrend(params),
+                ReportService.getTopRevenueServices({ limit: 6, ...params }),
+            ]);
+
+            return {
+                revenueSummary: revenueSummaryResponse.data.data,
+                revenueItems: revenueItemsResponse.data.data,
+                revenueTrend: toChartData(revenueTrendResponse.data.data),
+                topServices: toChartData(topServicesResponse.data.data),
+                medicineStock: [],
+                lowStock: null,
+                cancelledAppointments: null,
+                userRoles: [],
+                petSpecies: [],
+                appointmentStatus: [],
+            };
+        }
+
         const [
             revenueSummaryResponse,
             revenueItemsResponse,
@@ -103,6 +144,7 @@ const homeSlice = createSlice({
         logoutAdmin: (state) => {
             localStorage.removeItem("accessToken");
             localStorage.removeItem("adminEmail");
+            localStorage.removeItem("adminRole");
             state.adminEmail = "admin@gmail.com";
         },
     },

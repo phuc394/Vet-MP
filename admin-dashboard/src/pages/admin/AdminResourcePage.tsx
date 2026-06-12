@@ -17,7 +17,7 @@ import {
     setAdminResourceKey,
 } from "../../redux/slices/admin.slice";
 import { AdminRecord, AdminResource, DetailSection } from "./adminResources";
-import { hasPermission } from "./permissions";
+import { getCurrentRole, hasPermission } from "./permissions";
 
 type AdminResourcePageProps = {
     resource: AdminResource;
@@ -48,6 +48,7 @@ const AdminResourcePage = ({ resource }: AdminResourcePageProps) => {
     const canCreate = resource.allowCreate !== false && hasPermission(resource.key, "create") && resource.formFields.length > 0;
     const canEdit = resource.allowEdit !== false && hasPermission(resource.key, "edit") && resource.formFields.length > 0;
     const canDelete = resource.allowDelete !== false && hasPermission(resource.key, "delete");
+    const canUseExtraAction = getCurrentRole() === "staff";
 
     useEffect(() => {
         dispatch(setAdminResourceKey(resource.key));
@@ -63,6 +64,7 @@ const AdminResourcePage = ({ resource }: AdminResourcePageProps) => {
 
     const formFields = useMemo<FormField[]>(() => {
         const isEdit = modal?.type === "edit";
+        const role = getCurrentRole();
         return resource.formFields.filter((field) => {
             if (isEdit && field.hideOnEdit) {
                 return false;
@@ -70,10 +72,22 @@ const AdminResourcePage = ({ resource }: AdminResourcePageProps) => {
             if (!isEdit && field.hideOnCreate) {
                 return false;
             }
+            if (role === "staff" && resource.key === "appointments" && ["pet_id", "service_id", "staff_id", "service_price"].includes(field.name)) {
+                return false;
+            }
             return true;
         }).map((field) => {
             const options = referenceOptions[field.name];
-            return options ? { ...field, type: "select", options } : field;
+            const fieldWithChildOptions = field.fields
+                ? {
+                    ...field,
+                    fields: field.fields.map((childField) => {
+                        const childOptions = referenceOptions[childField.name];
+                        return childOptions ? { ...childField, type: "select" as const, options: childOptions } : childField;
+                    }),
+                }
+                : field;
+            return options ? { ...fieldWithChildOptions, type: "select", options } : fieldWithChildOptions;
         });
     }, [modal?.type, referenceOptions, resource.formFields]);
 
@@ -154,7 +168,7 @@ const AdminResourcePage = ({ resource }: AdminResourcePageProps) => {
                 canDelete={canDelete}
                 canDeleteRow={resource.canDeleteRow}
                 isLoading={isLoading}
-                extraActionLabel={resource.extraActionLabel}
+                extraActionLabel={canUseExtraAction ? resource.extraActionLabel : undefined}
                 onSearchChange={setSearchValue}
                 onFilterChange={setFilterValue}
                 onAdd={() => setModal({ type: "create" })}

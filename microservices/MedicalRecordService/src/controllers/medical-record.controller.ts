@@ -17,7 +17,9 @@ const getAllMedicalRecords = asyncHandler(
         const user = (req as any).user;
         const records = user.role === 'admin'
             ? await MedicalRecordService.getAllMedicalRecords(req.query)
-            : await MedicalRecordService.getMedicalRecordsByOwnerId(user.user_id, req.query);
+            : user.role === 'staff'
+                ? await MedicalRecordService.getMedicalRecordsByStaffId(user.user_id, req.query)
+                : await MedicalRecordService.getMedicalRecordsByOwnerId(user.user_id, req.query);
         return sendSuccess(res, 200, 'Medical records retrieved', records);
     }
 );
@@ -31,7 +33,9 @@ const getMedicalRecordById = asyncHandler(async (req: Request<{ id: string }>, r
     const user = (req as any).user;
     if (
         user.role !== 'admin' &&
-        !await MedicalRecordService.isMedicalRecordOwnedByUser(id, user.user_id)
+        !(user.role === 'staff'
+            ? await MedicalRecordService.isMedicalRecordAssignedToStaff(id, user.user_id)
+            : await MedicalRecordService.isMedicalRecordOwnedByUser(id, user.user_id))
     ) {
         throw new HttpError(403, 'Forbidden');
     }
@@ -52,6 +56,14 @@ const createMedicalRecord = asyncHandler(
         const status = parseOptionalString(req.body.status, 'status');
         if (status !== undefined) payload.status = MedicalRecordService.resolveMedicalRecordStatus(status);
 
+        const user = (req as any).user;
+        if (
+            user.role === 'staff' &&
+            !await MedicalRecordService.isAppointmentAssignedToStaff(payload.appointment_id, user.user_id)
+        ) {
+            throw new HttpError(403, 'Forbidden');
+        }
+
         const record = await MedicalRecordService.createMedicalRecord(payload);
         return sendSuccess(res, 201, 'Medical record created', [record]);
     }
@@ -60,6 +72,13 @@ const createMedicalRecord = asyncHandler(
 const updateMedicalRecord = asyncHandler(
     async (req: Request<{ id: string }, unknown, UpdateMedicalRecordRequest>, res: Response) => {
         const id = parseId(req.params.id, 'id');
+        const user = (req as any).user;
+        if (
+            user.role === 'staff' &&
+            !await MedicalRecordService.isMedicalRecordAssignedToStaff(id, user.user_id)
+        ) {
+            throw new HttpError(403, 'Forbidden');
+        }
 
         const payload: UpdateMedicalRecordRequest = {};
         const symptoms = parseOptionalString(req.body.symptoms, 'symptoms');
@@ -85,6 +104,13 @@ const updateMedicalRecord = asyncHandler(
 
 const deleteMedicalRecord = asyncHandler(async (req: Request<{ id: string }>, res: Response) => {
     const id = parseId(req.params.id, 'id');
+    const user = (req as any).user;
+    if (
+        user.role === 'staff' &&
+        !await MedicalRecordService.isMedicalRecordAssignedToStaff(id, user.user_id)
+    ) {
+        throw new HttpError(403, 'Forbidden');
+    }
     const deleted = await MedicalRecordService.deleteMedicalRecord(id);
     if (!deleted) {
         throw new HttpError(404, 'Medical record not found');
@@ -108,7 +134,9 @@ const searchMedicalRecords = asyncHandler(
         const user = (req as any).user;
         const records = user.role === 'admin'
             ? await MedicalRecordService.searchMedicalRecords(filters)
-            : await MedicalRecordService.searchMedicalRecordsByOwnerId(user.user_id, filters);
+            : user.role === 'staff'
+                ? await MedicalRecordService.searchMedicalRecordsByStaffId(user.user_id, filters)
+                : await MedicalRecordService.searchMedicalRecordsByOwnerId(user.user_id, filters);
         return sendSuccess(res, 200, 'Medical records retrieved', records);
     }
 );

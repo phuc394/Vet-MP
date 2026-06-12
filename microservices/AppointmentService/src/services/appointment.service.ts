@@ -88,6 +88,15 @@ async function getAppointmentsByOwnerId(ownerId: number, sortQuery?: Appointment
     return rows as Appointment[];
 }
 
+async function getAppointmentsByStaffId(staffId: number, sortQuery?: AppointmentSortQuery): Promise<Appointment[]> {
+    const { sortBy, order } = resolveSort(sortQuery);
+    const [rows] = await connection.query(
+        `SELECT * FROM Appointment WHERE staff_id = ? ORDER BY ${sortBy} ${order}`,
+        [staffId]
+    );
+    return rows as Appointment[];
+}
+
 async function getAppointmentById(id: number): Promise<Appointment | null> {
     const [rows] = await connection.query('SELECT * FROM Appointment WHERE appointment_id = ?', [id]);
     const appointments = rows as Appointment[];
@@ -102,6 +111,17 @@ async function isAppointmentOwnedByUser(id: number, ownerId: number): Promise<bo
          WHERE a.appointment_id = ? AND p.owner_id = ? AND p.is_deleted = FALSE
          LIMIT 1`,
         [id, ownerId]
+    );
+    return (rows as Array<{ appointment_id: number }>).length > 0;
+}
+
+async function isAppointmentAssignedToStaff(id: number, staffId: number): Promise<boolean> {
+    const [rows] = await connection.query(
+        `SELECT appointment_id
+         FROM Appointment
+         WHERE appointment_id = ? AND staff_id = ?
+         LIMIT 1`,
+        [id, staffId]
     );
     return (rows as Array<{ appointment_id: number }>).length > 0;
 }
@@ -243,6 +263,40 @@ async function searchAppointmentsByOwnerId(
     return rows as Appointment[];
 }
 
+async function searchAppointmentsByStaffId(
+    staffId: number,
+    filters: AppointmentSearchFilters
+): Promise<Appointment[]> {
+    let sql = 'SELECT * FROM Appointment WHERE staff_id = ?';
+    const params: Array<string | number | Date> = [staffId];
+
+    if (filters.status) {
+        sql += ' AND status = ?';
+        params.push(filters.status);
+    }
+
+    if (filters.startDate && filters.endDate) {
+        sql += ' AND appointment_date BETWEEN ? AND ?';
+        params.push(filters.startDate, filters.endDate);
+    } else if (filters.startDate) {
+        sql += ' AND appointment_date >= ?';
+        params.push(filters.startDate);
+    } else if (filters.endDate) {
+        sql += ' AND appointment_date <= ?';
+        params.push(filters.endDate);
+    }
+
+    if (filters.petId) {
+        sql += ' AND pet_id = ?';
+        params.push(filters.petId);
+    }
+
+    sql += ' LIMIT 10';
+
+    const [rows] = await connection.query(sql, params);
+    return rows as Appointment[];
+}
+
 function resolveAppointmentStatus(value: string): AppointmentStatus {
     if (!VALID_APPOINTMENT_STATUSES.includes(value as AppointmentStatus)) {
         throw new HttpError(400, `status must be one of: ${VALID_APPOINTMENT_STATUSES.join(', ')}`);
@@ -253,13 +307,16 @@ function resolveAppointmentStatus(value: string): AppointmentStatus {
 export {
     getAllAppointments,
     getAppointmentsByOwnerId,
+    getAppointmentsByStaffId,
     getAppointmentById,
     isAppointmentOwnedByUser,
+    isAppointmentAssignedToStaff,
     isPetOwnedByUser,
     createAppointment,
     updateAppointment,
     deleteAppointment,
     searchAppointments,
     searchAppointmentsByOwnerId,
+    searchAppointmentsByStaffId,
     resolveAppointmentStatus
 };

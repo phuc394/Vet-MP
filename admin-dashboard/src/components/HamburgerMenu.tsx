@@ -11,6 +11,8 @@ import ToggleOffIcon from "@mui/icons-material/ToggleOff";
 import ToggleOnIcon from "@mui/icons-material/ToggleOn";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getCurrentRole } from "../pages/admin/permissions";
+import { SvgIconComponent } from "@mui/icons-material";
 
 type HamburgerMenuProps = {
     adminEmail: string;
@@ -21,7 +23,14 @@ type HamburgerMenuProps = {
     onToggleDarkMode: () => void;
 };
 
-const menuItems = [
+type MenuItem = {
+    label: string;
+    icon: SvgIconComponent;
+    path?: string;
+    children?: Array<{ label: string; path: string }>;
+};
+
+const adminMenuItems: MenuItem[] = [
     { label: "Appointments", icon: EventAvailableIcon, path: "/appointments" },
     { label: "Medical Records", icon: MedicalServicesIcon, path: "/medical-records" },
     { label: "Pets and Customers", icon: PetsIcon, path: "/pets-customers" },
@@ -47,6 +56,12 @@ const menuItems = [
     { label: "Report", icon: AssessmentIcon, path: "/home" },
 ];
 
+const staffMenuItems: MenuItem[] = [
+    { label: "Appointments", icon: EventAvailableIcon, path: "/appointments" },
+    { label: "Medical Records", icon: MedicalServicesIcon, path: "/medical-records" },
+    { label: "Report", icon: AssessmentIcon, path: "/home" },
+];
+
 const HamburgerMenu = ({
     adminEmail,
     isDarkMode,
@@ -56,6 +71,7 @@ const HamburgerMenu = ({
     onToggleDarkMode,
 }: HamburgerMenuProps) => {
     const navigate = useNavigate();
+    const menuItems = getCurrentRole() === "staff" ? staffMenuItems : adminMenuItems;
 
     const handleNavigate = (path: string) => {
         navigate(path);

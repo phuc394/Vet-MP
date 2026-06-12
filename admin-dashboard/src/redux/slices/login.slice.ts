@@ -29,6 +29,10 @@ export const loginAdmin = createAsyncThunk<
             localStorage.setItem("accessToken", token);
         }
 
+        const user = response.data?.data?.user ?? response.data?.user;
+        if (user?.role) {
+            localStorage.setItem("adminRole", user.role);
+        }
         localStorage.setItem("adminEmail", email);
     } catch (error) {
         const message = axios.isAxiosError(error)

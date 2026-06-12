@@ -1,6 +1,7 @@
 import { TableColumn } from "../../components/admin/DataTable";
 import { FormField } from "../../components/admin/ResourceForm";
 import { privateAxios } from "../../utils/axios";
+import { getCurrentRole, getCurrentUserId } from "./permissions";
 
 export type AdminRecord = Record<string, unknown>;
 
@@ -96,7 +97,7 @@ const toNumber = (valueToConvert: unknown) => {
 const cleanPayload = (values: AdminRecord) => {
     return Object.entries(values).reduce<AdminRecord>((payload, [key, item]) => {
         if (item !== "" && item !== undefined) {
-            payload[key] = ["pet_id", "service_id", "staff_id", "owner_id", "appointment_id", "record_id", "medicine_id", "quantity", "stock_quantity", "unit_price", "import_quantity", "supplier_id", "weight"].includes(key)
+            payload[key] = ["pet_id", "service_id", "staff_id", "owner_id", "appointment_id", "record_id", "medicine_id", "quantity", "stock_quantity", "unit_price", "import_quantity", "supplier_id", "weight", "selling_price", "price", "import_price", "available_stock", "min_threshold", "reference_id", "created_by"].includes(key)
                 ? toNumber(item)
                 : item;
         }
@@ -104,8 +105,19 @@ const cleanPayload = (values: AdminRecord) => {
     }, {});
 };
 
+const isCurrentStaff = () => getCurrentRole() === "staff";
+
+const ownStaffId = () => getCurrentUserId();
+
 const getAll = async (endpoint: string) => unwrapRows(await privateAxios.get(endpoint));
 const getOne = async (endpoint: string, id: string | number) => unwrapRecord(await privateAxios.get(`${endpoint}/${id}`));
+const tryGetAll = async (endpoint: string) => {
+    try {
+        return await getAll(endpoint);
+    } catch {
+        return [];
+    }
+};
 
 const labelOf = (row: AdminRecord, keys: string[], fallback: string) => {
     const found = keys.map((key) => row[key]).find((item) => item !== undefined && item !== null && item !== "");
@@ -114,11 +126,11 @@ const labelOf = (row: AdminRecord, keys: string[], fallback: string) => {
 
 const getRelationshipLookups = async () => {
     const [pets, services, staff, medicines, suppliers] = await Promise.all([
-        getAll("/api/v1/pets"),
-        getAll("/api/v1/catalog/services"),
-        getAll("/api/v1/staff"),
-        getAll("/api/v1/catalog/medicines"),
-        getAll("/api/v1/suppliers"),
+        tryGetAll("/api/v1/pets"),
+        tryGetAll("/api/v1/catalog/services"),
+        isCurrentStaff() ? Promise.resolve([]) : tryGetAll("/api/v1/staff"),
+        tryGetAll("/api/v1/catalog/medicines"),
+        tryGetAll("/api/v1/suppliers"),
     ]);
 
     return {
@@ -136,12 +148,14 @@ const loadAppointmentsWithNames = async (): Promise<AdminRecord[]> => {
         getRelationshipLookups(),
     ]);
 
-    return appointments.map((appointment) => ({
-        ...appointment,
-        pet_name: lookups.pets.get(String(appointment.pet_id)) ?? `Pet #${appointment.pet_id}`,
-        service_name: lookups.services.get(String(appointment.service_id)) ?? `Service #${appointment.service_id}`,
-        staff_name: lookups.staff.get(String(appointment.staff_id)) ?? `Staff #${appointment.staff_id}`,
-    }));
+    return appointments
+        .filter((appointment) => !isCurrentStaff() || String(appointment.staff_id) === String(ownStaffId()))
+        .map((appointment) => ({
+            ...appointment,
+            pet_name: lookups.pets.get(String(appointment.pet_id)) ?? `Pet #${appointment.pet_id}`,
+            service_name: lookups.services.get(String(appointment.service_id)) ?? `Service #${appointment.service_id}`,
+            staff_name: lookups.staff.get(String(appointment.staff_id)) ?? `Staff #${appointment.staff_id}`,
+        }));
 };
 
 const loadMedicalRecordsWithAppointmentNames = async (): Promise<AdminRecord[]> => {
@@ -150,11 +164,14 @@ const loadMedicalRecordsWithAppointmentNames = async (): Promise<AdminRecord[]> 
         loadAppointmentsWithNames(),
     ]);
     const appointmentDates = new Map(appointments.map((appointment) => [String(appointment.appointment_id), appointment.appointment_date]));
+    const appointmentStaff = new Map(appointments.map((appointment) => [String(appointment.appointment_id), appointment.staff_id]));
 
-    return records.map((record) => ({
-        ...record,
-        appointment_date: appointmentDates.get(String(record.appointment_id)) ?? "-",
-    }));
+    return records
+        .filter((record) => !isCurrentStaff() || String(appointmentStaff.get(String(record.appointment_id))) === String(ownStaffId()))
+        .map((record) => ({
+            ...record,
+            appointment_date: appointmentDates.get(String(record.appointment_id)) ?? "-",
+        }));
 };
 
 const loadPetsWithOwners = async () => {
@@ -193,6 +210,7 @@ const loadInventoryTransactionsWithNames = async (): Promise<AdminRecord[]> => {
         supplier_name: transaction.supplier_id
             ? lookups.suppliers.get(String(transaction.supplier_id)) ?? `Supplier #${transaction.supplier_id}`
             : "-",
+        created_by_name: lookups.staff.get(String(transaction.created_by)) ?? `Staff #${transaction.created_by}`,
     }));
 };
 
@@ -244,18 +262,25 @@ const createMedicalRecordWithPrescription = async (values: AdminRecord) => {
     const record = unwrapRecord(await privateAxios.post("/api/v1/medical-records", medicalRecordPayload));
     const recordId = record.record_id;
 
-    if (!recordId || !values.medicine_id) {
+    const prescriptions = Array.isArray(values.prescriptions)
+        ? values.prescriptions as AdminRecord[]
+        : [];
+    const validPrescriptions = prescriptions.filter((prescription) => prescription.medicine_id);
+
+    if (!recordId || validPrescriptions.length === 0) {
         return;
     }
 
-    await privateAxios.post("/api/v1/prescriptions", cleanPayload({
-        record_id: recordId,
-        medicine_id: values.medicine_id,
-        quantity: values.quantity,
-        dosage: values.dosage,
-        usage_instructions: values.usage_instructions,
-        notes: values.prescription_notes,
-    }));
+    await Promise.all(validPrescriptions.map((prescription) =>
+        privateAxios.post("/api/v1/prescriptions", cleanPayload({
+            record_id: recordId,
+            medicine_id: prescription.medicine_id,
+            quantity: prescription.quantity,
+            dosage: prescription.dosage,
+            usage_instructions: prescription.usage_instructions,
+            notes: prescription.notes,
+        })),
+    ));
 };
 
 export const adminResources: AdminResource[] = [
@@ -334,11 +359,20 @@ export const adminResources: AdminResource[] = [
             { name: "diagnosis", label: "Diagnosis", type: "textarea" },
             { name: "notes", label: "Notes", type: "textarea" },
             { name: "status", label: "Status", type: "select", options: ["in_progress", "completed"] },
-            { name: "medicine_id", label: "Medicine", type: "select", required: true, hideOnEdit: true },
-            { name: "quantity", label: "Quantity", type: "number", required: true, hideOnEdit: true },
-            { name: "dosage", label: "Dosage", hideOnEdit: true },
-            { name: "usage_instructions", label: "Usage Instructions", type: "textarea", hideOnEdit: true },
-            { name: "prescription_notes", label: "Prescription Notes", type: "textarea", hideOnEdit: true },
+            {
+                name: "prescriptions",
+                label: "Prescriptions",
+                type: "repeatable",
+                hideOnEdit: true,
+                addLabel: "Add Prescription",
+                fields: [
+                    { name: "medicine_id", label: "Medicine", type: "select", required: true },
+                    { name: "quantity", label: "Quantity", type: "number", required: true },
+                    { name: "dosage", label: "Dosage" },
+                    { name: "usage_instructions", label: "Usage Instructions", type: "textarea" },
+                    { name: "notes", label: "Prescription Notes", type: "textarea" },
+                ],
+            },
         ],
         filterField: "status",
         filterOptions: ["All", "in_progress", "completed"],
@@ -397,14 +431,25 @@ export const adminResources: AdminResource[] = [
         path: "/catalog/medicine",
         endpoint: "/api/v1/catalog/medicines",
         idField: "medicine_id",
-        columns: [column("medicine_id", "ID"), column("name", "Name"), column("description", "Description"), column("price", "Price")],
+        columns: [
+            column("medicine_id", "ID"),
+            column("name", "Name"),
+            column("unit", "Unit"),
+            column("selling_price", "Selling Price"),
+            column("ingredients", "Ingredients"),
+            column("is_active", "Active"),
+        ],
         formFields: [
             { name: "name", label: "Name", required: true },
-            { name: "description", label: "Description", type: "textarea" },
-            { name: "price", label: "Price", type: "number", required: true },
+            { name: "unit", label: "Unit", required: true },
+            { name: "selling_price", label: "Selling Price", type: "number", required: true },
+            { name: "ingredients", label: "Ingredients", type: "textarea" },
+            { name: "is_active", label: "Active", type: "checkbox", defaultValue: true, hideOnCreate: true },
         ],
-        searchKeys: ["medicine_id", "name", "description", "price"],
-        createPayload: cleanPayload,
+        filterField: "is_active",
+        filterOptions: ["All", "true", "false"],
+        searchKeys: ["medicine_id", "name", "unit", "selling_price", "ingredients", "is_active"],
+        createPayload: (values) => cleanPayload({ ...values, is_active: true }),
         updatePayload: cleanPayload,
     },
     {
@@ -413,14 +458,23 @@ export const adminResources: AdminResource[] = [
         path: "/catalog/service",
         endpoint: "/api/v1/catalog/services",
         idField: "service_id",
-        columns: [column("service_id", "ID"), column("name", "Name"), column("description", "Description"), column("price", "Price")],
+        columns: [
+            column("service_id", "ID"),
+            column("name", "Name"),
+            column("description", "Description"),
+            column("price", "Price"),
+            column("is_active", "Active"),
+        ],
         formFields: [
             { name: "name", label: "Name", required: true },
             { name: "description", label: "Description", type: "textarea" },
             { name: "price", label: "Price", type: "number", required: true },
+            { name: "is_active", label: "Active", type: "checkbox", defaultValue: true, hideOnCreate: true },
         ],
-        searchKeys: ["service_id", "name", "description", "price"],
-        createPayload: cleanPayload,
+        filterField: "is_active",
+        filterOptions: ["All", "true", "false"],
+        searchKeys: ["service_id", "name", "description", "price", "is_active"],
+        createPayload: (values) => cleanPayload({ ...values, is_active: true }),
         updatePayload: cleanPayload,
     },
     {
@@ -429,14 +483,20 @@ export const adminResources: AdminResource[] = [
         path: "/inventory/medicine",
         endpoint: "/api/v1/medicine-inventory",
         idField: "inventory_id",
-        columns: [column("inventory_id", "ID"), column("medicine_name", "Medicine"), column("stock_quantity", "Stock"), column("unit_price", "Unit Price"), column("expiry_date", "Expiry")],
-        formFields: [
-            { name: "medicine_id", label: "Medicine", type: "select", required: true },
-            { name: "stock_quantity", label: "Stock Quantity", type: "number", required: true },
-            { name: "unit_price", label: "Unit Price", type: "number", required: true },
-            { name: "expiry_date", label: "Expiry Date", type: "date" },
+        columns: [
+            column("inventory_id", "ID"),
+            column("medicine_name", "Medicine"),
+            column("import_price", "Import Price"),
+            column("available_stock", "Available Stock"),
+            column("min_threshold", "Min Threshold"),
         ],
-        searchKeys: ["inventory_id", "medicine_name", "stock_quantity", "unit_price", "expiry_date"],
+        formFields: [
+            { name: "medicine_id", label: "Medicine", type: "select", required: true, hideOnEdit: true },
+            { name: "import_price", label: "Import Price", type: "number" },
+            { name: "available_stock", label: "Available Stock", type: "number" },
+            { name: "min_threshold", label: "Min Threshold", type: "number" },
+        ],
+        searchKeys: ["inventory_id", "medicine_name", "import_price", "available_stock", "min_threshold"],
         loadRows: loadMedicineInventoryWithNames,
         createPayload: cleanPayload,
         updatePayload: cleanPayload,
@@ -447,14 +507,18 @@ export const adminResources: AdminResource[] = [
         path: "/inventory/suppliers",
         endpoint: "/api/v1/suppliers",
         idField: "supplier_id",
-        columns: [column("supplier_id", "ID"), column("name", "Name"), column("phone", "Phone"), column("email", "Email"), column("address", "Address")],
+        columns: [
+            column("supplier_id", "ID"),
+            column("name", "Name"),
+            column("contact_info", "Contact Info"),
+            column("address", "Address"),
+        ],
         formFields: [
             { name: "name", label: "Name", required: true },
-            { name: "phone", label: "Phone" },
-            { name: "email", label: "Email", type: "email" },
+            { name: "contact_info", label: "Contact Info", type: "textarea" },
             { name: "address", label: "Address", type: "textarea" },
         ],
-        searchKeys: ["supplier_id", "name", "phone", "email", "address"],
+        searchKeys: ["supplier_id", "name", "contact_info", "address"],
         createPayload: cleanPayload,
         updatePayload: cleanPayload,
     },
@@ -464,15 +528,26 @@ export const adminResources: AdminResource[] = [
         path: "/inventory/transactions",
         endpoint: "/api/v1/inventory-transactions",
         idField: "transaction_id",
-        columns: [column("transaction_id", "ID"), column("medicine_name", "Medicine"), column("supplier_name", "Supplier"), column("import_quantity", "Quantity"), column("transaction_date", "Date")],
+        columns: [
+            column("transaction_id", "ID"),
+            column("medicine_name", "Medicine"),
+            column("transaction_type", "Type"),
+            column("quantity", "Quantity"),
+            column("transaction_date", "Date"),
+            column("supplier_name", "Supplier"),
+            column("created_by_name", "Created By"),
+        ],
         formFields: [
             { name: "medicine_id", label: "Medicine", type: "select", required: true },
-            { name: "supplier_id", label: "Supplier", type: "select", required: true },
-            { name: "import_quantity", label: "Import Quantity", type: "number", required: true },
-            { name: "transaction_date", label: "Transaction Date", type: "date" },
+            { name: "transaction_type", label: "Transaction Type", type: "select", options: ["import", "export_prescription", "adjustment"], required: true },
+            { name: "quantity", label: "Quantity", type: "number", required: true },
+            { name: "transaction_date", label: "Transaction Date", type: "date", required: true },
+            { name: "supplier_id", label: "Supplier", type: "select" },
+            { name: "reference_id", label: "Reference ID", type: "number" },
+            { name: "created_by", label: "Created By", type: "select", required: true },
             { name: "notes", label: "Notes", type: "textarea" },
         ],
-        searchKeys: ["transaction_id", "medicine_name", "supplier_name", "import_quantity", "transaction_date"],
+        searchKeys: ["transaction_id", "medicine_name", "transaction_type", "quantity", "transaction_date", "supplier_name", "created_by_name", "notes"],
         loadRows: loadInventoryTransactionsWithNames,
         createPayload: cleanPayload,
         updatePayload: cleanPayload,
@@ -488,10 +563,10 @@ export const adminResources: AdminResource[] = [
         columns: [column("user_id", "User ID"), column("full_name", "Full Name"), column("email", "Email"), column("phone_number", "Phone"), column("role", "Role"), column("position", "Position"), column("status", "Status")],
         formFields: [
             { name: "full_name", label: "Full Name", required: true },
-            { name: "email", label: "Email", type: "email" },
+            { name: "email", label: "Email", type: "email", required: true, hideOnEdit: true },
             { name: "phone_number", label: "Phone Number" },
-            { name: "password", label: "Password", type: "password" },
-            { name: "role", label: "Role", type: "select", options: ["staff", "admin"] },
+            { name: "password", label: "Password", type: "password", required: true, hideOnEdit: true },
+            { name: "role", label: "Role", type: "select", options: ["staff", "admin"], required: true, defaultValue: "staff", hideOnEdit: true },
             { name: "position", label: "Position", required: true },
             { name: "license_number", label: "License Number" },
         ],

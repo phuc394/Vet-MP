@@ -17,24 +17,23 @@ import { identityMiddleware } from "../middleware/identity.middleware";
 const router = express.Router();
 
 router.use(identityMiddleware);
-router.use(authorizeRoles("admin"));
 
 // Pie chart endpoints
-router.get("/pie/auth/role", userRoleDist);
-router.get("/pie/pet/species", petSpeciesDist);
-router.get("/pie/appointment/status", appointmentStatusDist);
+router.get("/pie/auth/role", authorizeRoles("admin"), userRoleDist);
+router.get("/pie/pet/species", authorizeRoles("admin"), petSpeciesDist);
+router.get("/pie/appointment/status", authorizeRoles("admin"), appointmentStatusDist);
 
 // Bar chart endpoints
-router.get("/bar/inventory/stock", medicineStock);
-router.get("/bar/top-services", topServices);
+router.get("/bar/inventory/stock", authorizeRoles("admin"), medicineStock);
+router.get("/bar/top-services", authorizeRoles("admin", "staff"), topServices);
 
 // Line chart endpoints
-router.get("/line/revenue-trend", revenueTrend);
-router.get("/revenue", getRevenueReport);
-router.get("/revenue/calculate", calculateRevenueReport);
+router.get("/line/revenue-trend", authorizeRoles("admin", "staff"), revenueTrend);
+router.get("/revenue", authorizeRoles("admin", "staff"), getRevenueReport);
+router.get("/revenue/calculate", authorizeRoles("admin", "staff"), calculateRevenueReport);
 
 // Table endpoints
-router.get("/table/low-stock", lowStock);
-router.get("/table/appointment/cancelled", cancelledAppointments);
+router.get("/table/low-stock", authorizeRoles("admin"), lowStock);
+router.get("/table/appointment/cancelled", authorizeRoles("admin"), cancelledAppointments);
 
 export default router;

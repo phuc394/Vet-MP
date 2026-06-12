@@ -7,11 +7,11 @@ const router = express.Router();
 
 router.use(identityMiddleware);
 
-router.get('/', authorizeRoles('admin', 'customer'), PrescriptionController.getAllPrescriptions);
-router.get('/search', authorizeRoles('admin', 'customer'), PrescriptionController.searchPrescriptions);
-router.get('/:id', authorizeRoles('admin', 'customer'), PrescriptionController.getPrescriptionById);
-router.post('/', authorizeRoles('admin'), PrescriptionController.createPrescription);
-router.put('/:id', authorizeRoles('admin'), PrescriptionController.updatePrescription);
-router.delete('/:id', authorizeRoles('admin'), PrescriptionController.deletePrescription);
+router.get('/', authorizeRoles('admin', 'staff', 'customer'), PrescriptionController.getAllPrescriptions);
+router.get('/search', authorizeRoles('admin', 'staff', 'customer'), PrescriptionController.searchPrescriptions);
+router.get('/:id', authorizeRoles('admin', 'staff', 'customer'), PrescriptionController.getPrescriptionById);
+router.post('/', authorizeRoles('admin', 'staff'), PrescriptionController.createPrescription);
+router.put('/:id', authorizeRoles('admin', 'staff'), PrescriptionController.updatePrescription);
+router.delete('/:id', authorizeRoles('admin', 'staff'), PrescriptionController.deletePrescription);
 
 export default router;

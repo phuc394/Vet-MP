@@ -7,11 +7,11 @@ const router = express.Router();
 
 router.use(identityMiddleware);
 
-router.get('/', authorizeRoles('admin', 'customer'), AppointmentController.getAllAppointments);
-router.get('/search', authorizeRoles('admin', 'customer'), AppointmentController.searchAppointments);
-router.get('/:id', authorizeRoles('admin', 'customer'), AppointmentController.getAppointmentById);
+router.get('/', authorizeRoles('admin', 'staff', 'customer'), AppointmentController.getAllAppointments);
+router.get('/search', authorizeRoles('admin', 'staff', 'customer'), AppointmentController.searchAppointments);
+router.get('/:id', authorizeRoles('admin', 'staff', 'customer'), AppointmentController.getAppointmentById);
 router.post('/', authorizeRoles('admin', 'customer'), AppointmentController.createAppointment);
-router.put('/:id', authorizeRoles('admin', 'customer'), AppointmentController.updateAppointment);
-router.delete('/:id', authorizeRoles('admin'), AppointmentController.deleteAppointment);
+router.put('/:id', authorizeRoles('admin', 'staff', 'customer'), AppointmentController.updateAppointment);
+router.delete('/:id', authorizeRoles('admin', 'staff'), AppointmentController.deleteAppointment);
 
 export default router;

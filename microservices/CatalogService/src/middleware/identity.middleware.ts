@@ -8,7 +8,7 @@ const identityMiddleware = (req: Request, res: Response, next: NextFunction) => 
   const userId = Number(req.headers['x-user-id']);
   const role = normalizeRole(String(req.headers['x-user-role'] ?? ''));
 
-  if (!Number.isInteger(userId) || !['admin', 'customer'].includes(role)) {
+  if (!Number.isInteger(userId) || !['admin', 'staff', 'customer'].includes(role)) {
     res.status(401).json({ success: false, message: 'Unauthorized' });
     return;
   }

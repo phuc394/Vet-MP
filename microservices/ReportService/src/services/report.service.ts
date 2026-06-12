@@ -27,9 +27,9 @@ interface RevenueItemRow extends RowDataPacket {
 /** Helper to safely convert DB values to number */
 const toNumber = (val: any): number => (typeof val === "number" ? val : Number(val ?? 0));
 
-function buildRevenueFilter(startDate?: string, endDate?: string) {
+function buildRevenueFilter(startDate?: string, endDate?: string, staffId?: number) {
   let sql = ` FROM ${tables.appointment} WHERE status = 'completed'`;
-  const params: string[] = [];
+  const params: Array<string | number> = [];
 
   if (startDate && endDate) {
     sql += " AND appointment_date BETWEEN ? AND ?";
@@ -40,6 +40,11 @@ function buildRevenueFilter(startDate?: string, endDate?: string) {
   } else if (endDate) {
     sql += " AND appointment_date <= ?";
     params.push(endDate);
+  }
+
+  if (staffId !== undefined) {
+    sql += " AND staff_id = ?";
+    params.push(staffId);
   }
 
   return { sql, params };
@@ -85,34 +90,51 @@ export async function getMedicineStockLevels() {
   return { labels, datasets: [{ data }] };
 }
 
-export async function getTopRevenueServices(limit = 5, type: "revenue" | "count" = "revenue") {
+export async function getTopRevenueServices(limit = 5, type: "revenue" | "count" = "revenue", start?: string, end?: string, staffId?: number) {
+  const filters: string[] = [];
+  const params: any[] = [];
+  if (start) {
+    filters.push("a.appointment_date >= ?");
+    params.push(start);
+  }
+  if (end) {
+    filters.push("a.appointment_date <= ?");
+    params.push(end);
+  }
+  if (staffId !== undefined) {
+    filters.push("a.staff_id = ?");
+    params.push(staffId);
+  }
+  const whereSuffix = filters.length ? ` AND ${filters.join(" AND ")}` : "";
   const sql = type === "revenue"
     ? `SELECT s.name AS service_name, SUM(a.service_price) AS total
        FROM ${tables.appointment} a
        JOIN ${tables.service} s ON s.service_id = a.service_id
-       WHERE a.status = 'completed'
+       WHERE a.status = 'completed'${whereSuffix}
        GROUP BY a.service_id, s.name
        ORDER BY total DESC
        LIMIT ?`
     : `SELECT s.name AS service_name, COUNT(*) AS cnt
        FROM ${tables.appointment} a
        JOIN ${tables.service} s ON s.service_id = a.service_id
+       WHERE 1=1${whereSuffix}
        GROUP BY a.service_id, s.name
        ORDER BY cnt DESC
        LIMIT ?`;
-  const [rows] = await pool.query<RowDataPacket[]>(sql, [limit]);
+  const [rows] = await pool.query<RowDataPacket[]>(sql, [...params, limit]);
   const labels = rows.map(r => r.service_name);
   const data = rows.map(r => toNumber(type === "revenue" ? r.total : r.cnt));
   return { labels, datasets: [{ data }] };
 }
 
 /** ---------- LINE CHARTS ---------- */
-export async function getRevenueTrend(start?: string, end?: string, groupBy: "day" | "month" | "year" = "day") {
+export async function getRevenueTrend(start?: string, end?: string, groupBy: "day" | "month" | "year" = "day", staffId?: number) {
   const format = groupBy === "day" ? "%Y-%m-%d" : groupBy === "month" ? "%Y-%m" : "%Y";
   let sql = `SELECT DATE_FORMAT(appointment_date, ?) AS period, COALESCE(SUM(service_price),0) AS revenue FROM ${tables.appointment} WHERE status = 'completed'`;
   const params: any[] = [format];
   if (start) { sql += " AND appointment_date >= ?"; params.push(start); }
   if (end) { sql += " AND appointment_date <= ?"; params.push(end); }
+  if (staffId !== undefined) { sql += " AND staff_id = ?"; params.push(staffId); }
   sql += " GROUP BY period ORDER BY period";
   const [rows] = await pool.query<RowDataPacket[]>(sql, params);
   const labels = rows.map(r => r.period);
@@ -142,8 +164,8 @@ export async function getCancelledAppointmentsWithReasons() {
   return { columns, rows: dataRows };
 }
 
-export async function calculateRevenue(startDate?: string, endDate?: string): Promise<RevenueSummary> {
-  const { sql, params } = buildRevenueFilter(startDate, endDate);
+export async function calculateRevenue(startDate?: string, endDate?: string, staffId?: number): Promise<RevenueSummary> {
+  const { sql, params } = buildRevenueFilter(startDate, endDate, staffId);
   const [rows] = await pool.query<RevenueSummaryRow[]>(
     `SELECT
       COALESCE(SUM(service_price), 0) AS total_revenue,
@@ -163,8 +185,8 @@ export async function calculateRevenue(startDate?: string, endDate?: string): Pr
   };
 }
 
-export async function getRevenue(startDate?: string, endDate?: string): Promise<RevenueItem[]> {
-  const { sql, params } = buildRevenueFilter(startDate, endDate);
+export async function getRevenue(startDate?: string, endDate?: string, staffId?: number): Promise<RevenueItem[]> {
+  const { sql, params } = buildRevenueFilter(startDate, endDate, staffId);
   const [rows] = await pool.query<RevenueItemRow[]>(
     `SELECT
       appointment_id,
