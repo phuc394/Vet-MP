@@ -57,9 +57,6 @@ export const hasPermission = (resourceKey: string, action: PermissionAction) => 
     }
 
     if (role === "admin") {
-        if (resourceKey === "appointments") {
-            return action === "create";
-        }
         if (resourceKey === "medical-records") {
             return false;
         }
