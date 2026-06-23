@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const rawApiBaseUrl = "http://localhost:3000";
+const rawApiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || "http://localhost:3000";
 
 const API_BASE_URL = rawApiBaseUrl.replace(/\/+$/, "").endsWith("/api/v1")
   ? rawApiBaseUrl.replace(/\/+$/, "")

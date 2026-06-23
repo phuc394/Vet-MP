@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
+    "expo-dev-client": "^56.0.20",
     "typescript": "~5.9.2"
   },
   "private": true

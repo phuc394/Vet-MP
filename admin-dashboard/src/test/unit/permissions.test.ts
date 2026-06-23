@@ -13,6 +13,12 @@ describe("admin permissions", () => {
 
     it("allows admin users by default", () => {
         expect(hasPermission("appointments", "delete")).toBe(true);
+        expect(hasPermission("appointments", "create")).toBe(true);
+        expect(hasPermission("appointments", "edit")).toBe(true);
+        expect(hasPermission("staff", "edit")).toBe(true);
+        expect(hasPermission("staff", "delete")).toBe(true);
+        expect(hasPermission("service", "create")).toBe(true);
+        expect(hasPermission("service", "delete")).toBe(true);
     });
 
     it("reads flat permission arrays from localStorage", () => {
