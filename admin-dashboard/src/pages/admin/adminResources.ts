@@ -24,6 +24,7 @@ export type AdminResource = {
     deleteMethod?: "delete" | "patch";
     deletePath?: (row: AdminRecord) => string;
     createRecord?: (values: AdminRecord) => Promise<void>;
+    updateRecord?: (values: AdminRecord, editRow: AdminRecord) => Promise<void>;
     createPayload?: (values: AdminRecord) => AdminRecord;
     updatePayload?: (values: AdminRecord) => AdminRecord;
     loadRows?: () => Promise<AdminRecord[]>;
@@ -159,17 +160,28 @@ const loadAppointmentsWithNames = async (): Promise<AdminRecord[]> => {
 };
 
 const loadMedicalRecordsWithAppointmentNames = async (): Promise<AdminRecord[]> => {
-    const [records, appointments] = await Promise.all([
+    const [records, appointments, prescriptions] = await Promise.all([
         getAll("/api/v1/medical-records"),
         loadAppointmentsWithNames(),
+        getAll("/api/v1/prescriptions"),
     ]);
     const appointmentDates = new Map(appointments.map((appointment) => [String(appointment.appointment_id), appointment.appointment_date]));
     const appointmentStaff = new Map(appointments.map((appointment) => [String(appointment.appointment_id), appointment.staff_id]));
+
+    const prescriptionsByRecordId = new Map<string, AdminRecord[]>();
+    prescriptions.forEach((prescription) => {
+        const recordId = String(prescription.record_id);
+        if (!prescriptionsByRecordId.has(recordId)) {
+            prescriptionsByRecordId.set(recordId, []);
+        }
+        prescriptionsByRecordId.get(recordId)!.push(prescription);
+    });
 
     return records
         .filter((record) => !isCurrentStaff() || String(appointmentStaff.get(String(record.appointment_id))) === String(ownStaffId()))
         .map((record) => ({
             ...record,
+            prescriptions: prescriptionsByRecordId.get(String(record.record_id)) ?? [],
             appointment_date: appointmentDates.get(String(record.appointment_id)) ?? "-",
         }));
 };
@@ -283,6 +295,48 @@ const createMedicalRecordWithPrescription = async (values: AdminRecord) => {
     ));
 };
 
+const updateMedicalRecordWithPrescription = async (values: AdminRecord, editRow: AdminRecord) => {
+    const recordId = editRow.record_id as string | number;
+
+    const medicalRecordPayload = cleanPayload({
+        symptoms: values.symptoms,
+        diagnosis: values.diagnosis,
+        notes: values.notes,
+        status: values.status,
+    });
+
+    await privateAxios.put(`/api/v1/medical-records/${recordId}`, medicalRecordPayload);
+
+    const prescriptions = Array.isArray(values.prescriptions)
+        ? values.prescriptions as AdminRecord[]
+        : [];
+    const validPrescriptions = prescriptions.filter((prescription) => prescription.medicine_id);
+
+    const existingPrescriptions = await getAll("/api/v1/prescriptions");
+    const matchingExisting = existingPrescriptions.filter((prescription) => String(prescription.record_id) === String(recordId));
+
+    await Promise.all(
+        matchingExisting.map((prescription) =>
+            privateAxios.delete(`/api/v1/prescriptions/${prescription.prescription_id}`)
+        ),
+    );
+
+    if (validPrescriptions.length === 0) {
+        return;
+    }
+
+    await Promise.all(validPrescriptions.map((prescription) =>
+        privateAxios.post("/api/v1/prescriptions", cleanPayload({
+            record_id: recordId,
+            medicine_id: prescription.medicine_id,
+            quantity: prescription.quantity,
+            dosage: prescription.dosage,
+            usage_instructions: prescription.usage_instructions,
+            notes: prescription.notes,
+        })),
+    ));
+};
+
 export const adminResources: AdminResource[] = [
     {
         key: "appointments",
@@ -363,7 +417,6 @@ export const adminResources: AdminResource[] = [
                 name: "prescriptions",
                 label: "Prescriptions",
                 type: "repeatable",
-                hideOnEdit: true,
                 addLabel: "Add Prescription",
                 fields: [
                     { name: "medicine_id", label: "Medicine", type: "select", required: true },
@@ -385,12 +438,7 @@ export const adminResources: AdminResource[] = [
             return { data: record, sections: [{ title: "Prescriptions", rows: formattedPrescriptions }] };
         },
         createRecord: createMedicalRecordWithPrescription,
-        updatePayload: (values) => cleanPayload({
-            symptoms: values.symptoms,
-            diagnosis: values.diagnosis,
-            notes: values.notes,
-            status: values.status,
-        }),
+        updateRecord: updateMedicalRecordWithPrescription,
     },
     {
         key: "pets-customers",
@@ -566,6 +614,7 @@ export const adminResources: AdminResource[] = [
             { name: "email", label: "Email", type: "email", required: true, hideOnEdit: true },
             { name: "phone_number", label: "Phone Number" },
             { name: "password", label: "Password", type: "password", required: true, hideOnEdit: true },
+            { name: "new_password", label: "New Password", type: "password", hideOnCreate: true },
             { name: "role", label: "Role", type: "select", options: ["staff", "admin"], required: true, defaultValue: "staff", hideOnEdit: true },
             { name: "position", label: "Position", required: true },
             { name: "license_number", label: "License Number" },
@@ -578,6 +627,7 @@ export const adminResources: AdminResource[] = [
             full_name: values.full_name,
             position: values.position,
             license_number: values.license_number,
+            password: values.new_password,
         }),
     },
     {

@@ -1,4 +1,5 @@
-import "./Home.css";
+import "./home.css";
+import "../../styles/global.css";
 import { useCallback, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../components/Footer";

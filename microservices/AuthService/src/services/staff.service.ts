@@ -216,6 +216,7 @@ const updateStaff = async (
     full_name,
     position,
     license_number,
+    password,
   } = data;
 
   const connection =
@@ -232,6 +233,20 @@ const updateStaff = async (
         WHERE user_id = ?
         `,
         [full_name, userId]
+      );
+    }
+
+    if (password) {
+      const passwordHash =
+        await bcrypt.hash(password, 10);
+
+      await connection.execute(
+        `
+        UPDATE Users
+        SET password_hash = ?
+        WHERE user_id = ?
+        `,
+        [passwordHash, userId]
       );
     }
 

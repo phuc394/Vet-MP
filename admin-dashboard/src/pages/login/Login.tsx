@@ -1,4 +1,5 @@
-import "./Login.css";
+import "./login.css";
+import "../../styles/global.css";
 import { SyntheticEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";

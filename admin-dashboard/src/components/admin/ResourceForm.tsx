@@ -185,6 +185,7 @@ const ResourceForm = ({ fields, initialValues = {}, submitLabel, onSubmit, onCan
                                 <span>{field.label}</span>
                                 <button
                                     type="button"
+                                    className="resource-add-prescription"
                                     onClick={() => setValues({ ...values, [field.name]: [...items, {}] })}
                                 >
                                     {field.addLabel ?? "Add item"}
@@ -211,7 +212,7 @@ const ResourceForm = ({ fields, initialValues = {}, submitLabel, onSubmit, onCan
                                     ))}
                                     {items.length > 1 && (
                                         <button
-                                            className="danger"
+                                            className="resource-remove-prescription"
                                             type="button"
                                             onClick={() => setValues({
                                                 ...values,

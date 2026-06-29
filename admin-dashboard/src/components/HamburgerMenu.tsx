@@ -59,7 +59,6 @@ const adminMenuItems: MenuItem[] = [
 const staffMenuItems: MenuItem[] = [
     { label: "Appointments", icon: EventAvailableIcon, path: "/appointments" },
     { label: "Medical Records", icon: MedicalServicesIcon, path: "/medical-records" },
-    { label: "Report", icon: AssessmentIcon, path: "/home" },
 ];
 
 const HamburgerMenu = ({
