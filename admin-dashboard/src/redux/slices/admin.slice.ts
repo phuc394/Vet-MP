@@ -200,7 +200,12 @@ export const saveAdminRecord = createAsyncThunk<
 
     try {
         if (editRow) {
-            await privateAxios.put(`${resource.updateEndpoint ?? resource.endpoint}/${editRow[resource.idField]}`, payload);
+            if (resource.updateRecord) {
+                await resource.updateRecord(values, editRow);
+            } else {
+                const payload = resource.updatePayload?.(values) ?? values;
+                await privateAxios.put(`${resource.updateEndpoint ?? resource.endpoint}/${editRow[resource.idField]}`, payload);
+            }
         } else if (resource.createRecord) {
             await resource.createRecord(values);
         } else {

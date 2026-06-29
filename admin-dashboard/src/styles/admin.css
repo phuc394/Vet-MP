@@ -1,0 +1,346 @@
+@import url("./global.css");
+
+.admin-table-panel {
+    background: #ffffff;
+    border: 1px solid #dbe4ee;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+    padding: 18px;
+}
+
+.table-toolbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 16px;
+}
+
+.table-toolbar-left,
+.table-toolbar-right {
+    min-width: 0;
+}
+
+.table-toolbar-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.admin-add-button,
+.admin-actions button,
+.resource-form-actions button,
+.admin-modal-header button {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #0f172a;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 10px;
+    font-weight: 800;
+}
+
+.admin-add-button {
+    border-color: #15803d;
+    background: #16a34a;
+    color: #ffffff;
+}
+
+.admin-search {
+    width: min(360px, 100%);
+    min-height: 40px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+}
+
+.admin-search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    color: #0f172a;
+}
+
+.admin-filter {
+    width: min(220px, 100%);
+    min-height: 36px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #0f172a;
+    padding: 0 10px;
+}
+
+.admin-table-scroll {
+    overflow-x: auto;
+}
+
+.admin-data-table {
+    width: 100%;
+    min-width: 980px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.admin-data-table.compact {
+    min-width: 0;
+}
+
+.admin-data-table th,
+.admin-data-table td {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 12px 10px;
+    color: #334155;
+    text-align: left;
+    vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-data-table th {
+    color: #064e3b;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+.admin-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.admin-actions button {
+    min-height: 32px;
+    font-size: 13px;
+}
+
+.admin-actions button:hover,
+.resource-form-actions button:hover {
+    background: #f1f5f9;
+}
+
+.admin-actions .danger {
+    border-color: #fecdd3;
+    color: #dc2626;
+}
+
+.admin-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: rgba(15, 23, 42, 0.52);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.admin-modal {
+    width: min(760px, 100%);
+    max-height: min(760px, 88vh);
+    overflow: auto;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 24px 80px rgba(15, 23, 42, 0.28);
+    padding: 20px;
+}
+
+.admin-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.admin-modal-header h2,
+.details-panel h3 {
+    margin: 0;
+    color: #064e3b;
+}
+
+.resource-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.resource-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.resource-form input,
+.resource-form select,
+.resource-form textarea {
+    width: 100%;
+    min-height: 40px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    color: #0f172a;
+    padding: 8px 10px;
+}
+
+.resource-form textarea {
+    min-height: 92px;
+    resize: vertical;
+}
+
+.resource-repeatable {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 12px;
+}
+
+.resource-repeatable-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.resource-repeatable-item {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.resource-repeatable-item .danger {
+    justify-self: start;
+}
+
+.resource-add-prescription {
+    border-color: #15803d;
+    background: #16a34a;
+    color: #ffffff;
+}
+
+.resource-add-prescription:hover {
+    background: #15803d;
+}
+
+.resource-remove-prescription {
+    border-color: #fecdd3;
+    background: #ffffff;
+    color: #dc2626;
+    min-height: 28px;
+    padding: 0 8px;
+    font-size: 12px;
+    border-radius: 14px;
+}
+
+.resource-remove-prescription:hover {
+    background: #fecdd3;
+}
+
+.resource-form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.resource-form-actions .primary {
+    border-color: #047857;
+    background: #047857;
+    color: #ffffff;
+}
+
+.details-panel {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 14px;
+    margin-top: 14px;
+}
+
+.details-panel dl {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 16px;
+}
+
+.details-panel dt {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: capitalize;
+}
+
+.details-panel dd {
+    margin: 2px 0 0;
+    color: #0f172a;
+    overflow-wrap: anywhere;
+}
+
+.dashboard.is-dark .admin-table-panel,
+.dashboard.is-dark .admin-modal,
+.dashboard.is-dark .admin-search,
+.dashboard.is-dark .admin-filter,
+.dashboard.is-dark .admin-actions button,
+.dashboard.is-dark .resource-form input,
+.dashboard.is-dark .resource-form select,
+.dashboard.is-dark .resource-form textarea,
+.dashboard.is-dark .resource-form-actions button,
+.dashboard.is-dark .admin-modal-header button {
+    border-color: #334155;
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+.dashboard.is-dark .admin-data-table th,
+.dashboard.is-dark .admin-modal-header h2,
+.dashboard.is-dark .details-panel h3 {
+    color: #d1fae5;
+}
+
+.dashboard.is-dark .admin-data-table td,
+.dashboard.is-dark .details-panel dd,
+.dashboard.is-dark .resource-form label {
+    color: #cbd5e1;
+}
+
+.dashboard.is-dark .admin-data-table th,
+.dashboard.is-dark .admin-data-table td,
+.dashboard.is-dark .details-panel {
+    border-bottom-color: #334155;
+    border-top-color: #334155;
+}
+
+.dashboard.is-dark .admin-search input {
+    background: transparent;
+    color: #e2e8f0;
+}
+
+.dashboard.is-dark .admin-search input::placeholder {
+    color: #94a3b8;
+}
+
+@media (max-width: 720px) {
+    .admin-search,
+    .admin-filter {
+        width: 100%;
+        align-items: stretch;
+    }
+}

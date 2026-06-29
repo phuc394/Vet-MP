@@ -6,6 +6,7 @@ import Footer from "../Footer";
 import HamburgerMenu from "../HamburgerMenu";
 import HamburgerMenuToggle from "../HamburgerMenuToggle";
 import Header from "../Header";
+import "../../styles/global.css";
 
 type AdminLayoutProps = {
     title: string;

@@ -89,7 +89,7 @@ const AdminResourcePage = ({ resource }: AdminResourcePageProps) => {
                 : field;
             return options ? { ...fieldWithChildOptions, type: "select", options } : fieldWithChildOptions;
         });
-    }, [modal?.type, referenceOptions, resource.formFields]);
+    }, [modal?.type, referenceOptions, resource.formFields, resource.key]);
 
     const filterOptions = useMemo(() => {
         if (resource.filterOptions) {

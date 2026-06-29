@@ -12,6 +12,7 @@ export interface UpdateStaffPayload {
   full_name?: string;
   position?: string;
   license_number?: string;
+  password?: string;
 }
 
 export interface StaffDetail {

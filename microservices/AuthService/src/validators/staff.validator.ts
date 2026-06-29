@@ -38,14 +38,20 @@ const validateUpdateStaff = (body: any) => {
     full_name,
     position,
     license_number,
+    password,
   } = body;
 
   if (
     !full_name &&
     !position &&
-    !license_number
+    !license_number &&
+    !password
   ) {
     return "At least one field is required";
+  }
+
+  if (password && password.length < 8) {
+    return "Password must be at least 8 characters";
   }
 
   return null;
