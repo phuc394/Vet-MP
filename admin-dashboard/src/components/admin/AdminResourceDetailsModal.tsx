@@ -38,7 +38,7 @@ const AdminResourceDetailsModal = ({ title, row, details, sections, onClose }: A
                     ) : (
                         section.rows.map((sectionRow, index) => (
                             <DetailsPanel
-                                key={String(sectionRow.id ?? sectionRow.prescription_id ?? sectionRow.record_id ?? sectionRow.re_exam_id ?? index)}
+                                key={String(sectionRow.id ?? sectionRow.prescription_id ?? sectionRow.record_id ?? index)}
                                 title={section.rows.length > 1 ? `#${index + 1}` : undefined}
                                 data={Object.fromEntries(getVisibleEntries(sectionRow))}
                             />

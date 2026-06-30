@@ -49,14 +49,6 @@ type Prescription = {
   notes?: string | null;
 };
 
-type ReExamination = {
-  re_exam_id: number;
-  record_id: number;
-  suggested_date: string;
-  reason: string;
-  is_booked: boolean;
-};
-
 type Medicine = {
   medicine_id: number;
   name: string;
@@ -104,7 +96,6 @@ export default function AppointmentDetail() {
   const source = route.params?.source;
   const [modalContent, setModalContent] = useState<{ title: string; text: string } | null>(null);
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
-  const [reExaminations, setReExaminations] = useState<ReExamination[]>([]);
   const [medicineNames, setMedicineNames] = useState<Record<number, string>>({});
   const [medicalInfoLoading, setMedicalInfoLoading] = useState(false);
   const [medicalInfoError, setMedicalInfoError] = useState<string | null>(null);
@@ -157,16 +148,12 @@ export default function AppointmentDetail() {
 
           if (!record?.record_id) {
             setPrescriptions([]);
-            setReExaminations([]);
             setMedicineNames({});
             return;
           }
 
-          const [prescriptionsResponse, reExaminationsResponse, medicinesResponse] = await Promise.all([
+          const [prescriptionsResponse, medicinesResponse] = await Promise.all([
             api.get<ApiListResponse<Prescription>>('/prescriptions/search', {
-              params: { recordId: record.record_id },
-            }),
-            api.get<ApiListResponse<ReExamination>>('/re-examinations/search', {
               params: { recordId: record.record_id },
             }),
             api.get<ApiListResponse<Medicine>>('/catalog/medicines'),
@@ -179,12 +166,10 @@ export default function AppointmentDetail() {
           );
 
           setPrescriptions(prescriptionsResponse.data.data ?? []);
-          setReExaminations(reExaminationsResponse.data.data ?? []);
           setMedicineNames(medicinesById);
         } catch (error: any) {
           if (!isActive) return;
           setPrescriptions([]);
-          setReExaminations([]);
           setMedicineNames({});
           setMedicalInfoError(error.response?.data?.message || 'Could not load medical details.');
         } finally {
@@ -420,36 +405,6 @@ export default function AppointmentDetail() {
                   <Text style={styles.prescriptionMeta}>Usage: {prescription.usage_instructions}</Text>
                 )}
                 {!!prescription.notes && <Text style={styles.prescriptionMeta}>Notes: {prescription.notes}</Text>}
-              </View>
-            ))
-          )}
-        </View>
-
-        <View style={styles.sectionCard}>
-          <View style={styles.sectionHeader}>
-            <View style={styles.iconBox}>
-              <MaterialCommunityIcons name="calendar-refresh" size={20} color="#835300" />
-            </View>
-            <Text style={styles.sectionTitle}>Re-examinations</Text>
-          </View>
-
-          {medicalInfoLoading ? (
-            <View style={styles.inlineState}>
-              <ActivityIndicator size="small" color="#465F4D" />
-              <Text style={styles.inlineStateText}>Loading follow-up...</Text>
-            </View>
-          ) : reExaminations.length === 0 ? (
-            <Text style={styles.emptySectionText}>This pet do not need any follow-up right now</Text>
-          ) : (
-            reExaminations.map((reExamination) => (
-              <View key={reExamination.re_exam_id} style={styles.followUpItem}>
-                <View style={styles.followUpHeader}>
-                  <Text style={styles.followUpDate}>{formatDate(reExamination.suggested_date)}</Text>
-                  <View style={[styles.followUpBadge, reExamination.is_booked && styles.followUpBadgeBooked]}>
-                    <Text style={styles.followUpBadgeText}>{reExamination.is_booked ? 'Booked' : 'Pending'}</Text>
-                  </View>
-                </View>
-                <Text style={styles.prescriptionMeta}>{reExamination.reason}</Text>
               </View>
             ))
           )}

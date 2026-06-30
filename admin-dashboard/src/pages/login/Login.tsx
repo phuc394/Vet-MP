@@ -1,9 +1,10 @@
-import "./login.css";
+import "./Login.css";
 import "../../styles/global.css";
 import { SyntheticEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { loginAdmin, setEmail, setPassword } from "../../redux/slices/login.slice";
+import { getCurrentRole } from "../admin/permissions";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -15,7 +16,12 @@ const Login = () => {
 
         try {
             await dispatch(loginAdmin({ email, password })).unwrap();
-            navigate("/home");
+            const role = getCurrentRole();
+            if (role === "admin") {
+                navigate("/home");
+            } else if (role === "staff") {
+                navigate("/appointments");
+            }
         } catch {
             // Error message is stored in Redux state.
         }
@@ -53,6 +59,10 @@ const Login = () => {
                 <button className="login-submit" type="submit" disabled={isSubmitting}>
                     {isSubmitting ? "Signing in..." : "Sign In"}
                 </button>
+
+                <Link className="login-link" to="/forgot-password">
+                    Forgot Password?
+                </Link>
             </form>
         </div>
     );

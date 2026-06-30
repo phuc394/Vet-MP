@@ -1,17 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+import "../../styles/global.css";
+import "./admin.css";
 import AdminResourceDetailsModal from "../../components/admin/AdminResourceDetailsModal";
 import AdminResourceFormModal from "../../components/admin/AdminResourceFormModal";
 import AdminLayout from "../../components/admin/AdminLayout";
 import DataTable from "../../components/admin/DataTable";
-import ReExaminationModal from "../../components/admin/ReExaminationModal";
 import { FormField } from "../../components/admin/ResourceForm";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import {
-    createReExamination,
     deleteAdminRecord,
     fetchAdminDetails,
     fetchAdminRows,
-    fetchInitialReExaminationRecord,
     fetchReferenceOptions,
     saveAdminRecord,
     setAdminResourceKey,
@@ -26,7 +25,6 @@ type AdminResourcePageProps = {
 type ModalState =
     | { type: "create" }
     | { type: "edit"; row: AdminRecord }
-    | { type: "reexamination"; row: AdminRecord; initialRecordId?: unknown }
     | { type: "details"; row: AdminRecord; details: AdminRecord; sections?: DetailSection[] }
     | null;
 
@@ -48,7 +46,6 @@ const AdminResourcePage = ({ resource }: AdminResourcePageProps) => {
     const canCreate = resource.allowCreate !== false && hasPermission(resource.key, "create") && resource.formFields.length > 0;
     const canEdit = resource.allowEdit !== false && hasPermission(resource.key, "edit") && resource.formFields.length > 0;
     const canDelete = resource.allowDelete !== false && hasPermission(resource.key, "delete");
-    const canUseExtraAction = getCurrentRole() === "staff";
 
     useEffect(() => {
         dispatch(setAdminResourceKey(resource.key));
@@ -136,23 +133,6 @@ const AdminResourcePage = ({ resource }: AdminResourcePageProps) => {
         await dispatch(deleteAdminRecord({ resourceKey: resource.key, row })).unwrap();
     };
 
-    const handleReExamination = async (row: AdminRecord) => {
-        if (resource.key !== "appointments") {
-            return;
-        }
-        try {
-            const initialRecordId = await dispatch(fetchInitialReExaminationRecord(row)).unwrap();
-            setModal({ type: "reexamination", row, initialRecordId });
-        } catch {
-            setModal({ type: "reexamination", row });
-        }
-    };
-
-    const handleCreateReExamination = async (values: AdminRecord) => {
-        await dispatch(createReExamination(values)).unwrap();
-        setModal(null);
-    };
-
     return (
         <AdminLayout title={resource.title} description="Manage records with searchable, filterable data tables">
             {error && <div className="dashboard-alert">{error}</div>}
@@ -168,14 +148,12 @@ const AdminResourcePage = ({ resource }: AdminResourcePageProps) => {
                 canDelete={canDelete}
                 canDeleteRow={resource.canDeleteRow}
                 isLoading={isLoading}
-                extraActionLabel={canUseExtraAction ? resource.extraActionLabel : undefined}
                 onSearchChange={setSearchValue}
                 onFilterChange={setFilterValue}
                 onAdd={() => setModal({ type: "create" })}
                 onEdit={(row) => setModal({ type: "edit", row })}
                 onDetails={handleDetails}
                 onDelete={handleDelete}
-                onExtraAction={handleReExamination}
             />
 
             {(modal?.type === "create" || modal?.type === "edit") && (
@@ -185,15 +163,6 @@ const AdminResourcePage = ({ resource }: AdminResourcePageProps) => {
                     initialValues={modal.type === "edit" ? modal.row : undefined}
                     submitLabel={modal.type === "edit" ? "Save Changes" : "Create"}
                     onSubmit={handleSubmit}
-                    onClose={() => setModal(null)}
-                />
-            )}
-
-            {modal?.type === "reexamination" && (
-                <ReExaminationModal
-                    initialRecordId={modal.initialRecordId}
-                    recordOptions={referenceOptions.record_id}
-                    onSubmit={handleCreateReExamination}
                     onClose={() => setModal(null)}
                 />
             )}

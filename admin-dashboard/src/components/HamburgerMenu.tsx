@@ -1,4 +1,3 @@
-import AssessmentIcon from "@mui/icons-material/Assessment";
 import CategoryIcon from "@mui/icons-material/Category";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
@@ -53,7 +52,6 @@ const adminMenuItems: MenuItem[] = [
     },
     { label: "Staff", icon: LocalHospitalIcon, path: "/staff" },
     { label: "Account", icon: PeopleAltIcon, path: "/account" },
-    { label: "Report", icon: AssessmentIcon, path: "/home" },
 ];
 
 const staffMenuItems: MenuItem[] = [
