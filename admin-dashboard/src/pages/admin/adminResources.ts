@@ -253,15 +253,6 @@ const enrichPrescriptions = async (prescriptions: AdminRecord[], record?: AdminR
     }));
 };
 
-const enrichReExaminations = (reExaminations: AdminRecord[], records: AdminRecord[]) => {
-    const recordNames = new Map(records.map((record) => [String(record.record_id), formatMedicalRecordName(record)]));
-
-    return reExaminations.map(({ record_id, ...reExamination }) => ({
-        ...reExamination,
-        medical_record: recordNames.get(String(record_id)) ?? `Medical Record #${record_id}`,
-    }));
-};
-
 const createMedicalRecordWithPrescription = async (values: AdminRecord) => {
     const medicalRecordPayload = cleanPayload({
         appointment_id: values.appointment_id,
@@ -369,17 +360,9 @@ export const adminResources: AdminResource[] = [
         filterField: "status",
         filterOptions: ["All", "pending", "confirmed", "cancelled", "completed"],
         searchKeys: ["appointment_id", "pet_name", "service_name", "staff_name", "status", "note"],
-        extraActionLabel: "Re-Examination",
         loadRows: loadAppointmentsWithNames,
         loadDetails: async (row) => {
             const appointment = await getOne("/api/v1/appointments", row.appointment_id as string | number);
-            const records = await detailRowsByField("/api/v1/medical-records", "appointment_id", row.appointment_id);
-            const reExaminations = records.length
-                ? (await getAll("/api/v1/re-examinations")).filter((exam) =>
-                    records.some((record) => String(record.record_id) === String(exam.record_id)),
-                )
-                : [];
-            const formattedReExaminations = enrichReExaminations(reExaminations, records);
             return {
                 data: {
                     ...appointment,
@@ -387,7 +370,6 @@ export const adminResources: AdminResource[] = [
                     service_name: row.service_name,
                     staff_name: row.staff_name,
                 },
-                sections: [{ title: "Re-Examinations", rows: formattedReExaminations }],
             };
         },
         createPayload: cleanPayload,

@@ -1,4 +1,4 @@
-import "./home.css";
+import "./Home.css";
 import "../../styles/global.css";
 import { useCallback, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -35,18 +35,25 @@ const Home = () => {
         adminEmail,
     } = useAppSelector((state) => state.home);
 
-    const handleToggleDarkMode = useCallback(() => {
-        dispatch(toggleDarkMode());
-    }, [dispatch]);
-
     const handleLogout = useCallback(() => {
         dispatch(logoutAdmin());
         navigate("/");
     }, [dispatch, navigate]);
 
+    const handleToggleDarkMode = useCallback(() => {
+        dispatch(toggleDarkMode());
+    }, [dispatch]);
+
     useEffect(() => {
         dispatch(fetchDashboardReports());
     }, [dispatch]);
+
+    useEffect(() => {
+        const role = getCurrentRole();
+        if (role === "staff") {
+            navigate("/appointments", { replace: true });
+        }
+    }, [navigate]);
 
     const totalUsers = useMemo(() => {
         return userRoles.reduce((sum, item) => sum + item.value, 0);

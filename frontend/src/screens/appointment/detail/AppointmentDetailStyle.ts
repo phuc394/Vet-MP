@@ -80,37 +80,6 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 19,
   },
-  followUpItem: {
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#F3EEE9',
-  },
-  followUpHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  followUpDate: {
-    color: '#465F4D',
-    fontSize: 15,
-    fontWeight: '900',
-  },
-  followUpBadge: {
-    backgroundColor: '#FFF3E6',
-    borderRadius: 14,
-    paddingHorizontal: 9,
-    paddingVertical: 5,
-  },
-  followUpBadgeBooked: {
-    backgroundColor: '#E7F2EA',
-  },
-  followUpBadgeText: {
-    color: '#465F4D',
-    fontSize: 12,
-    fontWeight: '900',
-  },
-
   actionRow: { marginTop: 6, alignItems: 'center' },
   cancelCard: { backgroundColor: '#FFFFFF', borderRadius: 18, padding: 12, borderWidth: 1, borderColor: '#F3E9E6', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cancelInfo: { flex: 1, paddingRight: 12 },

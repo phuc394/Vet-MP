@@ -274,49 +274,6 @@ select {
     font-weight: 700;
 }
 
-.dashboard.is-dark .admin-table-panel,
-.dashboard.is-dark .admin-modal,
-.dashboard.is-dark .admin-search,
-.dashboard.is-dark .admin-filter,
-.dashboard.is-dark .admin-actions button,
-.dashboard.is-dark .resource-form input,
-.dashboard.is-dark .resource-form select,
-.dashboard.is-dark .resource-form textarea,
-.dashboard.is-dark .resource-form-actions button,
-.dashboard.is-dark .admin-modal-header button {
-    border-color: #334155;
-    background: #1e293b;
-    color: #e2e8f0;
-}
-
-.dashboard.is-dark .admin-data-table th,
-.dashboard.is-dark .admin-modal-header h2,
-.dashboard.is-dark .details-panel h3 {
-    color: #d1fae5;
-}
-
-.dashboard.is-dark .admin-data-table td,
-.dashboard.is-dark .details-panel dd,
-.dashboard.is-dark .resource-form label {
-    color: #cbd5e1;
-}
-
-.dashboard.is-dark .admin-data-table th,
-.dashboard.is-dark .admin-data-table td,
-.dashboard.is-dark .details-panel {
-    border-bottom-color: #334155;
-    border-top-color: #334155;
-}
-
-.dashboard.is-dark .admin-search input {
-    background: transparent;
-    color: #e2e8f0;
-}
-
-.dashboard.is-dark .admin-search input::placeholder {
-    color: #94a3b8;
-}
-
 @media (max-width: 720px) {
     .page-header {
         align-items: flex-start;
@@ -330,22 +287,5 @@ select {
 
     .app-footer {
         margin: 32px -20px -20px;
-    }
-
-    .table-toolbar,
-    .resource-form,
-    .details-panel dl {
-        grid-template-columns: 1fr;
-    }
-
-    .table-toolbar {
-        flex-direction: column;
-    }
-
-    .table-toolbar-right,
-    .admin-search,
-    .admin-filter {
-        width: 100%;
-        align-items: stretch;
     }
 }

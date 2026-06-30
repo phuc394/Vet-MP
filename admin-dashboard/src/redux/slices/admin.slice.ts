@@ -251,36 +251,6 @@ export const fetchAdminDetails = createAsyncThunk(
     },
 );
 
-export const fetchInitialReExaminationRecord = createAsyncThunk(
-    "admin/fetchInitialReExaminationRecord",
-    async (row: AdminRecord) => {
-        const response = await privateAxios.get("/api/v1/medical-records");
-        const records = response.data?.data ?? response.data;
-        const record = Array.isArray(records)
-            ? records.find((item) => String(item.appointment_id) === String(row.appointment_id))
-            : undefined;
-        return record?.record_id;
-    },
-);
-
-export const createReExamination = createAsyncThunk<
-    void,
-    AdminRecord,
-    { rejectValue: string }
->("admin/createReExamination", async (values, { rejectWithValue }) => {
-    try {
-        await privateAxios.post("/api/v1/re-examinations", {
-            record_id: Number(values.record_id),
-            suggested_date: values.suggested_date,
-            reason: values.reason,
-            is_booked: Boolean(values.is_booked),
-        });
-    } catch (error) {
-        const message = axios.isAxiosError(error) ? error.response?.data?.message : undefined;
-        return rejectWithValue(message ?? "Could not schedule re-examination.");
-    }
-});
-
 const adminSlice = createSlice({
     name: "admin",
     initialState,
@@ -335,9 +305,6 @@ const adminSlice = createSlice({
             .addCase(deleteAdminRecord.rejected, (state, action) => {
                 state.error = action.payload ?? "Could not delete record.";
             })
-            .addCase(createReExamination.rejected, (state, action) => {
-                state.error = action.payload ?? "Could not schedule re-examination.";
-            });
     },
 });
 

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import adminReducer, {
     clearAdminError,
-    createReExamination,
     fetchAdminRows,
     fetchReferenceOptions,
     setAdminResourceKey,
@@ -45,15 +44,5 @@ describe("admin slice", () => {
         expect(state.referenceOptions.pet_id).toEqual([{ label: "Milo (#1)", value: 1 }]);
     });
 
-    it("stores async errors and clears them", () => {
-        const failedState = adminReducer(undefined, createReExamination.rejected(
-            new Error("network"),
-            "request-id",
-            { record_id: 1 },
-            "Could not schedule re-examination.",
-        ));
 
-        expect(failedState.error).toBe("Could not schedule re-examination.");
-        expect(adminReducer(failedState, clearAdminError()).error).toBe("");
-    });
 });

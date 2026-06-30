@@ -30,7 +30,7 @@ export const getTokenPayload = (): TokenPayload => {
     }
 };
 
-export const getCurrentRole = () => getTokenPayload().role ?? localStorage.getItem("adminRole") ?? "admin";
+export const getCurrentRole = () => getTokenPayload().role ?? localStorage.getItem("adminRole") ?? null;
 
 export const getCurrentUserId = () => getTokenPayload().user_id;
 

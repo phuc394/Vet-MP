@@ -25,9 +25,16 @@ export type LoginPayload = {
   password: string;
 };
 
+export type ForgotPasswordPayload = {
+  email: string;
+};
+
 export const AuthService = {
   login: (payload: LoginPayload) => {
     return publicAxios.post("/api/v1/auth/login", payload);
+  },
+  forgotPassword: (payload: ForgotPasswordPayload) => {
+    return publicAxios.post("/api/v1/auth/forgot-password", payload);
   },
 };
 
