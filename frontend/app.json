@@ -15,6 +15,12 @@
           "resizeMode": "cover",
           "backgroundColor": "#FFF9EC"
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app needs access to your photo library to select pet avatars."
+        }
       ]
     ],
     "ios": {
