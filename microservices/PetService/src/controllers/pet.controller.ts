@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
 import * as petService from "../services/pet.service";
 import { CreatePet, UpdatePet } from "../models/pet.model";
-import { validateCreatePet } from "../utils/createPet.validate";
-import { validateUpdatePet } from "../utils/updatePet.validate";
+import { handleControllerError } from "../utils/errorHandler";
 
 
 //  GET ALL 
@@ -18,10 +17,7 @@ const getPets = async (req: Request, res: Response): Promise<void> => {
       data: pets,
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Internal server error",
-      error,
-    });
+    handleControllerError(res, error);
   }
 };
 
@@ -31,7 +27,7 @@ const getPetById = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = Number(req.params.id);
 
-    if (isNaN(id)) {
+    if(!Number.isFinite(id) || id <= 0) {
       res.status(400).json({ message: "Invalid pet id" });
       return;
     }
@@ -54,10 +50,7 @@ const getPetById = async (req: Request, res: Response): Promise<void> => {
       data: pet,
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Internal server error",
-      error,
-    });
+    handleControllerError(res, error);
   }
 };
 
@@ -67,14 +60,6 @@ const createPet = async (req: Request, res: Response): Promise<void> => {
   try {
     const body = req.body;
     const user = (req as any).user;
-    
-    const error = validateCreatePet(body);
-    if (error) {
-      res.status(400).json({ message: error });
-      return;
-    }
-
-    
     const data: CreatePet = {
       owner_id: user.user_id,
       name: body.name,
@@ -94,10 +79,7 @@ const createPet = async (req: Request, res: Response): Promise<void> => {
       data: newPet,
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Internal server error",
-      error,
-    });
+    handleControllerError(res, error);
   }
 };
 
@@ -107,21 +89,13 @@ const updatePet = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = Number(req.params.id);
 
-    if (isNaN(id)) {
+   if(!Number.isFinite(id) || id <= 0) {
       res.status(400).json({ message: "Invalid pet id" });
       return;
     }
 
     const body = req.body;
 
-    
-    const error = validateUpdatePet(body);
-    if (error) {
-      res.status(400).json({ message: error });
-      return;
-    }
-
-   
     const data: UpdatePet = {};
 
     if (body.name !== undefined) data.name = body.name;
@@ -133,29 +107,14 @@ const updatePet = async (req: Request, res: Response): Promise<void> => {
     if (body.notes !== undefined) data.notes = body.notes;
     if (body.avatar !== undefined) data.avatar = body.avatar;
 
-    if (Object.keys(data).length === 0) {
-      res.status(400).json({
-        message: "No valid fields to update",
-      });
-      return;
-    }
-
     const updatedPet = await petService.updatePet(id, data);
-
-    if (!updatedPet) {
-      res.status(404).json({ message: "Pet not found" });
-      return;
-    }
 
     res.status(200).json({
       message: "Pet updated successfully",
       data: updatedPet,
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Internal server error",
-      error,
-    });
+    handleControllerError(res, error);
   }
 };
 
@@ -165,26 +124,19 @@ const deletePet = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = Number(req.params.id);
 
-    if (isNaN(id)) {
+    if(!Number.isFinite(id) || id <= 0) {
       res.status(400).json({ message: "Invalid pet id" });
       return;
     }
 
     const deleted = await petService.deletePet(id);
 
-    if (!deleted) {
-      res.status(404).json({ message: "Pet not found or already deleted" });
-      return;
-    }
 
     res.status(200).json({
       message: "Pet deleted successfully",
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Internal server error",
-      error,
-    });
+    handleControllerError(res, error);
   }
 };
 
@@ -196,12 +148,6 @@ const searchPet= async(
  
   try{
       const keyword= req.query.name as string;
-       if (!keyword || keyword.trim() === "") {
-      res.status(400).json({
-        message: "Search keyword is required",
-      });
-      return;
-    }
       const user = (req as any).user;
       const pets = await petService.searchPet(
         keyword,
@@ -213,10 +159,7 @@ const searchPet= async(
       data: pets,
     });
   } catch (error){
-    res.status(500).json({
-      message: "Internal server error",
-      error,
-    });
+    handleControllerError(res, error);
   }
 
   

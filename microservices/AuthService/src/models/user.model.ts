@@ -65,3 +65,7 @@ export interface LoginResponse {
   };
 }
 
+export interface RegisterRespone{
+  message : string;
+}
+
