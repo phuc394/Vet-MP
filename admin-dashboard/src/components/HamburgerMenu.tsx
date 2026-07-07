@@ -3,6 +3,7 @@ import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import LogoutIcon from "@mui/icons-material/Logout";
+import AssessmentIcon from "@mui/icons-material/Assessment";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import PetsIcon from "@mui/icons-material/Pets";
@@ -30,6 +31,7 @@ type MenuItem = {
 };
 
 const adminMenuItems: MenuItem[] = [
+    { label: "Report", icon: AssessmentIcon, path: "/home" },
     { label: "Appointments", icon: EventAvailableIcon, path: "/appointments" },
     { label: "Medical Records", icon: MedicalServicesIcon, path: "/medical-records" },
     { label: "Pets and Customers", icon: PetsIcon, path: "/pets-customers" },

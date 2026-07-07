@@ -44,16 +44,20 @@ const Home = () => {
         dispatch(toggleDarkMode());
     }, [dispatch]);
 
-    useEffect(() => {
-        dispatch(fetchDashboardReports());
-    }, [dispatch]);
+    const role = getCurrentRole();
+    const isStaff = role === "staff";
 
     useEffect(() => {
-        const role = getCurrentRole();
-        if (role === "staff") {
+        if (isStaff) {
             navigate("/appointments", { replace: true });
         }
-    }, [navigate]);
+    }, [isStaff, navigate]);
+
+    useEffect(() => {
+        if (role === "admin") {
+            dispatch(fetchDashboardReports());
+        }
+    }, [dispatch, role]);
 
     const totalUsers = useMemo(() => {
         return userRoles.reduce((sum, item) => sum + item.value, 0);
@@ -70,8 +74,6 @@ const Home = () => {
     }, [userRoles]);
 
     const cancelledCount = cancelledAppointments?.rows.length ?? 0;
-    const isStaff = getCurrentRole() === "staff";
-
     return (
         <div className={`dashboard${isDarkMode ? " is-dark" : ""}`}>
             <HamburgerMenu
