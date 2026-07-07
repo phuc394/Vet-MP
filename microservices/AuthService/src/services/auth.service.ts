@@ -6,9 +6,17 @@ import transporter from "../config/mailer";
 
 import pool from "../config/db";
 import jwtUtil from "../utils/jwt.util";
+import {
+  validateChangePassword,
+  validateForgotPassword,
+  validateLogin,
+  validateRefreshToken,
+  validateRegister,
+  validateResetPassword,
+} from "../validators/auth.validator";
 
-import { User,LoginResponse } from "../models/user.model";
-import { RefreshToken } from "../models/refresh-token.model";
+import { User,LoginResponse,LoginInput,RegisterInput, RegisterRespone } from "../models/user.model";
+import { RefreshToken,RefreshTokenRespone } from "../models/refresh-token.model";
 import {ChangePasswordResponse, ForgotPasswordResponse,ResetPasswordResponse} from "../models/auth.type";
 
 const DEMO_ADMIN_EMAIL = "admin@gmail.com";
@@ -67,13 +75,17 @@ const ensureDemoAdmin = async () => {
 
 
 
-const registerCustomer = async (data: {
-  full_name: string;
-  email: string;
-  phone_number: string;
-  password: string;
-}) => {
-  const { full_name, email, phone_number, password } = data;
+const registerCustomer = async (data:  RegisterInput) : Promise<RegisterRespone> => {
+
+  const error= validateRegister(data);
+  if(error){
+    throw new Error(error);
+  }
+
+  const full_name = data.full_name.trim();
+  const email = data.email.trim().toLowerCase();
+  const phone_number = data.phone_number.trim();
+  const { password } = data;
 
   // Check existing user
   const checkQuery = `
@@ -125,16 +137,22 @@ const registerCustomer = async (data: {
   };
 };
 
-const login = async (data: {
-  identifier: string;
-  password: string;
-}) : Promise<LoginResponse> => {
-  const { identifier, password } = data;
+const login = async (data: LoginInput) : Promise<LoginResponse> => {
+  const error= validateLogin(data);
+  if(error){
+    throw new Error(error);
+  }
+
+  const identifier = data.identifier.trim();
+  const { password } = data;
 
   await ensureDemoAdmin();
 
   // Determine email or phone
   const isEmail = identifier.includes("@");
+  const loginIdentifier = isEmail
+    ? identifier.toLowerCase()
+    : identifier;
 
   const query = isEmail
     ? `
@@ -150,7 +168,7 @@ const login = async (data: {
 
   const [rows] = await pool.execute<RowDataPacket[]>(
     query,
-    [identifier]
+    [loginIdentifier]
   );
 
   const users = rows as User[];
@@ -223,10 +241,17 @@ const login = async (data: {
 
 const refreshAccessToken = async (
   refreshToken: string
-) => {
+) : Promise<RefreshTokenRespone> => {
+  const error = validateRefreshToken(refreshToken);
+  if (error) {
+    throw new Error(error);
+  }
+
+  const normalizedRefreshToken = refreshToken.trim();
+
   // Verify JWT
   const decoded = await jwtUtil.verifyRefreshToken(
-    refreshToken
+    normalizedRefreshToken
   ) as {
     user_id: number;
     role: string;
@@ -241,7 +266,7 @@ const refreshAccessToken = async (
 
   const [rows] = await pool.execute<RowDataPacket[]>(
     query,
-    [refreshToken]
+    [normalizedRefreshToken]
   );
 
   const refreshTokens = rows as RefreshToken[];
@@ -274,8 +299,15 @@ const refreshAccessToken = async (
 
 
 const forgotPassword = async (email: string): Promise<ForgotPasswordResponse> => {
+  const error = validateForgotPassword({ email });
+  if (error) {
+    throw new Error(error);
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
   // 1. Tìm kiếm user 
-  const user = await AuthModel.findUserByEmail(email);
+  const user = await AuthModel.findUserByEmail(normalizedEmail);
 
   if (!user) {
     return {
@@ -345,10 +377,21 @@ const resetPassword = async (
   token: string,
   newPassword: string
 ): Promise<ResetPasswordResponse> => {
+  const error = validateResetPassword({
+    token,
+    newPassword,
+  });
+
+  if (error) {
+    throw new Error(error);
+  }
+
+  const normalizedToken = token.trim();
+
   // 1. Băm token nhận được từ client để đối chiếu với DB
   const hashedToken: string = crypto
     .createHash("sha256")
-    .update(token)
+    .update(normalizedToken)
     .digest("hex");
 
   // 2. Tìm user dựa trên token đã băm (Kết quả trả về là User | null nhờ tầng Model)
@@ -392,6 +435,13 @@ const resetPassword = async (
 const logout = async (
   refreshToken: string
 ) => {
+  const error = validateRefreshToken(refreshToken);
+  if (error) {
+    throw new Error(error);
+  }
+
+  const normalizedRefreshToken = refreshToken.trim();
+
   const query = `
     DELETE FROM RefreshTokens
     WHERE refresh_token = ?
@@ -399,7 +449,7 @@ const logout = async (
 
   await pool.execute<ResultSetHeader>(
     query,
-    [refreshToken]
+    [normalizedRefreshToken]
   );
 
   return {
@@ -412,6 +462,14 @@ const changePassword = async (
   currentPassword: string,
   newPassword: string
 ): Promise<ChangePasswordResponse> => {
+  const error = validateChangePassword({
+    currentPassword,
+    newPassword,
+  });
+
+  if (error) {
+    throw new Error(error);
+  }
 
   // 1. Lấy password hiện tại
   const user =

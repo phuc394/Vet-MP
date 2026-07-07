@@ -5,3 +5,7 @@ export interface RefreshToken {
   expires_at: Date;
   created_at?: Date;
 }
+
+export interface RefreshTokenRespone{
+  accessToken: string;
+}

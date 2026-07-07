@@ -1,6 +1,7 @@
 import { pool } from "../config/database";
 import { Pet, CreatePet, UpdatePet } from "../models/pet.model";
-
+import { validateCreatePet, validateUpdatePet, validatePetId, validateSearchKey } from "../utils/Pet.validate";
+import { throwIfvalidateError } from "../utils/throwValidateError";
 //GET 
 const getAllPets = async (): Promise<Pet[]> => {
   const [rows] = await pool.query(
@@ -11,6 +12,7 @@ const getAllPets = async (): Promise<Pet[]> => {
 };
 
 const getPetsByOwnerId = async (ownerId: number): Promise<Pet[]> => {
+  throwIfvalidateError(validatePetId(ownerId));
   const [rows] = await pool.query(
     "SELECT * FROM Pet WHERE owner_id = ? AND is_deleted = FALSE",
     [ownerId]
@@ -22,6 +24,7 @@ const getPetsByOwnerId = async (ownerId: number): Promise<Pet[]> => {
 
 //GET BY ID
 const getPetById = async (id: number): Promise<Pet | null> => {
+  throwIfvalidateError(validatePetId(id));
   const [rows] = await pool.query(
     "SELECT * FROM Pet WHERE pet_id = ? AND is_deleted = FALSE",
     [id]
@@ -34,6 +37,8 @@ const getPetById = async (id: number): Promise<Pet | null> => {
 
 // CREATE
 const createPet = async (data: CreatePet): Promise<Pet> => {
+
+  throwIfvalidateError(validateCreatePet(data));
   const {
     owner_id,
     name,
@@ -67,13 +72,38 @@ const updatePet = async (
   data: UpdatePet
 ): Promise<Pet | null> => {
 
+  throwIfvalidateError(validatePetId(id));
+  throwIfvalidateError(validateUpdatePet(data));
+  
+  const pet = await getPetById(id);
+  if (!pet) {
+    throw new Error(`Pet with id ${id} not found`);
+  }
+
+  
+
   const fields: string[] = [];
   const values: any[] = [];
+  const allowedFields = [
+    "name",
+    "sex",
+    "species",
+    "breed",
+    "birth_date",
+    "weight",
+    "notes",
+    "avatar",
+  ];
 
   Object.entries(data).forEach(([key, value]) => {
-    fields.push(`${key} = ?`);
-    values.push(value);
-  });
+    
+    if (!allowedFields.includes(key)) {
+      return;
+    }
+      fields.push(`${key} = ?`);
+      values.push(value);
+     
+  });  
 
   if (fields.length === 0) {
     return getPetById(id);
@@ -92,6 +122,13 @@ const updatePet = async (
 
 // DELETE (soft delete)
 const deletePet = async (id: number): Promise<boolean> => {
+
+  throwIfvalidateError(validatePetId(id));
+  const pet = await getPetById(id);
+  if (!pet) {
+    throw new Error(`Pet with id ${id} not found`);
+  }
+  
   const [result] = await pool.query(
     "UPDATE Pet SET is_deleted = TRUE WHERE pet_id = ? AND is_deleted = FALSE",
     [id]
@@ -103,6 +140,10 @@ const deletePet = async (id: number): Promise<boolean> => {
 
 
 const searchPet = async(keyword : string, ownerId?: number) : Promise<Pet[]> =>{
+  throwIfvalidateError(validateSearchKey(keyword));
+  if(ownerId !== undefined){
+    throwIfvalidateError(validatePetId(ownerId));
+  }
     const params: Array<string | number> = [`%${keyword}%`];
     let sql = "SELECT * FROM Pet WHERE name LIKE ? AND is_deleted = FALSE";
 
