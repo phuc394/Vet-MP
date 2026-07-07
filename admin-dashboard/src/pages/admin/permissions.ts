@@ -1,4 +1,4 @@
-import { PermissionAction } from "./adminResources";
+import type { PermissionAction } from "./adminResources";
 
 type TokenPayload = {
     user_id?: number;
@@ -34,6 +34,22 @@ export const getCurrentRole = () => getTokenPayload().role ?? localStorage.getIt
 
 export const getCurrentUserId = () => getTokenPayload().user_id;
 
+const staffResourceKeys = ["appointments", "medical-records"];
+
+export const canAccessResource = (resourceKey: string) => {
+    const role = getCurrentRole();
+
+    if (role === "staff") {
+        return staffResourceKeys.includes(resourceKey);
+    }
+
+    if (role === "admin") {
+        return true;
+    }
+
+    return false;
+};
+
 export const hasPermission = (resourceKey: string, action: PermissionAction) => {
     const stored = parseJson<string[] | Record<string, string[]>>(localStorage.getItem("adminPermissions"));
     const permissions = stored ?? getTokenPayload().permissions;
@@ -57,11 +73,8 @@ export const hasPermission = (resourceKey: string, action: PermissionAction) => 
     }
 
     if (role === "admin") {
-        if (resourceKey === "medical-records") {
-            return false;
-        }
         return true;
     }
 
-    return false;
+    return !role;
 };

@@ -16,7 +16,8 @@ import {
     setAdminResourceKey,
 } from "../../redux/slices/admin.slice";
 import { AdminRecord, AdminResource, DetailSection } from "./adminResources";
-import { getCurrentRole, hasPermission } from "./permissions";
+import { canAccessResource, getCurrentRole, hasPermission } from "./permissions";
+import { useNavigate } from "react-router-dom";
 
 type AdminResourcePageProps = {
     resource: AdminResource;
@@ -38,20 +39,27 @@ const matchesSearch = (row: AdminRecord, searchKeys: string[], searchValue: stri
 
 const AdminResourcePage = ({ resource }: AdminResourcePageProps) => {
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
     const { rows, referenceOptions, isLoading, error } = useAppSelector((state) => state.admin);
     const [searchValue, setSearchValue] = useState("");
     const [filterValue, setFilterValue] = useState("All");
     const [modal, setModal] = useState<ModalState>(null);
+    const canAccess = canAccessResource(resource.key);
 
     const canCreate = resource.allowCreate !== false && hasPermission(resource.key, "create") && resource.formFields.length > 0;
     const canEdit = resource.allowEdit !== false && hasPermission(resource.key, "edit") && resource.formFields.length > 0;
     const canDelete = resource.allowDelete !== false && hasPermission(resource.key, "delete");
 
     useEffect(() => {
+        if (!canAccess) {
+            navigate("/appointments", { replace: true });
+            return;
+        }
+
         dispatch(setAdminResourceKey(resource.key));
         dispatch(fetchAdminRows(resource.key));
         dispatch(fetchReferenceOptions(resource.key));
-    }, [dispatch, resource.key]);
+    }, [canAccess, dispatch, navigate, resource.key]);
 
     useEffect(() => {
         setFilterValue("All");
@@ -132,6 +140,10 @@ const AdminResourcePage = ({ resource }: AdminResourcePageProps) => {
         }
         await dispatch(deleteAdminRecord({ resourceKey: resource.key, row })).unwrap();
     };
+
+    if (!canAccess) {
+        return null;
+    }
 
     return (
         <AdminLayout title={resource.title} description="Manage records with searchable, filterable data tables">

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AdminRecord, getResourceByKey } from "../../pages/admin/adminResources";
+import { getCurrentRole, getCurrentUserId } from "../../pages/admin/permissions";
 import { privateAxios } from "../../utils/axios";
 
 type ReferenceOption = { label: string; value: string | number };
@@ -167,6 +168,9 @@ export const fetchReferenceOptions = createAsyncThunk<
                     const records = unwrapRows(await privateAxios.get("/api/v1/medical-records"));
                     const usedAppointmentIds = new Set(records.map((record) => String(record.appointment_id)));
                     optionRows = rows.filter((row) => !usedAppointmentIds.has(String(row.appointment_id)));
+                    if (getCurrentRole() === "staff") {
+                        optionRows = optionRows.filter((row) => String(row.staff_id) === String(getCurrentUserId()));
+                    }
                 }
 
                 const options = optionRows
